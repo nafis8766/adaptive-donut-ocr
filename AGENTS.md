@@ -421,9 +421,12 @@ fourth consecutive UNDERPOWERED.
   constraints below and the Conventions entry *"A question closed by three nulls is closed."*
 
 - [ ] **T8 — Housekeeping (no dependencies; fill gaps with this).**
-  - Reconcile `REPORT.md` and `README.md` against runs 11–14. Filed 2026-09-17, still
-    open. `REPORT.md`'s stale banner still names "ToMe has never executed" and a run
-    table stopping at run 10; `README.md` is unchecked against any of runs 11–14.
+  - ~~Reconcile `REPORT.md` and `README.md` against runs 11–14.~~ **`README.md` DONE
+    2026-10-02** — rewritten visitor-first and reconciled against runs 2–14; the old
+    caveat-first text is preserved verbatim as `NOTES.md` (`git mv`, history intact). Every
+    figure in the new file was cross-checked against *this* file rather than carried over from
+    the old one. **`REPORT.md` is still open** — its stale banner still names "ToMe has never
+    executed" and a run table stopping at run 10.
   - `STORY.md` has **no numeric audit** and stops at run 12.
   - **Dead code found 2026-09-22:** `src/model.py:248` assigns `final_coords` from the
     merger and never reads it — only `compressed_tokens` reaches the decoder, and the
@@ -457,15 +460,27 @@ the abandoned SROIE CLI plan. It is a summary, not a second source of truth — 
 still wins on any disagreement. `REPORT.md` (same date) is a standing prose summary of
 the project and of what each run established; it carries the same subordination notice.
 
-**Four derived documents, none of them a source of truth.** All four are subordinate to
-this file and all four go stale the moment a run lands:
+**Five derived documents, none of them a source of truth.** All five are subordinate to
+this file and all five go stale the moment a run lands:
 
 | File | Organised by | Audience | Audit |
 |---|---|---|---|
-| `README.md` | repo orientation | someone opening the repo | — |
+| `README.md` | results first, then scope limits | **someone arriving from a link, with 30 seconds** | — |
+| **`NOTES.md`** | **caveat first — "read this before quoting a number"** | **a maintainer about to cite a figure** | — |
 | `REPORT.md` | claims + per-run table | someone who knows the project | — |
 | `WRITEUP.md` | results-first, claim by claim | a reviewer checking the claims | `scripts/check_writeup_numbers.py`, 134/134 |
 | **`STORY.md`** | **chronology — stage by stage** | **a general reader, no ML background** | **none — see below** |
+
+⚠ **`NOTES.md` IS the old `README.md`, renamed 2026-10-02, not a new document** — moved with
+`git mv` so its history follows it. The split exists because one file was being asked to do two
+incompatible jobs: it opened with *"Read this before quoting a number"*, which is correct
+maintainer hygiene and a poor first impression for a visitor who has not yet been told what the
+project is. The new `README.md` leads with the three scoped claims and keeps the negative
+results as a named section rather than as a preamble. **Every caveat in `NOTES.md` still
+applies** — nothing was dropped in the rewrite, and the figures in the new `README.md` were
+cross-checked against this file rather than copied from the old one (11 of them by grepping the
+literal digits, per the Conventions entry on correcting numbers).
+
 
 `STORY.md` (2026-09-17) is the **only** document organised by time rather than by result:
 each stage is "what we set out to do → what went wrong → what we did about it", covering
@@ -706,7 +721,7 @@ one, because in several cases the caveat is the finding.
 
 | Path | Role |
 | --- | --- |
-| [README.md](README.md), [REPORT.md](REPORT.md), [WRITEUP.md](WRITEUP.md), [STORY.md](STORY.md) | **Derived prose, none of them a source of truth** — see the subordination table at the top of this file. `WRITEUP.md` is the only one with a numeric audit (`scripts/check_writeup_numbers.py`, 134/134); `STORY.md` (2026-09-17) is the only one organised chronologically (stage → problem → fix, for a reader with no ML background). Correcting a number in this file leaves all four stale until someone propagates it. |
+| [README.md](README.md), [NOTES.md](NOTES.md), [REPORT.md](REPORT.md), [WRITEUP.md](WRITEUP.md), [STORY.md](STORY.md) | **Derived prose, none of them a source of truth** — see the subordination table at the top of this file. `WRITEUP.md` is the only one with a numeric audit (`scripts/check_writeup_numbers.py`, 134/134); `STORY.md` (2026-09-17) is the only one organised chronologically (stage → problem → fix, for a reader with no ML background). **`NOTES.md` is the old `README.md`, renamed 2026-10-02** when the visitor-facing and maintainer-facing jobs were split — it holds the caveat-first detail, the new `README.md` leads with results. Correcting a number in this file leaves all five stale until someone propagates it. |
 | [kaggle_token_pruning_ocr.ipynb](kaggle_token_pruning_ocr.ipynb) | The **canonical** notebook, 17 cells, edited only via asserted patchers (below). Produced runs 2–6. **It did NOT produce runs 7–8.** |
 | [kaggle_pruning_run.ipynb](kaggle_pruning_run.ipynb) | **The notebook that actually produced runs 7–11.** Generated by `scripts/make_kaggle_pruning_notebook.py`, which copies the canonical notebook and adds the `DO_TRAIN` pruning-ON retrain + `SUPERVISE_SALIENCY` ink-BCE loss, and since 2026-09-16 the **real checkerboard `BipartiteTokenMerger` spliced from `src/tome.py`** plus the 13 token-matched merge rows (PATCH E/F/G), and since 2026-09-26 **PATCH H** — `_selection_signal` spliced from `src/model.py` (59 lines) with `select_mode` threaded into `forward()` so `forward()` and `generate()` share one selection path — and since 2026-09-29 **PATCH I**, the pooled-corpus port (cells 2/9/13/15: FUNSD+SROIE = 397 behind a `PooledTestSet`, a per-document `corpus` label, `word_order` in `per_image`, per-corpus strata on every row, and a 29th sweep row `keep=0.40 random TWIN` at M=1920). ⚠ **This list read "E/F/G" until 2026-09-27, 11 days after H shipped** — see `## Patch H, run 18's staged config, and two select-mode verifiers`. **The mechanism behind the project's headline result lives only here and in its generator — not in `src/`, not in the canonical notebook.** That is a third copy of the model; see the duplication gotcha. Regenerate, never hand-edit. **The merge fix exists ONLY here** — the canonical notebook still carries the broken parity split (gotcha). |
 | [src/](src/) | Library mirror: `model.py`, `router.py`, `tome.py`, `dataset.py`, `train.py`, `evaluate.py`, `loss.py` |
@@ -1740,6 +1755,31 @@ loop's scope is being reconstructed**, or the greenest possible section 4 is one
 branch that did not run.
 
 ## Conventions
+
+**The repo is under git as of 2026-10-02 — use it, and know what it does not cover.** Initial
+commit: 262 files, 183,293 lines, 22 MB. `.gitignore` excludes ~9.4 GB that cannot be
+versioned anywhere with a 100 MB per-file limit — 10 `*.pt` checkpoints (3.9 GB) and 7 per-run
+`pruned_ocr_results.zip` archives (5.5 GB), each file ~1 GB. **The 12 `results/*.json` and 49
+`*.log` artifacts every diagnostic re-derives from ARE versioned**, so the analyses reproduce
+without the weights.
+
+Three consequences, the first of which is immediately load-bearing:
+
+1. **Concurrent sessions are now diffable.** This file's own gotcha about verifier logs
+   predating their inputs was found by mtime archaeology; `git status` answers the same
+   question directly. Within minutes of the initial commit it confirmed that a parallel
+   session had changed nothing after its last write — a question that previously required
+   comparing timestamps on four files and reasoning about which was newer than which.
+   **Before assuming you know what state the tree is in, run `git status`.**
+2. ⚠ **The excluded zips are the only place the printed Q1–Q6 verdicts live** — see the
+   Conventions entry *"Transcribe the verdict"*, which says exactly that. So `git clone`
+   does **not** reproduce the verdict logs. If a verdict needs to be readable from the repo,
+   extract `__notebook__.ipynb` out of its zip and commit that file on its own, the pattern
+   `run 12/_cell15.txt` already uses. **This is a known gap, recorded rather than fixed.**
+3. **A commit is not a backup of the weights.** `run */adaptive_donut_pruned.pt` exists only
+   on this machine and in whatever Kaggle still holds. The checkpoint fingerprint table in
+   this file is the only thing tying a results table to the weights that produced it, and
+   nothing versions those weights.
 
 **Notebook edits go through asserted patchers in `scripts/`.** Never hand-edit the
 notebook. Each patcher: backs up first (refusing to overwrite an existing backup),

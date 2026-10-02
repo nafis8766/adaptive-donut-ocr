@@ -2346,6 +2346,50 @@ separately on purpose so those changes stay distinguishable.
   disagreement** — a summary that outranks nothing cannot go stale dangerously, which is the
   failure mode the old README demonstrated for ten runs.
 
+- **2026-10-02 — the repo is under version control, and `README.md` was split in two.** Two
+  changes, both additive, neither touching a notebook, a script or a result.
+  **(a) `git init`.** 262 files, 183,293 lines, 22 MB on the initial commit. `.gitignore`
+  excludes ~9.4 GB that no git host will take: 10 `*.pt` checkpoints (3.9 GB) and 7 per-run
+  `pruned_ocr_results.zip` archives (5.5 GB), each individual file ~1 GB against a 100 MB
+  per-file limit. The 12 `results/*.json` and 49 `*.log` artifacts that every diagnostic
+  actually re-derives from **are** versioned, so the analyses reproduce without the weights.
+  **Nothing has been pushed anywhere** — the commit is local, and publishing is a separate
+  decision.
+  **(b) the old `README.md` is now `NOTES.md`** (via `git mv`, so its history follows it), and
+  a new visitor-facing `README.md` leads with the three scoped claims. One file had been doing
+  two incompatible jobs: it opened with *"Read this before quoting a number"*, which is exactly
+  right for a maintainer about to cite a figure and exactly wrong for a reader who has not yet
+  been told what the project is. **No caveat was dropped** — `NOTES.md` is the old text
+  verbatim, and the new file carries the 1.04× wall-clock finding, the `UNDERPOWERED` merge
+  verdict and the `n ≳ 307` requirement as a named section rather than as a preamble.
+  **Every figure in the new file was checked against `AGENTS.md`, not carried over from the old
+  one** — 11 of them by grepping the literal digits, per the Conventions entry on correcting
+  numbers, which exists because this project has shipped a stale figure in a summary four
+  times. That caught nothing, which is the point of running it: the old README's numbers were
+  current. What it would have caught is the thing the 2026-09-04 entry above lists four
+  instances of.
+  **What version control proved within minutes, and it is the reason to record this at all:**
+  a parallel session was mid-task in this repo during the commit. `git status` then answered
+  "has anything changed since?" directly — clean tree — where the same question previously
+  required comparing mtimes across four files and reasoning about which was newer than which.
+  That is precisely the technique the Gotchas entry on stale verifier logs had to use on
+  2026-10-02, hours earlier, to discover that a green `62/62` log predated both the notebook it
+  read and the script that produced it.
+  ⚠ **Two honest limits, recorded rather than fixed.** (i) The excluded zips are **the only
+  place the printed Q1–Q6 verdicts live** — the Conventions entry *"Transcribe the verdict"*
+  says so explicitly — therefore a clone does not contain them. Extract a run's
+  `__notebook__.ipynb` and commit it alone if a verdict must be readable from the repo, the
+  pattern `run 12/_cell15.txt` already uses. (ii) Nothing versions the weights, so the
+  checkpoint-fingerprint table in `AGENTS.md` remains the only link between a results table and
+  the weights behind it.
+  ⚠ **Worth stating plainly: this arrived five weeks and fourteen runs late.** The 2026-09-06
+  incident in Gotchas — a bulk path rewrite that silently corrupted 1,117 characters of
+  `AGENTS.md`, em dashes 936 → 179, caught only because the damage happened to land inside the
+  text of the item being edited — was a one-command revert under git and instead cost a
+  careful manual CP1252/UTF-8 reconstruction. The lesson is not "use git"; it is that this
+  file's own standing rule, *a bulk operation needs a check on what it was NOT supposed to
+  change*, had no mechanism behind it for the project's entire history to date.
+
 ---
 
 ## Kilo (tencent/hy3:free) — contributions (2026-08-29)
