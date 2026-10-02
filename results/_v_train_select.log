@@ -1,0 +1,133 @@
+==============================================================================
+0. exec the notebook's own cells  (cell 2=2 4=4 7=7 11=11)
+==============================================================================
+  [PASS] cell 2 still imports the typing names the helper's annotations need -- 5 import stmts exec'd
+  [PASS] cell 2's config constants are seeded FROM THE CELL (cell 11's blocks read them) -- 13 consts: ALLOW_CPU, RESUME_CKPT, DO_TRAIN, TRAIN_KEEP_RATIO, TRAIN_MERGE_RATIO, TRAIN_SELECT_MODE ...
+  [PASS] the seeded TRAIN_KEEP_RATIO is the notebook's own value, not a restatement -- TRAIN_KEEP_RATIO=0.5, TRAIN_SELECT_MODE='ink', TRAIN_MERGE_RATIO=0.0
+  [PASS] cell 2 still imports gc (cells 7/11 use it without importing it)
+  [PASS] cells 4 + 7 exec
+  [PASS] cell 7 defines _selection_signal on the notebook's OWN model class
+  [PASS] cell 7's forward() takes select_mode (not **kwargs) -- ('self', 'pixel_values', 'labels', 'decoder_input_ids', 'keep_ratio', 'merge_ratio', 'select_mode', 'k_ratio')
+  [PASS] cell 11's saliency block extracted verbatim from the notebook -- 97 lines
+  [PASS] the saliency block is in cell 11's DO_TRAIN branch, not the canonical `else` branch -- THIS is the loop scope section 4 reconstructs -- block L171; DO_TRAIN body L13-319, else L322-421
+  [PASS] its two enclosing loops are `for step, batch` inside `for epoch` -- step loop L134-279 inside epoch loop L126-315
+  [PASS] every accumulator the saliency block writes is initialised by cell 11's own epoch preamble (extracted, not restated) -- 7 of them: epoch_ch, epoch_gap, epoch_ov, epoch_pm, epoch_ps, epoch_sal, n_sal
+  [PASS] and all start at zero, so any nonzero reading in section 4 is the term firing -- epoch_ch=0.0; epoch_gap=0.0; epoch_ov=0.0; epoch_pm=0.0; epoch_ps=0.0; epoch_sal=0.0; n_sal=0
+  [PASS] cell 11's F3 epoch-telemetry if/else extracted verbatim -- 8 lines
+
+==============================================================================
+1. select_mode reaches forward() AND changes which tokens the decoder sees
+==============================================================================
+  [PASS] re-running select_mode='router' is bit-identical (the noise floor is 0) -- 0 differing indices
+  [PASS] forward() selects K=2400 tokens -- (2, 2400)
+  [PASS] select_mode='ink' changes the kept set vs 'router' (not just the return dict) -- 2460 indices differ symmetrically, noise 0
+  [PASS] all five exercised modes produce DISTINCT kept sets -- 5 distinct of 5
+  retained ink at keep=0.5: router=0.4399  ink=0.9672  random=0.4882  negated=0.5601
+  [PASS] ink retains the MOST page ink of any mode (it is the top-K of ink itself) -- ink 0.9672 vs random 0.4882
+  [PASS] and it sits at the CEILING, not a hair above random -- >= 0.95 of the page's ink, the property run 9 measured on FUNSD (0.994 vs random 0.50) -- ink 0.9672, margin over random +0.4790
+  [PASS] 'random' lands near 0.50 of the ink (the structure-free baseline) -- 0.4882
+  [PASS] 'negated' is the complement direction of 'router' (guard against a no-op) -- negated 0.5601 vs router 0.4399
+
+==============================================================================
+2. forward() echoes the mode it USED (what cell 11's step-0 assert reads)
+==============================================================================
+  [PASS] forward() returns select_mode='router' -- 'router'
+  [PASS] forward() returns select_mode='negated' -- 'negated'
+  [PASS] forward() returns select_mode='random' -- 'random'
+  [PASS] forward() returns select_mode='ink' -- 'ink'
+  [PASS] forward() returns select_mode='stratified' -- 'stratified'
+  [PASS] forward() returns select_mode='stratified_negated' -- 'stratified_negated'
+  [PASS] the echo tracks the argument rather than a hardcoded default
+  [PASS] an unknown mode raises instead of falling through -- select_mode must be one of ('router', 'negated', 'random', 'ink', 'str
+
+==============================================================================
+3. the router head gets NO task gradient under an external ranking
+==============================================================================
+  max|d(CE)/d(scorer)|  router               1.486e-02
+  max|d(CE)/d(scorer)|  negated              7.873e-03
+  max|d(CE)/d(scorer)|  random               0.000e+00
+  max|d(CE)/d(scorer)|  ink                  0.000e+00
+  max|d(CE)/d(scorer)|  stratified           0.000e+00
+  max|d(CE)/d(scorer)|  stratified_negated   0.000e+00
+  [PASS] select_mode='router' DOES send task gradient to the scorer (the pairing) -- 1.486e-02
+  [PASS] select_mode='negated' does too (it still ranks BY the scorer) -- 7.873e-03
+  [PASS] select_mode='ink' sends EXACTLY zero task gradient to the scorer -- 0.000e+00
+  [PASS] select_mode='random' sends EXACTLY zero task gradient to the scorer -- 0.000e+00
+  [PASS] select_mode='stratified' sends EXACTLY zero task gradient to the scorer -- 0.000e+00
+  [PASS] select_mode='stratified_negated' sends EXACTLY zero task gradient to the scorer -- 0.000e+00
+  [PASS] _selection_signal('ink') override requires_grad is False (so the guard is a no-op on this mode) -- requires_grad=False
+  [PASS] _selection_signal('random') override requires_grad is False (so the guard is a no-op on this mode) -- requires_grad=False
+  [PASS] _selection_signal('stratified') override requires_grad is True (so the guard is load-bearing on this mode) -- requires_grad=True
+  [PASS] _selection_signal('stratified_negated') override requires_grad is True (so the guard is load-bearing on this mode) -- requires_grad=True
+  [PASS] the STE guard clause is present in cell 4 exactly once (anchor for the sabotage) -- 1 hits
+  [PASS] SABOTAGE (guard clause removed) leaks gradient into the scorer under 'stratified' -- so the PASS above is a real property, not a free zero -- sabotaged 2.486e-02 vs shipped 0.000e+00
+  [PASS] SABOTAGE leaves 'router' unchanged (it isolates the clause, not the STE) -- 1.486e-02 vs 1.486e-02
+  [PASS] SABOTAGE still reads 0.0 under 'ink' -- confirming ink's zero comes from the MISSING GRAPH, not from the guard -- 0.000e+00
+
+==============================================================================
+4. under 'ink' the saliency term is the scorer's ONLY gradient -- and it
+   reaches the UNFROZEN encoder tail the decoder reads
+==============================================================================
+  [PASS] cell 11 ships LAMBDA_SAL = 0.5 on the supervised branch
+  [PASS] with the saliency term OFF, 'ink' gives the scorer zero gradient (the head is inert -- run 18's stated consequence) -- 0.000e+00
+  [PASS] with the saliency term ON, 'ink' DOES train the scorer (so it is not dead code) -- 3.316e-01
+  F3 epoch line, term ON : sal 1.0231 x0.5 [1/1] | dev 0.6145 | p 0.687+-0.055 | ov 0.435 ch 0.200 lift +0.235
+  F3 epoch line, term OFF: sal OFF (LAMBDA_SAL=0)
+  [PASS] the saliency term moves cell 11's own epoch telemetry -- F3's property, that the log distinguishes LAMBDA_SAL=0.5 from 0, which run 9's log could not -- n_sal=1 on vs 0 off
+  [PASS] the block does not execute at LAMBDA_SAL=0, so the accumulators stay at the zeros cell 11 initialised them to -- which is what 'sal OFF' reports
+  [PASS] the ink target is NON-DEGENERATE on a document-shaped page: `ch` is a rate strictly inside (0, 1), not the saturated 1.0 a uniform-noise fixture gives -- ch=0.2000 over 1 step(s), ov=0.4354
+  target: INK | positive rate 0.200 (threshold 0.15)
+  [FAIL] `ch` is the mean over STEPS, so two pages give a different figure from the step-0 header print -- the 46% disagreement AGENTS.md says to trust `ch` over -- header (step 0) 0.2000 vs ch over 2 steps 0.2000 -- 0.0% apart
+  [FAIL] and `ov` must be read as lift over `ch`, not as an absolute -- cell 11's own comment says so, and on an UNTRAINED scorer the lift is ~0 by construction -- ov 0.4354 vs ch 0.2000 (lift +0.2354)
+  [PASS] re-running the same config is bit-identical (so 'differs' below is not noise) -- noise floor 0.000e+00
+  [PASS] the saliency term CHANGES the gradient on the unfrozen encoder tail -- so turning SUPERVISE_SALIENCY off would move two knobs, not one -- max|delta| 5.676e-02 vs noise 0.000e+00
+  [PASS] cell 11 ships UNFREEZE_STAGES = 1 (the premise of the check above)
+  [PASS] with the encoder FROZEN the same term reaches the scorer but not the encoder (so section 4's claim is about UNFREEZE_STAGES, not about the loss) -- scorer 3.316e-01, encoder grads 0
+
+==============================================================================
+5. cell 11's step-0 assert and SELECT_MODES cross-check are NON-VACUOUS
+==============================================================================
+  extracted: assert outputs.get('select_mode') == TRAIN_SELECT_MODE, (...
+  [PASS] echo assert passes when the model used the requested mode
+  [PASS] echo assert RAISES when the model used 'router' but the config said 'ink' (the silent-4-hour-run failure) -- model used select_mode='router' but TRAIN_SELECT_MODE is 'ink'. The kwarg did not reach fo
+  [PASS] echo assert RAISES when forward() does not echo at all (un-regenerated notebook / **kwargs) -- model used select_mode=None but TRAIN_SELECT_MODE is 'ink'. The kwarg did not reach forwar
+  [PASS] cell 11's cross-check passes for the shipped mode
+  [PASS] cell 11's cross-check RAISES when cell 2's list has drifted from cell 7's -- TRAIN_SELECT_MODE='ink' is not in SELECT_MODES=('router', 'random'). Cell 2 accepted it ag
+  [PASS] cell 2's _TRAIN_SELECT_MODES equals cell 7's SELECT_MODES today -- ('router', 'negated', 'random', 'ink', 'stratified', 'stratified_negated') vs ('router', 'negated', 'random', 'ink', 'stratified', 'stratified_negated')
+
+==============================================================================
+6. cell 2's _VS_RUN9 guard chain -- run 18 flipped TRAIN_MERGE_RATIO back to 0
+==============================================================================
+  [PASS] extracted cell 2's guard chain (both asserts, _VS_RUN9, the size block) -- 8 statements
+  [PASS] the guard chain still keys on TRAIN_SELECT_MODE, not on TRAIN_MERGE_RATIO alone
+  [PASS]  RAISES: run 18 with no checkpoint -- the guard run 14's knob would have silenced -- TRAIN_SELECT_MODE='ink' (run 18) makes this a ONE-VARIABLE run measured against 
+  [PASS]  passes: run 18 as it ships: ink, no merging, run-5 weights -- no raise
+  [PASS]  RAISES: run 18 pointed at a pruning-era checkpoint (run 12's exact failure) -- RESUME_CKPT is a PRUNING-ERA checkpoint (one of runs 7/8/9/10/11 -- size cannot 
+  [PASS]  RAISES: run 18 pointed at an unrecognised checkpoint -- RESUME_CKPT is UNRECOGNISED (12345 bytes), but TRAIN_SELECT_MODE='ink' (run 18) 
+  [PASS]  RAISES: ink AND merging -- two knobs against run 9 at once -- TRAIN_SELECT_MODE='ink' with TRAIN_MERGE_RATIO=0.4 changes TWO things against ru
+  [PASS]  passes: run 14 as it shipped (still passes) -- no raise
+  [PASS]  passes: run 9's own config -- guard correctly dormant -- no raise
+  [PASS]  RAISES: a typo'd mode -- TRAIN_SELECT_MODE='inkk' is not one of ('router', 'negated', 'random', 'ink', 's
+
+==============================================================================
+7. the shipped config is run 18: ONE variable against run 9
+==============================================================================
+  shipped: {'ALLOW_CPU': False, 'DO_TRAIN': True, 'TRAIN_KEEP_RATIO': 0.5, 'TRAIN_MERGE_RATIO': 0.0, 'TRAIN_SELECT_MODE': 'ink', 'TRAIN_EPOCHS': 5, 'SUPERVISE_SALIENCY': True, 'SALIENCY_THRESHOLD': 0.15, 'ATTN_TARGET': False}
+  [PASS] TRAIN_SELECT_MODE ships 'ink' (THIS is run 18's variable) -- 'ink'
+  [PASS] DO_TRAIN matches run 9 (True) -- so selection is the only variable -- shipped True
+  [PASS] TRAIN_KEEP_RATIO matches run 9 (0.5) -- so selection is the only variable -- shipped 0.5
+  [PASS] TRAIN_MERGE_RATIO matches run 9 (0.0) -- so selection is the only variable -- shipped 0.0
+  [PASS] TRAIN_EPOCHS matches run 9 (5) -- so selection is the only variable -- shipped 5
+  [PASS] SUPERVISE_SALIENCY matches run 9 (True) -- so selection is the only variable -- shipped True
+  [PASS] ATTN_TARGET matches run 9 (False) -- so selection is the only variable -- shipped False
+  [PASS] SALIENCY_THRESHOLD matches run 9 (0.15) -- so selection is the only variable -- shipped 0.15
+  [PASS] ALLOW_CPU matches run 9 (False) -- so selection is the only variable -- shipped False
+  [PASS] cell 11 passes the config knob, not a literal, into forward()
+  [PASS] cell 11's header prints the selection regime (D5: an unlogged knob shaped 2 runs)
+  [PASS] cell 2's PLAN line states the selection regime too
+  [PASS] the EVAL sweep still builds at merge_ratio=0.0 and sets it per row
+
+==============================================================================
+2 FAIL
+  FAILED: `ch` is the mean over STEPS, so two pages give a different figure from the step-0 header print -- the 46% disagreement AGENTS.md says to trust `ch` over
+  FAILED: and `ov` must be read as lift over `ch`, not as an absolute -- cell 11's own comment says so, and on an UNTRAINED scorer the lift is ~0 by construction

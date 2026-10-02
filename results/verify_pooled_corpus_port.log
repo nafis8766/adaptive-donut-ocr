@@ -1,0 +1,99 @@
+==========================================================================
+VERIFY PATCH I -- pooled eval corpus, corpus labels, token-matched random arm
+==========================================================================
+
+==========================================================================
+0. STRUCTURAL -- PATCH I landed where it claims, and only there
+==========================================================================
+  [PASS] cell 2 declares EVAL_CORPORA as a top-level literal
+  [info] EVAL_CORPORA = [('funsd', 'nielsr/funsd', 'test'), ('sroie', 'sizhkhy/SROIE', 'test')]
+  [PASS] EVAL_CORPORA is exactly (funsd, sroie), FUNSD first
+  [PASS] CORD is NOT a member -- T2 excluded it because its GT denotes the annotated key-value subset, not the page (a denotation reason, which more receipts cannot repair)
+  [PASS] cell 2 pins POOLED_N_EXPECTED = 397
+  [PASS] cell 9: no raw sample['image'] remains
+  [PASS] cell 13: no raw sample['image'] remains
+  [PASS] cell 15: no raw sample['image'] remains
+  [PASS] cell 9: the image load goes through doc_image() exactly once
+  [PASS] cell 13: the image load goes through doc_image() exactly once
+  [PASS] cell 15: the image load goes through doc_image() exactly once
+  [PASS] cell 13 builds test_raw from the pooled set (cells 14/15 inherit it)
+  [PASS] cell 13 ASSERTS the pooled size at load time -- a resharded mirror is a crash at minute one, not a wrong denominator six hours in
+  [PASS] cell 9's training-side test_ds stays FUNSD-only (T4 is eval-only; pooling it would silently change what a future DO_TRAIN run validates against)
+  [PASS] per_image carries `corpus` -- without it T1 s5's per-corpus discard constraint is not merely unimplemented, it is UNCOMPUTABLE
+  [PASS] per_image carries `word_order` -- T4's DONE-WHEN, confirmed by REGENERATING rather than by grepping a committed notebook
+  [PASS] each row carries per-corpus aggregates
+  [PASS] SELECTION_CONFIGS untouched at 15 published rows (their numbers are already cited; PATCH G left them alone too)
+  [PASS] MERGE_CONFIGS is 14 = 13 + the random arm
+  [PASS] total sweep rows 29 (was 28)
+
+==========================================================================
+1. THE ADAPTER -- spliced from cell 9 and EXECUTED on both corpora
+==========================================================================
+  [info] spliced and exec'd 22 lines of cell 9 verbatim (not a restatement -- a restated copy would test itself)
+  [info] naive sample['image'] on SROIE raises KeyError: 'image'
+  [PASS] NON-VACUITY: the pre-PATCH-I access RAISES on SROIE -- so the adapter cannot later be deleted as defensive clutter
+  [PASS] adapter decodes FUNSD doc0 (754, 1000)
+  [PASS] adapter decodes SROIE doc0 (932, 2212)
+  [PASS] adapter RAISES on a corpus with a third column name rather than returning None into a .convert() several frames away
+  [PASS] doc_boxes resolves on both corpora -- reading_order_words is usable on each
+  [PASS] SROIE words<->boxes 1:1 on doc0 (141) -- per-WORD boxes, which is what makes its recall the same quantity as FUNSD's
+
+==========================================================================
+2. PooledTestSet -- EXECUTED against the real splits
+==========================================================================
+  [info] spliced and exec'd 39 lines verbatim
+  [PASS] len(pooled) == 397
+  [PASS] per-corpus counts {'funsd': 50, 'sroie': 347}
+  [PASS] n=397 clears T1 s6's n >~ 307, so `res <= 1.0 pt` and therefore the FREE verdict are REACHABLE for the first time
+  [PASS] documents 0..49 are tagged funsd
+  [PASS] documents 50..396 are tagged sroie
+  [PASS] the pool is BLOCKED by corpus, not interleaved -- so a per-corpus slice of any artifact is a contiguous range and FUNSD-only rows stay trivially recoverable
+  [PASS] neither corpus already defines a `corpus` column, so the tag overwrites nothing
+  [PASS] pooled[0] is FUNSD's doc 0 (words match)
+  [PASS] pooled[50] is SROIE's doc 0 (words match)
+  [PASS] pooled[396] is SROIE's last doc
+  [PASS] NON-VACUITY: the two probes above are not both matching the same row
+  [PASS] __iter__ order == __getitem__ order (cell 15 enumerates, cell 13 indexes; a disagreement would mis-label every per-image record)
+  [PASS] the index holds only (part, row) integer pairs -- no decoded images retained
+  [PASS] NON-VACUITY: nothing image-like is resident in the index
+
+==========================================================================
+3. THE RANDOM ARM -- T1 s8 / T3 s6's promoted BLOCKER
+==========================================================================
+  [PASS] exactly one random row in MERGE_CONFIGS: [('keep=0.40 random TWIN', 0.4, 'random', 0.0, 'checkerboard')]
+  [PASS] EXPECTED_M declares the arm (0.4, 'random', 0.0, 'checkerboard')
+  [PASS] the random arm is at M=1920
+  [PASS] token-matched to BOTH arms of T1 s1's primary (`keep=0.50 m=0.20 ink` and `keep=0.40 ink TWIN`) at M=1920
+  [info] merge budgets [1344, 1440, 1920, 3840] | prune-twin budgets [1344, 1440, 1920, 3840] | random [1920]
+  [PASS] the random budget now INTERSECTS the merge budgets at 1920 -- in runs 13/14 that intersection was EMPTY, so 'merging beats random at matched M' was not computable from either run at all
+  [PASS] SELECTION_SEED is declared
+  [PASS] cell 15 reseeds from SELECTION_SEED inside the per-row loop -- src/model.py's random branch draws from the AMBIENT RNG, so without this the arm would not reproduce
+  [PASS] same seed -> bit-identical mask scores (the arm reproduces)
+  [PASS] NON-VACUITY: a different seed gives different scores, so the equality above is not an artifact of a degenerate RNG
+  [PASS] the tome_split sabotage row is still exactly 1 (1) -- runs 12/13/14 already paid for it three times and a fourth changes nothing
+
+==========================================================================
+4. CANONICAL PARITY -- the canonical notebook must stay FUNSD-only
+==========================================================================
+  [PASS] the canonical notebook has NO PooledTestSet -- runs 2-6 still reproduce
+  [PASS] the canonical notebook never names SROIE
+  [PASS] the pooled config exists only in the generated notebook and its generator
+  [PASS] NON-VACUITY: the canonical notebook does still load FUNSD test, so the three absences above are a deliberate split and not an empty file
+
+==========================================================================
+5. PER-CORPUS AGGREGATE -- spliced from cell 15 and EXECUTED
+==========================================================================
+  [info] spliced 15 lines verbatim from the sweep function (dedented only; no token changed)
+  [PASS] aggregate keys ['funsd', 'sroie']
+  [PASS] per-corpus n: funsd 50, sroie 347
+  [PASS] FUNSD slice recovers its own recall exactly (80.0000)
+  [PASS] SROIE slice recovers its own recall exactly (40.0000)
+  [PASS] the per-corpus slices DECOMPOSE the pooled figure (45.037783 vs 45.037783) -- so the artifact cannot report a pooled number that its own strata contradict
+  [PASS] NON-VACUITY: pooled (45.0) differs from the FUNSD slice (80.0) by -35.0 pts -- the decomposition above is not two copies of one number
+  [PASS] per-corpus charAcc is (1 - mean ned) x 100, the same affine map T1 s4 uses to justify a family of THREE quantities rather than four
+  [PASS] an untagged per_image defaults to 'funsd' -- runs 13/14's artifacts remain readable by the same code path
+  [info] the pool is 87.4% receipts by document -- a 'pooled' number is substantially a RECEIPT number, and FUNSD (every result from runs 2-14) is a 12.6% minority in its own successor. Never report the pooled figure alone.
+
+==========================================================================
+CONTROLS: 61/61 PASS   |   sweep is 29 rows, new arm `keep=0.40 random TWIN`
+==========================================================================

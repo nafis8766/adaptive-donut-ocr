@@ -1,0 +1,90 @@
+==========================================================================
+T2 -- CORPUS VERIFICATION BY LOADING  (FUNSD / SROIE / CORD)
+==========================================================================
+
+==========================================================================
+1. SPLIT SIZE -- from len(loaded dataset), not from counting files
+==========================================================================
+   `buthaya/sroie` has 347 test annotation FILES and 0 images repo-wide.
+   A count that matches the expected number is not a confirmed split.
+  [PASS] FUNSD test loads n=50 (got 50)
+  [PASS] SROIE test loads n=347, the canonical ICDAR task-1/2 size (got 347)
+  [PASS] CORD  test loads n=100 (got 100)
+  [PASS] pooled FUNSD+SROIE n=397
+  [PASS] the pool clears T1 s6's n >= 307 for res <= 1.0 pt (margin 90 docs)
+  [PASS] FUNSD+CORD n=150 does NOT clear it -- recorded because it is the WRONG reason to exclude CORD; see section 3
+
+==========================================================================
+2. DENOTATION -- is a `words` field word-level, or line-level wearing the name?
+==========================================================================
+   `buthaya/sroie` and `jsdnrs/ICDAR2019-SROIE` both store LINE segments in a
+   field named `words`: ['TAN CHAY YEE', 'TEL:07-388 2218 FAX:07-388 8218', ...]
+   57% of units are multi-word. Scoring recall on that shrinks the denominator
+   ~2.1x and inflates every unit by the same factor, silently.
+  [info] FUNSD  multi-word units: 19/8707 (0.22%)
+  [info] SROIE  multi-word units: 0/40411 (0.00%)
+  [info] CORD   multi-word units: 35/2356 (1.49%)
+  [PASS] SROIE's chosen mirror is genuinely word-level: 0/40411 units contain whitespace
+  [PASS] SROIE words<->bboxes aligned 1:1 in 347/347 docs (per-WORD boxes)
+      NOTE: `buthaya` is ALSO 347/347 aligned -- with per-SEGMENT boxes. Alignment
+      is necessary, not sufficient; it is exactly what hides the mismatch.
+  [PASS] SROIE has a decodable image column (doc0 (932, 2212)) -- `buthaya`/`haocf` have none, so nothing could be run on them
+
+==========================================================================
+3. GRAIN AND DENOTATION OF THE METRIC -- why CORD is excluded
+==========================================================================
+  [PASS] every CORD valid_line carries a key-value `category` (1309/1309) -- its GT is the ANNOTATED SUBSET, not the page
+  [info] CORD doc0 categories: menu.nm, menu.num, menu.price, sub_total.tax_price, total.total_price, ...  The store name/address/phone are on the receipt and NOT in the ground truth. FUNSD and SROIE transcribe the whole page.
+   => `recall` on CORD and `recall` on FUNSD/SROIE are DIFFERENT QUANTITIES
+      wearing one name. Pooling them averages two metrics.
+
+   grain (one word, in recall points -- the smallest expressible move):
+      corpus     n  words/doc   1 word     max    >10pt
+      FUNSD     50      177.0     0.57    4.00     0/50
+      SROIE    347      109.0     0.92    1.64     0/347
+      CORD     100       20.0     5.00   12.50     4/100
+  [PASS] CORD's smallest expressible move (5.00 pt) is >= T1's MDE (1.0 pt) -- the metric cannot EXPRESS the effect being measured
+  [PASS] SROIE's smallest expressible move (0.92 pt) is < the MDE -- it can
+  [PASS] 4/100 CORD docs trip the -10 pt harm threshold on ONE wrong word
+  [PASS] no FUNSD or SROIE doc can: 0/50 and 0/347
+  [PASS] portability: SROIE is 1.62x FUNSD's grain, CORD is 8.82x -- T1's point-denominated thresholds port to SROIE and not to CORD
+  [info] pool composition: 87.4% of documents and 82.2% of words are SROIE receipts (49140 words total)
+  [PASS] a 'pooled' result is substantially a RECEIPT result -- FUNSD is a 12.6% minority in its own successor corpus; report per-corpus too
+  [PASS] g=0.10 at n=397 discards 39 per tail vs FUNSD's 50 docs -- D14 s4's 'trim can delete FUNSD' is REDUCED, not eliminated (78% of it)
+
+==========================================================================
+4. AUDIT OF THIS ANALYSIS'S OWN FRAMING (D14 s10's principle, applied here)
+==========================================================================
+   First draft claimed: '13/100 CORD docs can land exactly on -10.000000, vs
+   9/50 FUNSD' -- i.e. the tie convention is a CORD-specific hazard.
+   k words == exactly -10.000000  <=>  100k/n = 10  <=>  k = n/10 integer
+   <=>  n = 0 (mod 10).  The draft instead tested whether 1000/n is an integer,
+   i.e. whether n DIVIDES 1000 -- rarer, different, and satisfiable, so it
+   returned a plausible wrong number rather than an error.
+  [info] FUNSD  docs with an exact -10.000000 tie: 7/50
+  [info] SROIE  docs with an exact -10.000000 tie: 27/347
+  [info] CORD   docs with an exact -10.000000 tie: 17/100
+  [PASS] the first draft's counts were WRONG (claimed CORD 13/100 and FUNSD 9/50; measured 17/100 and 7/50)
+  [PASS] and the FRAMING was wrong too: ties are not CORD-specific (17% of CORD vs 14% of FUNSD) -- they need only n = 0 (mod 10), which happens everywhere
+
+   the real asymmetry, which the COUNT never showed:
+      FUNSD  median   177 words ->  17.7 wrong words reach -10.000000 exactly
+      SROIE  median   109 words ->  10.9 wrong words reach -10.000000 exactly
+      CORD   median    20 words ->   2.0 wrong words reach -10.000000 exactly
+  [PASS] on a median CORD receipt 2 wrong words land exactly on the threshold; on a median FUNSD form it takes 18 -- ordinary single-document event vs effectively unreachable
+
+   licence, at the strength the evidence supports:
+      SROIE's `mit` tag is asserted by a THIRD-PARTY UPLOADER, not by the ICDAR
+      2019 organisers who hold the original terms. Three re-uploads of the same
+      corpus carry `mit` (sizhkhy, buthaya) and `cc-by-4.0` (jsdnrs) -- they do
+      not agree. Of 100 SROIE-matching HF datasets, 77 carry no licence at all.
+      CORD's `cc-by-4.0` comes from naver-clova-ix, the publishing lab itself.
+  [PASS] recorded as a PUBLICATION question for the user to decide, not a measurement question this script can settle -- nothing downstream is blocked by it
+
+==========================================================================
+CONTROLS: 21/21 PASS
+==========================================================================
+DECISION: second corpus = sizhkhy/SROIE test, n=347. Pool FUNSD+SROIE = 397.
+CORD excluded on DENOTATION (its GT is the annotated subset, not the page),
+not on size -- size merely agreed. CORD may be reported as a separate row with
+its own thresholds; it must never enter the pool.

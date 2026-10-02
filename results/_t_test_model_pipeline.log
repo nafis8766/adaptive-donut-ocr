@@ -1,0 +1,12 @@
+Testing Full Architecture Pipeline with MiniAdaptiveOCR...
+`loss_type=None` was set in the config but it is unrecognized. Using the default loss: `ForCausalLMLoss`.
+Original tokens: 16
+Compressed tokens: 5
+Compression ratio: 68.8%
+Total Multi-Task Loss: 4.7272
+Sparsity Loss: 0.0833
+Gradients successfully flowed through STE into Router scoring head!
+Saved saliency overlay visualization to: visualizations/mini_test_overlay.png
+Visualization overlay successfully generated!
+
+>>> ALL PIPELINE ARCHITECTURE TESTS PASSED 100%! <<<

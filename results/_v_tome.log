@@ -1,0 +1,132 @@
+==============================================================================
+0. the patched cells EXECUTE (not just parse)
+==============================================================================
+  [PASS] cell 2 imports typing (cell 4's merger annotations need it at def time) -- 1 `from typing import` statements in cell 2
+  [PASS] cell 2 supplies every name src/tome.py annotates with -- []
+  [PASS] cell 4 (router + ToMe) execs, checkerboard_color present
+  [PASS] cell 7 (helpers + model) execs
+  [PASS] cell 4 no longer contains the rank-parity split
+  [PASS] TOME_SPLITS exposes both arms -- ('checkerboard', 'rank_parity')
+  [PASS] AdaptiveDonutOCR default merge_ratio is 0.0, not 0.20
+
+==============================================================================
+1. the spliced checkerboard_color AGREES NUMERICALLY with src/tome.py
+==============================================================================
+  [PASS] checkerboard_color(raster arange(4800)): notebook == src -- 0 mismatches
+  [PASS] checkerboard_color(shuffled, B=2): notebook == src -- 0 mismatches
+  [PASS] 4-neighbours always get opposite colours (right)
+  [PASS] 4-neighbours always get opposite colours (down) -- the case raster order lost
+
+==============================================================================
+2. the spliced merger produces BIT-IDENTICAL output to src/tome.py
+==============================================================================
+  [PASS] B=1 keep=0.50 merge=0.20: notebook == src, M=1920 -- shape (1, 1920, 8), max |diff| 0.000e+00
+  [PASS] B=1 keep=0.50 merge=0.40: notebook == src, M=1440 -- shape (1, 1440, 8), max |diff| 0.000e+00
+  [PASS] B=1 keep=0.35 merge=0.20: notebook == src, M=1344 -- shape (1, 1344, 8), max |diff| 0.000e+00
+  [PASS] B=1 keep=1.00 merge=0.20: notebook == src, M=3840 -- shape (1, 3840, 8), max |diff| 0.000e+00
+  [PASS] B=2 keep=0.50 merge=0.20: notebook == src, M=1920 -- shape (2, 1920, 8), max |diff| 0.000e+00
+  [PASS] B=2 keep=0.50 merge=0.40: notebook == src, M=1440 -- shape (2, 1440, 8), max |diff| 0.000e+00
+  [PASS] B=2 keep=0.35 merge=0.20: notebook == src, M=1344 -- shape (2, 1344, 8), max |diff| 0.000e+00
+  [PASS] B=2 keep=1.00 merge=0.20: notebook == src, M=3840 -- shape (2, 3840, 8), max |diff| 0.000e+00
+  [PASS] checkerboard and rank_parity DISAGREE on real score-sorted input -- max |diff| 5.336e+00 (0.0 would mean the fix is a no-op and every check above is empty)
+  [PASS] merging actually compacts (M < K) and is not a pass-through -- K=2400 -> M=1920
+  [PASS] NULL: the old split really does strand ~half the redundancy (1184 h-pairs, 1188 v-pairs kept) -- missed h 49.7%  v 46.5%
+  [PASS] FIX: the shipped split strands none of it -- missed h 0.0%  v 0.0%
+
+==============================================================================
+3. rank_parity REPRODUCES the pre-fix merger exactly (a usable negative control)
+==============================================================================
+  [PASS] the canonical notebook still carries the OLD rank-parity merger -- if it was fixed independently, this control is comparing two copies of the SAME implementation and proves nothing -- reconcile the notebooks
+  [PASS] B=1 K=2400 merge=0.20: rank_parity == the old merger, bit for bit -- max |diff| 0.000e+00
+  [PASS] B=1 K=2400 merge=0.20: batched old merger agrees to float32 noise -- batched 0.000e+00 vs a real split change 5.608e+00
+  [PASS] B=1 K=1680 merge=0.20: rank_parity == the old merger, bit for bit -- max |diff| 0.000e+00
+  [PASS] B=1 K=1680 merge=0.20: batched old merger agrees to float32 noise -- batched 0.000e+00 vs a real split change 6.088e+00
+  [PASS] B=1 K=2400 merge=0.40: rank_parity == the old merger, bit for bit -- max |diff| 0.000e+00
+  [PASS] B=1 K=2400 merge=0.40: batched old merger agrees to float32 noise -- batched 0.000e+00 vs a real split change 5.926e+00
+  [PASS] B=2 K=2400 merge=0.20: rank_parity == the old merger, bit for bit -- max |diff| 0.000e+00
+  [PASS] B=2 K=2400 merge=0.20: batched old merger agrees to float32 noise -- batched 0.000e+00 vs a real split change 5.938e+00
+  [PASS] B=2 K=1680 merge=0.20: rank_parity == the old merger, bit for bit -- max |diff| 0.000e+00
+  [PASS] B=2 K=1680 merge=0.20: batched old merger agrees to float32 noise -- batched 1.192e-07 vs a real split change 6.088e+00
+  [PASS] B=2 K=2400 merge=0.40: rank_parity == the old merger, bit for bit -- max |diff| 0.000e+00
+  [PASS] B=2 K=2400 merge=0.40: batched old merger agrees to float32 noise -- batched 2.384e-07 vs a real split change 5.926e+00
+
+==============================================================================
+4. merging without a page position RAISES rather than guessing
+==============================================================================
+  [PASS] merge_ratio>0 without orig_idx raises ValueError -- BipartiteTokenMerger needs orig_idx (B, K) and token_grid (g
+  [PASS] merge_ratio=0 without orig_idx passes through untouched
+
+==============================================================================
+5. generate() runs BOTH splits on a real 80x60 grid at every configured budget
+==============================================================================
+  [PASS] cell 15 declares 28 rows (15 published + 13 new)
+  [PASS] keep=1.00 m=0.20 router  -> M=3840 (predicted 3840), meta records the knobs -- merge_ratio=0.2 tome_split=checkerboard decoder saw 3840
+  [PASS] keep=0.80 router TWIN    -> M=3840 (predicted 3840), meta records the knobs -- merge_ratio=0.0 tome_split=None decoder saw 3840
+  [PASS] keep=0.50 m=0.20 router  -> M=1920 (predicted 1920), meta records the knobs -- merge_ratio=0.2 tome_split=checkerboard decoder saw 1920
+  [PASS] keep=0.40 router TWIN    -> M=1920 (predicted 1920), meta records the knobs -- merge_ratio=0.0 tome_split=None decoder saw 1920
+  [PASS] keep=0.35 m=0.20 router  -> M=1344 (predicted 1344), meta records the knobs -- merge_ratio=0.2 tome_split=checkerboard decoder saw 1344
+  [PASS] keep=0.28 router TWIN    -> M=1344 (predicted 1344), meta records the knobs -- merge_ratio=0.0 tome_split=None decoder saw 1344
+  [PASS] keep=0.50 m=0.40 router  -> M=1440 (predicted 1440), meta records the knobs -- merge_ratio=0.4 tome_split=checkerboard decoder saw 1440
+  [PASS] keep=0.30 router TWIN    -> M=1440 (predicted 1440), meta records the knobs -- merge_ratio=0.0 tome_split=None decoder saw 1440
+  [PASS] keep=0.50 m=0.20 ink     -> M=1920 (predicted 1920), meta records the knobs -- merge_ratio=0.2 tome_split=checkerboard decoder saw 1920
+  [PASS] keep=0.40 ink TWIN       -> M=1920 (predicted 1920), meta records the knobs -- merge_ratio=0.0 tome_split=None decoder saw 1920
+  [PASS] keep=0.35 m=0.20 ink     -> M=1344 (predicted 1344), meta records the knobs -- merge_ratio=0.2 tome_split=checkerboard decoder saw 1344
+  [PASS] keep=0.28 ink TWIN       -> M=1344 (predicted 1344), meta records the knobs -- merge_ratio=0.0 tome_split=None decoder saw 1344
+  [PASS] keep=0.50 m=0.20 RANKPAR -> M=1920 (predicted 1920), meta records the knobs -- merge_ratio=0.2 tome_split=rank_parity decoder saw 1920
+  [PASS] prune-only rows report tome_split=None rather than a split they never used
+  [PASS] an unknown tome_split raises ValueError
+  [PASS] an unknown tome_split raises even when merging is OFF
+
+==============================================================================
+6. _token_grid derives the width and REFUSES a grid it cannot account for
+==============================================================================
+  [PASS] _token_grid returns the real Swin-B grid -- (80, 60)
+  [PASS] _token_grid raises ValueError on a mismatched input -- token grid mismatch: pixel_values 3072x1920 at stride 32 giv
+  [PASS] merging on a mismatched grid raises ValueError -- token grid mismatch: pixel_values 3072x1920 at stride 32 giv
+  [PASS] but merge_ratio=0 on a mismatched grid still runs (grid resolved lazily) -- 2400
+
+==============================================================================
+7. the ablation cell EXECUTES END TO END (all 28 rows, Q6, the sabotage block)
+==============================================================================
+  accuracy numbers inside are SYNTHETIC and mean nothing -- only execution and
+  the token-match asserts are being checked.
+  [PASS] the whole ablation cell runs without raising
+  [PASS] all 28 rows completed -- 28 of 28
+  [PASS] 7 rows actually ran with merging ON (6 checkerboard + 1 rank_parity) -- 7 rows with merge_ratio>0, splits ['checkerboard', 'rank_parity']
+  [PASS] the 6 prune-only twins ran at the new budgets -- [0.28, 0.3, 0.35, 0.4, 0.5, 0.75, 0.8, 1.0]
+  [PASS] every row records merge_ratio and tome_split (D5: log the knob)
+  [PASS] every row's M was constant across images -- []
+  [PASS] every row stores per-image word_order for every image -- []
+  [PASS] word_order_pct == mean(per-image word_order) * 100, every row -- []
+  [PASS] that identity is discriminating: recall would FAIL it -- max |word_order_pct - mean(recall)*100| = 35.6944 pts
+  [PASS] character_accuracy_pct == (1 - mean(per-image ned)) * 100, every row -- []
+  [PASS] `by` is prune-only: no merge row shadows a published row -- []
+  [PASS] `by` still resolves every (keep, mode) Q1-Q5 reads
+  [PASS] `by_all` separates all 28 rows (no silent collision)
+  [PASS] Q3's pool excludes every merge row -- pooled 60 records from 20 prune-only rows
+  [PASS] Q6 measured all 6 token-matched pairs -- 6 pairs
+  [PASS] every Q6 pair is genuinely token-matched at the predicted M -- [('keep1.00 m0.20 vs keep0.80', 3840), ('keep0.50 m0.20 vs keep0.40', 1920), ('keep0.35 m0.20 vs keep0.28', 1344), ('keep0.50 m0.40 vs keep0.30', 1440), ('ink keep0.50 m0.20 vs 0.40', 1920), ('ink keep0.35 m0.20 vs 0.28', 1344)]
+  [PASS] every Q6 pair carries a paired CI, not just a delta -- [('keep1.00 m0.20 vs keep0.80', -28.89), ('keep0.50 m0.20 vs keep0.40', -15.56), ('keep0.35 m0.20 vs keep0.28', 0.0), ('keep0.50 m0.40 vs keep0.30', 24.44), ('ink keep0.50 m0.20 vs 0.40', 0.0), ('ink keep0.35 m0.20 vs 0.28', -8.89)]
+  [PASS] every Q6 row reports its own measured resolution (= CI half-width) -- [('keep1.00 m0.20 vs keep0.80', 16.67), ('keep0.50 m0.20 vs keep0.40', 56.67), ('keep0.35 m0.20 vs keep0.28', 0.0), ('keep0.50 m0.40 vs keep0.30', 36.67), ('ink keep0.50 m0.20 vs 0.40', 0.0), ('ink keep0.35 m0.20 vs 0.28', 66.67)]
+  [PASS] the underpowered flag tracks that resolution against the 3.0 pt bar -- bar 3.0, flags [('keep1.00 m0.20 vs keep0.80', False), ('keep0.50 m0.20 vs keep0.40', True), ('keep0.35 m0.20 vs keep0.28', False), ('keep0.50 m0.40 vs keep0.30', True), ('ink keep0.50 m0.20 vs 0.40', False), ('ink keep0.35 m0.20 vs 0.28', True)]
+  [PASS] the sabotage contrast ran (checkerboard vs rank_parity at the same M) -- 1920
+  [PASS] the sabotage row reports its resolution too -- res 0.00
+  [PASS] printed section: 'Q1. Does negating'
+  [PASS] printed section: 'Q3. Which statistic'
+  [PASS] printed section: 'Q5. keep_ratio curve'
+  [PASS] printed section: 'Q6. TOKEN-MATCHED'
+  [PASS] printed section: 'SABOTAGE CONTROL'
+  [PASS] no pair was skipped for a missing twin
+  [PASS] results JSON written -- C:\Users\Nafis\AppData\Local\Temp\verify_tome_v2gg8nn0\ablation_selection.json
+  [PASS] results JSON carries Q6 and the sabotage row, not just the table -- 28 rows, meta keys ['complete', 'control_ckpt', 'control_drift_pts', 'harness_control', 'harness_note', 'harness_verified', 'max_len', 'max_words', 'num_eval_samples', 'provenance', 'q6_resolution_pts', 'q6_sabotage', 'q6_token_matched', 'run6_reference', 'seed']
+
+==============================================================================
+8. the token-match assert is load-bearing (it fires on a mismatched pair)
+==============================================================================
+  [PASS] assert_token_matched rejects a pair at different M -- deliberate mismatch: NOT token-matched. merge row M [1920] (n=3) vs pr
+
+==============================================================================
+ALL CHECKS PASSED -- the generated notebook runs the REAL checkerboard merger,
+matches src/tome.py bit for bit, reproduces the pre-fix split as a control, and
+completes all 28 rows with every token-matched pair verified by execution.
+==============================================================================

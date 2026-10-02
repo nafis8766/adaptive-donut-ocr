@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>AdaptiveDonutOCR — accuracy vs visual tokens (Run 8, sign-fixed router)</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>body{font-family:system-ui,Arial;margin:2rem;max-width:900px}canvas{max-width:100%}</style>
+</head>
+<body>
+<h2>AdaptiveDonutOCR — word recall vs visual tokens</h2>
+<p>FUNSD test ×50, Run 8 (router retrained WITH pruning ON + ink-BCE saliency supervision).
+Blue = the forward <code>router</code> (now correctly signed — no negation needed); gray dashed =
+random floor; green dotted = ink-oracle ceiling proxy; red dashed = <code>negated</code> (now broken,
+showing the sign was the only bug).</p>
+<canvas id="c" width="860" height="460"></canvas>
+<script>
+const data = {
+  datasets: [
+    {label:'router forward (working pruner)', borderColor:'#1f77b4', backgroundColor:'#1f77b4',
+     fill:false, tension:0.1, pointRadius:5,
+     data:[{x:4800,y:78.25},{x:3600,y:75.19},{x:2400,y:80.17},{x:1680,y:77.80}]},
+    {label:'random (floor)', borderColor:'#777777', borderDash:[6,4], fill:false,
+     data:[{x:3600,y:72.10},{x:2400,y:60.75},{x:1680,y:48.37}]},
+    {label:'ink oracle (ceiling proxy)', borderColor:'#2ca02c', borderDash:[2,3], fill:false,
+     data:[{x:3600,y:75.96},{x:2400,y:74.79},{x:1680,y:74.24}]},
+    {label:'negated (now broken)', borderColor:'#d62728', borderDash:[4,4], fill:false,
+     data:[{x:3600,y:38.80},{x:2400,y:8.25},{x:1680,y:3.00}]}
+  ]
+};
+new Chart(document.getElementById('c'), {
+  type:'line',
+  data,
+  options:{
+    plugins:{title:{display:true,text:'Word recall (%) vs visual tokens (Run 8, sign-fixed router)'}},
+    scales:{
+      x:{title:{display:true,text:'Visual tokens fed to decoder (lower = more compression)'}},
+      y:{title:{display:true,text:'Word recall (%)'},min:0,max:100}
+    }
+  }
+});
+</script>
+</body>
+</html>

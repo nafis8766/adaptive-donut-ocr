@@ -1,0 +1,54 @@
+==========================================================================
+T4 PRE-FLIGHT -- pooled corpus (FUNSD + SROIE), before any GPU booking
+==========================================================================
+
+==========================================================================
+1. SCHEMA -- can the existing pipeline index a pooled sample at all?
+==========================================================================
+Using the latest cached version of the dataset since nielsr/funsd couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'default' at C:\Users\Nafis\.cache\huggingface\datasets\nielsr___funsd\default\0.0.0\7e7eeeedd84ce86540eb83cbbf7c75a3fcc7c7a5 (last modified on Tue Aug 25 12:38:54 2026).
+Using the latest cached version of the dataset since sizhkhy/SROIE couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'default' at C:\Users\Nafis\.cache\huggingface\datasets\sizhkhy___sroie\default\0.0.0\eed022b377460aff1b94a84b94dfb40317e1dc4d (last modified on Thu Sep 24 09:11:33 2026).
+  [PASS] FUNSD test n=50
+  [PASS] SROIE test n=347
+  [PASS] pool n=397 matches T2's 397
+  [info] FUNSD columns: ['bboxes', 'id', 'image', 'ner_tags', 'words']
+  [info] SROIE columns: ['bboxes', 'fields', 'images', 'ner_tags', 'words']
+  [PASS] FUNSD has `image`; SROIE does NOT -- the column name differs between corpora
+  [PASS] SROIE has `images` (plural); FUNSD does NOT
+  [PASS] column sets differ: only-FUNSD=['id', 'image'], only-SROIE=['fields', 'images']
+  [info] naive sample['image'] on SROIE raises KeyError: 'image'
+  [PASS] NON-VACUITY: the shipped `sample['image']` access RAISES on SROIE -- so cell 9, cell 15's eval loop and src/evaluate.py:149 all need the adapter, and it cannot be dropped as redundant later
+  [PASS] adapter returns a decodable FUNSD image (754, 1000)
+  [PASS] adapter returns a decodable SROIE image (932, 2212)
+  [PASS] both corpora expose `words`
+  [PASS] both expose boxes (FUNSD via `bboxes`, SROIE via `bboxes`) -- reading_order_words is usable
+  [PASS] SROIE words<->boxes aligned 1:1 on doc0 (141) -- per-WORD boxes, re-confirming T2 on the sample this script will actually run
+
+==========================================================================
+2. TARGET TEXT -- does the shipped reading-order builder survive receipts?
+==========================================================================
+  [info] imported reading_order_words + MAX_TARGET_WORDS=128 from src.dataset
+  [info] FUNSD  target words after truncation: mean  112.8  truncated at 128: 32/50 docs
+  [info] SROIE  target words after truncation: mean  107.7  truncated at 128: 104/347 docs
+  [PASS] both corpora produce non-empty targets
+  [PASS] SROIE is NOT uniformly truncated (104/347) -- its documents vary in length, so the corpus is not a constant-cost block
+  [PASS] SROIE targets are SHORTER than FUNSD's (107.7 vs 112.8 words) -- the prediction that receipts are cheaper, stated before generation runs
+      => length-based prediction: SROIE costs 0.95x a FUNSD doc.
+         Section 3 tests it. The model is OUT OF DOMAIN on receipts and can
+         run to the 512 cap regardless of how short the gold is, which would
+         invert this. A prediction from gold length is not a measurement.
+
+(skipping section 3: pass --gen to measure generation. Section 4 then has
+ no measured ratio and falls back to the arithmetic this script exists to test.)
+
+==========================================================================
+4. COST OF THE POOLED SWEEP -- run 13's Kaggle anchor, scaled by the measured ratio
+==========================================================================
+  [info] run 13 measured: 2609 ms/image x 28 rows x n=50 = 60.9 min of generate()
+   (--gen not run: no measured ratio, so the naive projection is all there is)
+   naive 397/50 projection, 28 rows: 8.06 h
+
+==========================================================================
+CONTROLS: 15/15 PASS
+==========================================================================

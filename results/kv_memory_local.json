@@ -1,0 +1,158 @@
+{
+ "meta": {
+  "purpose": "Pending 8c -- decoder cross-attention KV memory vs visual token budget, for both compression stages (pruning, and pruning+merging)",
+  "written": "2026-09-18T12:06:34+00:00",
+  "checkpoint": "run 9\\adaptive_donut_pruned.pt",
+  "device": "cpu",
+  "transformers": "5.4.0",
+  "torch": "2.12.1+cpu",
+  "cache_kind": "EncoderDecoderCache object",
+  "decoder": {
+   "layers": 4,
+   "heads": 16,
+   "head_dim": 64,
+   "d_model": 1024,
+   "bytes_per_element": 4
+  },
+  "param_bytes": 808460772,
+  "controls_passed": true,
+  "controls_run": 52,
+  "controls_failed": 0,
+  "agree_tol": 0.01,
+  "dtype_caveat": "fp32 on CPU. All byte figures halve at fp16/bf16 and scale linearly with batch size; the PERCENTAGE reduction is invariant to both.",
+  "scope_limit": "decoder cross-attention KV only; NOT total, NOT peak, NOT encoder activations (the frozen Swin computes all 4800 tokens at every budget). Self-attention KV is unaffected by pruning. Latency is settled separately at 1.04x by D11 and is not an efficiency claim. This applies identically to the merge rows: merging happens strictly AFTER the full encoder, so it also has no encoder-side saving, and the token reduction it buys is decoder cross-attention KV length and nothing else.",
+  "n_images": 1,
+  "n_images_note": "one image is sufficient and not a sample-size weakness: cross-attention KV size is a deterministic function of (layers, heads, head_dim, kept tokens, dtype) and does not vary with content. The analytic==observed control is what establishes that, rather than an average over images.",
+  "merge_rows_note": "rows with merge_ratio > 0 measure the SAME decoder cross-attention cache; control (2) establishes that a token removed by merging frees exactly as many cache bytes as one removed by pruning, which is what makes equal-M comparison meaningful. The bytes here are NOT evidence that merging is cheap in accuracy -- that comes from run 13 and is recorded in merge_accuracy_cost below.",
+  "merge_accuracy_cost": {
+   "source": "run 13/ablation_selection.json",
+   "contrast": "selection held fixed: same keep_ratio, same select_mode='router', same tome_split='checkerboard', merge on vs off. Deliberately NOT run 13's meta.q6_token_matched, whose pairs vary both the selection and the merging and so do not isolate the merger.",
+   "bootstrap": {
+    "resamples": 20000,
+    "seed": 0,
+    "unit": "document"
+   },
+   "free": {
+    "keep_ratio": 0.5,
+    "merge_ratio": 0.2,
+    "delta_pts": 0.541429332588726,
+    "ci95_lo": -2.3594569801465326,
+    "ci95_hi": 3.826790471027027,
+    "resolution_pts": 3.09312372558678,
+    "n_paired": 50,
+    "resolved": false
+   },
+   "costly": {
+    "keep_ratio": 0.5,
+    "merge_ratio": 0.4,
+    "delta_pts": -3.85910451316194,
+    "ci95_lo": -7.44762233972254,
+    "ci95_hi": -0.304227670119098,
+    "resolution_pts": 3.571697334801721,
+    "n_paired": 50,
+    "resolved": true
+   }
+  }
+ },
+ "rows": [
+  {
+   "keep_ratio": 1.0,
+   "merge_ratio": 0.0,
+   "visual_tokens": 4800,
+   "cache_tokens": 4800,
+   "gen_tokens": 343,
+   "cross_kv_bytes_analytic": 157286400,
+   "cross_kv_bytes_observed": 157286400,
+   "self_kv_bytes_observed": 11206656,
+   "cache_kind": "EncoderDecoderCache object"
+  },
+  {
+   "keep_ratio": 0.5,
+   "merge_ratio": 0.0,
+   "visual_tokens": 2400,
+   "cache_tokens": 2400,
+   "gen_tokens": 333,
+   "cross_kv_bytes_analytic": 78643200,
+   "cross_kv_bytes_observed": 78643200,
+   "self_kv_bytes_observed": 10878976,
+   "cache_kind": "EncoderDecoderCache object"
+  },
+  {
+   "keep_ratio": 0.35,
+   "merge_ratio": 0.0,
+   "visual_tokens": 1680,
+   "cache_tokens": 1680,
+   "gen_tokens": 307,
+   "cross_kv_bytes_analytic": 55050240,
+   "cross_kv_bytes_observed": 55050240,
+   "self_kv_bytes_observed": 10027008,
+   "cache_kind": "EncoderDecoderCache object"
+  },
+  {
+   "keep_ratio": 0.25,
+   "merge_ratio": 0.0,
+   "visual_tokens": 1200,
+   "cache_tokens": 1200,
+   "gen_tokens": 327,
+   "cross_kv_bytes_analytic": 39321600,
+   "cross_kv_bytes_observed": 39321600,
+   "self_kv_bytes_observed": 10682368,
+   "cache_kind": "EncoderDecoderCache object"
+  },
+  {
+   "keep_ratio": 0.2,
+   "merge_ratio": 0.0,
+   "visual_tokens": 960,
+   "cache_tokens": 960,
+   "gen_tokens": 248,
+   "cross_kv_bytes_analytic": 31457280,
+   "cross_kv_bytes_observed": 31457280,
+   "self_kv_bytes_observed": 8093696,
+   "cache_kind": "EncoderDecoderCache object"
+  },
+  {
+   "keep_ratio": 1.0,
+   "merge_ratio": 0.2,
+   "visual_tokens": 3840,
+   "cache_tokens": 3840,
+   "gen_tokens": 344,
+   "cross_kv_bytes_analytic": 125829120,
+   "cross_kv_bytes_observed": 125829120,
+   "self_kv_bytes_observed": 11239424,
+   "cache_kind": "EncoderDecoderCache object"
+  },
+  {
+   "keep_ratio": 0.5,
+   "merge_ratio": 0.2,
+   "visual_tokens": 1920,
+   "cache_tokens": 1920,
+   "gen_tokens": 357,
+   "cross_kv_bytes_analytic": 62914560,
+   "cross_kv_bytes_observed": 62914560,
+   "self_kv_bytes_observed": 11665408,
+   "cache_kind": "EncoderDecoderCache object"
+  },
+  {
+   "keep_ratio": 0.5,
+   "merge_ratio": 0.4,
+   "visual_tokens": 1440,
+   "cache_tokens": 1440,
+   "gen_tokens": 341,
+   "cross_kv_bytes_analytic": 47185920,
+   "cross_kv_bytes_observed": 47185920,
+   "self_kv_bytes_observed": 11141120,
+   "cache_kind": "EncoderDecoderCache object"
+  },
+  {
+   "keep_ratio": 0.35,
+   "merge_ratio": 0.2,
+   "visual_tokens": 1344,
+   "cache_tokens": 1344,
+   "gen_tokens": 302,
+   "cross_kv_bytes_analytic": 44040192,
+   "cross_kv_bytes_observed": 44040192,
+   "self_kv_bytes_observed": 9863168,
+   "cache_kind": "EncoderDecoderCache object"
+  }
+ ]
+}

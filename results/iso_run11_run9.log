@@ -1,0 +1,110 @@
+==============================================================================
+WHY DOES PRUNING HELP? -- H1 train/test matching vs H2 inference-time denoising
+==============================================================================
+  device cpu | transformers 5.4.0 | MAX_WORDS=128 MAX_LEN=512
+  selector 'ink' (weight-independent -> identical tokens for both checkpoints)
+  budgets keep=1.00 + (0.5, 0.35, 0.25, 0.2)
+  H1 predicts run 5 PEAKS at keep=1.00.  H2 predicts run 5 IMPROVES under pruning.
+Loading base backbone naver-clova-ix/donut-base (dtype=torch.float32)...
+Loading weights:   0%|          | 0/484 [00:00<?, ?it/s]Loading weights: 100%|██████████| 484/484 [00:00<00:00, 23819.25it/s]
+Freezing Swin vision encoder (saves ~12 GB VRAM). Training Router & Decoder!
+  50 FUNSD test images, gold capped at MAX_WORDS=128
+
+------------------------------------------------------------------------------
+run 11 (5 epochs at keep=1.00)  <- run 11\adaptive_donut_pruned.pt  (missing=0, unexpected=0)
+------------------------------------------------------------------------------
+  keep=1.00 router recall  76.81  ink 1.000  tok 4800   17.7s/img   ETA 133.4 min
+  keep=0.50 ink    recall  75.35  ink 0.994  tok 2400   14.5s/img   ETA 107.8 min
+  keep=0.35 ink    recall  68.41  ink 0.950  tok 1680   13.3s/img   ETA  88.9 min
+  keep=0.25 ink    recall  62.50  ink 0.847  tok 1200   14.6s/img   ETA  75.5 min
+  keep=0.20 ink    recall  55.87  ink 0.754  tok  960   14.7s/img   ETA  62.9 min
+
+------------------------------------------------------------------------------
+run 9  (trained at keep=0.50)  <- run 9\adaptive_donut_pruned.pt  (missing=0, unexpected=0)
+------------------------------------------------------------------------------
+  keep=1.00 router recall  77.62  ink 1.000  tok 4800   13.7s/img   ETA  49.6 min
+  keep=0.50 ink    recall  78.22  ink 0.994  tok 2400   12.7s/img   ETA  36.4 min
+  keep=0.35 ink    recall  77.37  ink 0.950  tok 1680   12.6s/img   ETA  23.9 min
+  keep=0.25 ink    recall  70.67  ink 0.847  tok 1200   12.4s/img   ETA  11.8 min
+  keep=0.20 ink    recall  64.61  ink 0.754  tok  960   12.4s/img   ETA   0.0 min
+
+==============================================================================
+THE CURVES -- recall vs budget, identical ink-selected tokens, paired per image
+==============================================================================
+
+  run 11 (5 epochs at keep=1.00)   unpruned ceiling 76.81
+     keep   tok  recall  vs 1.00    SE      t    ink
+     1.00  4800   76.81       --    --     --  1.000
+     0.50  2400   75.35    -1.45  1.66  -0.88   0.994
+     0.35  1680   68.41    -8.40  2.28  -3.68 * 0.950
+     0.25  1200   62.50   -14.31  2.83  -5.06 * 0.847
+     0.20   960   55.87   -20.93  2.83  -7.40 * 0.754
+
+  run 9  (trained at keep=0.50)   unpruned ceiling 77.62
+     keep   tok  recall  vs 1.00    SE      t    ink
+     1.00  4800   77.62       --    --     --  1.000
+     0.50  2400   78.22    +0.60  1.38  +0.43   0.994
+     0.35  1680   77.37    -0.26  1.41  -0.18   0.950
+     0.25  1200   70.67    -6.96  2.46  -2.82 * 0.847
+     0.20   960   64.61   -13.01  2.40  -5.42 * 0.754
+
+  (* = |t| >= 2.0, pre-registered. 'vs 1.00' is paired within a checkpoint: same images, same weights, only the budget differs.)
+
+==============================================================================
+CONTROLS
+==============================================================================
+  [PASS] selection fixed keep=0.50: ink 0.993997 vs 0.993997 -> |gap| 0.00e+00 (must be ~0: same tokens)
+  [PASS] selection fixed keep=0.35: ink 0.950189 vs 0.950189 -> |gap| 0.00e+00 (must be ~0: same tokens)
+  [PASS] selection fixed keep=0.25: ink 0.847365 vs 0.847365 -> |gap| 0.00e+00 (must be ~0: same tokens)
+  [PASS] selection fixed keep=0.20: ink 0.753743 vs 0.753743 -> |gap| 0.00e+00 (must be ~0: same tokens)
+  [PASS] ink oracle keep=0.50: local 0.994 vs Kaggle 0.994 -> |gap| 0.000 (tol 0.10)
+  [PASS] ink oracle keep=0.35: local 0.950 vs Kaggle 0.950 -> |gap| 0.000 (tol 0.10)
+  [PASS] harness anchor (run 9  (trained at keep=0.50) @ keep=1.00 reproduces D11/D12): local 77.62 vs D11/D12 local 77.62 -> |gap| 0.00 (tol 0.5; same device/transformers/images, so this must reproduce)
+  [INFO] run 11 (5 epochs at keep=1.00) @ keep=1.00 = 76.81: no prior local measurement exists to reproduce, so this is a first reading, not a check.
+  [INFO] run 11 (5 epochs at keep=1.00) @ keep=1.00: local 76.81 vs Kaggle run 6 77.74 -> |gap| 0.93. INFORMATIONAL ONLY -- D11 showed generation does not reproduce across environments (levels drift up to 3.4 pts on bit-identical selections), and the reference is run-5-specific. Gates nothing.
+
+  resolution -- smallest detectable 'vs 1.00' delta at |t|=2 (want <= 3.0 pts):
+    run 11 keep=0.50  SE  1.66  detectable >=  3.32 pts  UNDERPOWERED
+    run 11 keep=0.35  SE  2.28  detectable >=  4.56 pts  UNDERPOWERED
+    run 11 keep=0.25  SE  2.83  detectable >=  5.65 pts  UNDERPOWERED
+    run 11 keep=0.20  SE  2.83  detectable >=  5.66 pts  UNDERPOWERED
+    run 9  keep=0.50  SE  1.38  detectable >=  2.76 pts  OK
+    run 9  keep=0.35  SE  1.41  detectable >=  2.81 pts  OK
+    run 9  keep=0.25  SE  2.46  detectable >=  4.93 pts  UNDERPOWERED
+    run 9  keep=0.20  SE  2.40  detectable >=  4.80 pts  UNDERPOWERED
+
+==============================================================================
+ISO -- the isolation statistic:  ISO(k) = delta[run 11 (5 epochs at keep=1.00)](k) - delta[run 9  (trained at keep=0.50)](k)
+==============================================================================
+  delta_c(k) = recall_c(k) - recall_c(1.00), paired per image, ink tokens.
+  Negative ISO = the focus checkpoint is hurt MORE by identical pruning.
+     keep  d_focus    d_ref      ISO    SE      t  resolution   rho  power
+     0.50    -1.45    +0.60    -2.05  2.22  -0.92       4.44 pts -0.06  UNDERPOWERED
+     0.35    -8.40    -0.26    -8.15  2.71  -3.01 *     5.42 pts -0.02  UNDERPOWERED
+     0.25   -14.31    -6.96    -7.35  2.72  -2.70 *     5.45 pts  0.48  UNDERPOWERED
+     0.20   -20.93   -13.01    -7.92  2.48  -3.19 *     4.97 pts  0.56  UNDERPOWERED
+  rho = per-image correlation of the two delta columns. It, not the means, sets the
+  resolution: on D12's run-5/run-9 pair rho was 0.14-0.57 and all four rows were
+  UNDERPOWERED. n cannot be raised; 50 IS the FUNSD test split.
+  identity check: max |paired ISO - (d_focus - d_ref)| = 1.78e-15  (asserted <= 1e-09)
+
+  => H1 ISOLATED: H1 ISOLATED. ISO is -8.15 pts at keep=0.35 (SE 2.71, t -3.01) and <= 0 at every budget, so identical pruning costs the FOCUS checkpoint more than the REFERENCE one with the epoch count held constant. Pruning-aware training causes the robustness; Claim 1 may say 'because it was trained for it'.
+
+==============================================================================
+THE ANSWER
+==============================================================================
+  run 11 (5 epochs at keep=1.00): peaks at keep=1.00 (76.81)
+  run 9  (trained at keep=0.50): peaks at keep=0.50 (78.22)
+
+  => H2 VERDICT SUPPRESSED. This pair's slot A is run 11 (5 epochs at keep=1.00), not run 5. H1-vs-H2 turns on the curve of a checkpoint never trained with pruning, so decide() has nothing to say here; its -1.45-pt input is reported in the curve and ISO tables instead. Read the ISO table -- that is this pair's question.
+
+  Did the retrain help, holding the token set fixed? (run 9  (trained at keep=0.50) - run 11 (5 epochs at keep=1.00), identical ink tokens)
+    keep=0.50   +2.87 pts  SE  1.74  t  +1.65
+    keep=0.35   +8.96 pts  SE  2.34  t  +3.83 *
+    keep=0.25   +8.17 pts  SE  2.41  t  +3.38 *
+    keep=0.20   +8.74 pts  SE  2.22  t  +3.94 *
+    SCOPE: these are LEVEL differences at a budget, not curve shapes -- they do NOT
+    subtract each checkpoint's own keep=1.00, so they are not ISO. Read the ISO table
+    above for the attribution; these rows only say a difference exists.
+
+wrote results\why_pruning_helps_iso_run11_run9.json   (116.3 min)

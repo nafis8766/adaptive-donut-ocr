@@ -1,0 +1,23 @@
+  [PASS] exactly one cell defines RUN5_CKPT_BYTES = (config cell located by marker, not index) -- matched JSON cell indices [2]
+  [info] config cell is JSON index 2
+  [PASS] the config cell contains exactly one `if RESUME_CKPT:` guard block -- found 1
+  [PASS] the notebook's RUN5_CKPT_BYTES matches this file's expectation -- notebook 1045901275, here 1045901275
+  [PASS] the notebook's PRUNED_CKPT_BYTES matches this file's expectation -- notebook 1045901771, here 1045901771
+  [PASS] the guard body contains an assert mentioning DO_TRAIN (the eval-only gate exists) -- else the two RAISE rows below are failing for the wrong reason
+  [PASS] the guard body still contains the _VS_RUN9 assert (the train-side gate survives)
+
+==========================================================================
+the four scenarios -- two must raise
+==========================================================================
+  [PASS] DO_TRAIN=False + pruning-era  -> PASS (T4: extends runs 13/14)
+  [PASS] DO_TRAIN=False + run 5        -> RAISE (run 12 reproduced)
+  [PASS] DO_TRAIN=False + unrecognised -> RAISE (uncharacterised weights)
+  [PASS] DO_TRAIN=True  + run 5        -> PASS (run 14/18 starts from run 5)
+  [PASS] the run-5 rejection names run 5 and run 12, not a generic size complaint -- DO_TRAIN=False means this is an EVAL-ONLY sweep, and RESUME_CKPT is ru...
+  [PASS] the unrecognised rejection reports the actual byte count it saw -- DO_TRAIN=False means this is an EVAL-ONLY sweep, and RESUME_CKPT is UN...
+  [PASS] DO_TRAIN is the ONLY thing separating those two verdicts on identical weights -- DO_TRAIN=False raised=True, DO_TRAIN=True raised=False
+  [PASS] on pruning-era weights the two verdicts INVERT (the guards oppose each other) -- DO_TRAIN=False raised=False, DO_TRAIN=True raised=True
+
+==========================================================================
+CONTROLS: 14/14 PASS   |   notebook: kaggle_pruning_run.ipynb
+==========================================================================

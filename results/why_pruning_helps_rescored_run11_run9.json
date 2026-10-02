@@ -1,0 +1,384 @@
+{
+ "meta": {
+  "purpose": "H1 train/test matching vs H2 inference-time denoising, via run 5",
+  "written": "2026-09-15T16:23:01+00:00",
+  "checkpoints": {
+   "run 11 (5 epochs at keep=1.00)": "run 11\\adaptive_donut_pruned.pt",
+   "run 9  (trained at keep=0.50)": "run 9\\adaptive_donut_pruned.pt"
+  },
+  "pair": "run5_run9",
+  "focus": "run 11 (5 epochs at keep=1.00)",
+  "reference": "run 9  (trained at keep=0.50)",
+  "select_mode": "ink",
+  "select_mode_why": "ink ranks patches by pixel contrast, so it is weight-independent and both checkpoints keep the identical token set -- every curve difference is attributable to the weights. Verified by control 1, not assumed.",
+  "num_eval_samples": 2,
+  "test_set_size": 50,
+  "device": "cpu",
+  "transformers": "5.4.0",
+  "torch": "2.12.1+cpu",
+  "max_len": 512,
+  "max_words": 128,
+  "notebook_metrics_from": "kaggle_pruning_run.ipynb",
+  "preregistered": {
+   "run6_reference_recall": 77.74,
+   "harness_tol_pts": 1.5,
+   "kaggle_ink_oracle": {
+    "0.5": 0.994,
+    "0.35": 0.95
+   },
+   "ink_tol": 0.1,
+   "denoise_margin_pts": 1.0,
+   "t_signif": 2.0,
+   "min_effect_pts": 3.0,
+   "iso_effect_pts": 3.0,
+   "iso_key_budgets": [
+    0.35,
+    0.2
+   ],
+   "local_anchors": {
+    "run 9  (trained at keep=0.50)": 77.62,
+    "run 5  (no pruning in training)": 74.72
+   }
+  },
+  "controls_passed": true,
+  "iso_verdict": "UNDERPOWERED",
+  "iso_verdict_text": "UNDERPOWERED, not flat -- n=2 < 10, so every SE is itself noise. Neither outcome is excluded. Report the ISO table with resolution_pts and choose nothing.",
+  "controls_skipped": [
+   "harness anchor (run 9  (trained at keep=0.50) @ keep=1.00 reproduces D11/D12)"
+  ],
+  "controls_passed_note": "controls_passed reflects only the checks that RAN; read it together with controls_skipped, which is non-empty on any subsample run",
+  "verdict": "N/A (H2 verdict is run-5-specific)",
+  "is_full_protocol": false,
+  "resolution_pts": {
+   "run 11 (5 epochs at keep=1.00)|0.5": 10.812782722895077,
+   "run 11 (5 epochs at keep=1.00)|0.35": 7.4419962060411535,
+   "run 11 (5 epochs at keep=1.00)|0.25": 2.393112505472047,
+   "run 11 (5 epochs at keep=1.00)|0.2": 3.064351378958115,
+   "run 9  (trained at keep=0.50)|0.5": 11.16299430906173,
+   "run 9  (trained at keep=0.50)|0.35": 26.295053261345387,
+   "run 9  (trained at keep=0.50)|0.25": 1.0214504596526977,
+   "run 9  (trained at keep=0.50)|0.2": 33.95593170874071
+  },
+  "min_n_for_power": 10,
+  "scope_limit": "run 9 differs from run 5 by pruning-aware training AND 5 more epochs; cross-checkpoint rows do not isolate pruning as the cause",
+  "not_comparable_to_kaggle_in_level": "D11 measured local generation drifting up to 3.4 pts from Kaggle at tight budgets on bit-identical selections; within-checkpoint deltas are the comparable quantity"
+ },
+ "verdicts": [
+  {
+   "check": "selection fixed keep=0.50",
+   "pass": true,
+   "skipped": false,
+   "detail": "ink 1.000000 vs 1.000000 -> |gap| 0.00e+00 (must be ~0: same tokens)"
+  },
+  {
+   "check": "selection fixed keep=0.35",
+   "pass": true,
+   "skipped": false,
+   "detail": "ink 0.990130 vs 0.990130 -> |gap| 0.00e+00 (must be ~0: same tokens)"
+  },
+  {
+   "check": "selection fixed keep=0.25",
+   "pass": true,
+   "skipped": false,
+   "detail": "ink 0.822926 vs 0.822926 -> |gap| 0.00e+00 (must be ~0: same tokens)"
+  },
+  {
+   "check": "selection fixed keep=0.20",
+   "pass": true,
+   "skipped": false,
+   "detail": "ink 0.692256 vs 0.692256 -> |gap| 0.00e+00 (must be ~0: same tokens)"
+  },
+  {
+   "check": "ink oracle keep=0.50",
+   "pass": true,
+   "skipped": false,
+   "detail": "local 1.000 vs Kaggle 0.994 -> |gap| 0.006 (tol 0.10)"
+  },
+  {
+   "check": "ink oracle keep=0.35",
+   "pass": true,
+   "skipped": false,
+   "detail": "local 0.990 vs Kaggle 0.950 -> |gap| 0.040 (tol 0.10)"
+  },
+  {
+   "check": "harness anchor (run 9  (trained at keep=0.50) @ keep=1.00 reproduces D11/D12)",
+   "pass": null,
+   "skipped": true,
+   "detail": "local 86.54 over n=2 vs D11/D12 77.62 over 50 -- |gap| 8.92, NOT COMPARABLE (different image sets). Needs --n 50."
+  }
+ ],
+ "rows": [
+  {
+   "checkpoint": "run 11 (5 epochs at keep=1.00)",
+   "keep_ratio": 1.0,
+   "select_mode": "router",
+   "visual_tokens": 4800,
+   "word_recall_pct": 87.80096308186197,
+   "mean_ned": 0.28815757436389955,
+   "retained_ink": 1.0,
+   "mean_gen_tokens": 308.5,
+   "avg_latency_ms": 18427.80264999601,
+   "num_eval_samples": 2,
+   "per_image_recall": [
+    0.898876404494382,
+    0.8571428571428571
+   ]
+  },
+  {
+   "checkpoint": "run 11 (5 epochs at keep=1.00)",
+   "keep_ratio": 0.5,
+   "select_mode": "ink",
+   "visual_tokens": 2400,
+   "word_recall_pct": 88.0125492485043,
+   "mean_ned": 0.3135883079588661,
+   "retained_ink": 1.0,
+   "mean_gen_tokens": 327.0,
+   "avg_latency_ms": 16945.503999999346,
+   "num_eval_samples": 2,
+   "per_image_recall": [
+    0.9550561797752809,
+    0.8051948051948052
+   ]
+  },
+  {
+   "checkpoint": "run 11 (5 epochs at keep=1.00)",
+   "keep_ratio": 0.35,
+   "select_mode": "ink",
+   "visual_tokens": 1680,
+   "word_recall_pct": 86.32715599007734,
+   "mean_ned": 0.4728475422173517,
+   "retained_ink": 0.9901304543018341,
+   "mean_gen_tokens": 335.5,
+   "avg_latency_ms": 15972.750949997135,
+   "num_eval_samples": 2,
+   "per_image_recall": [
+    0.9213483146067416,
+    0.8051948051948052
+   ]
+  },
+  {
+   "checkpoint": "run 11 (5 epochs at keep=1.00)",
+   "keep_ratio": 0.25,
+   "select_mode": "ink",
+   "visual_tokens": 1200,
+   "word_recall_pct": 71.01999124471034,
+   "mean_ned": 0.5719972764910662,
+   "retained_ink": 0.8229256868362427,
+   "mean_gen_tokens": 294.5,
+   "avg_latency_ms": 14336.496399999305,
+   "num_eval_samples": 2,
+   "per_image_recall": [
+    0.7191011235955056,
+    0.7012987012987013
+   ]
+  },
+  {
+   "checkpoint": "run 11 (5 epochs at keep=1.00)",
+   "keep_ratio": 0.2,
+   "select_mode": "ink",
+   "visual_tokens": 960,
+   "word_recall_pct": 58.996060119655624,
+   "mean_ned": 0.6617622284400041,
+   "retained_ink": 0.6922562420368195,
+   "mean_gen_tokens": 291.0,
+   "avg_latency_ms": 14170.27065000002,
+   "num_eval_samples": 2,
+   "per_image_recall": [
+    0.5955056179775281,
+    0.5844155844155844
+   ]
+  },
+  {
+   "checkpoint": "run 9  (trained at keep=0.50)",
+   "keep_ratio": 1.0,
+   "select_mode": "router",
+   "visual_tokens": 4800,
+   "word_recall_pct": 86.53874215671968,
+   "mean_ned": 0.25180577849117175,
+   "retained_ink": 1.0,
+   "mean_gen_tokens": 309.5,
+   "avg_latency_ms": 16127.825150004355,
+   "num_eval_samples": 2,
+   "per_image_recall": [
+    0.9775280898876404,
+    0.7532467532467533
+   ]
+  },
+  {
+   "checkpoint": "run 9  (trained at keep=0.50)",
+   "keep_ratio": 0.5,
+   "select_mode": "ink",
+   "visual_tokens": 2400,
+   "word_recall_pct": 88.7494527943966,
+   "mean_ned": 0.3268662887311065,
+   "retained_ink": 1.0,
+   "mean_gen_tokens": 330.0,
+   "avg_latency_ms": 15514.654949998658,
+   "num_eval_samples": 2,
+   "per_image_recall": [
+    0.9438202247191011,
+    0.8311688311688312
+   ]
+  },
+  {
+   "checkpoint": "run 9  (trained at keep=0.50)",
+   "keep_ratio": 0.35,
+   "select_mode": "ink",
+   "visual_tokens": 1680,
+   "word_recall_pct": 85.07952721435868,
+   "mean_ned": 0.34581615944893007,
+   "retained_ink": 0.9901304543018341,
+   "mean_gen_tokens": 310.0,
+   "avg_latency_ms": 15178.133649998927,
+   "num_eval_samples": 2,
+   "per_image_recall": [
+    0.8314606741573034,
+    0.8701298701298701
+   ]
+  },
+  {
+   "checkpoint": "run 9  (trained at keep=0.50)",
+   "keep_ratio": 0.25,
+   "select_mode": "ink",
+   "visual_tokens": 1200,
+   "word_recall_pct": 76.93710783598424,
+   "mean_ned": 0.4316848002134106,
+   "retained_ink": 0.8229256868362427,
+   "mean_gen_tokens": 325.5,
+   "avg_latency_ms": 15226.26769999988,
+   "num_eval_samples": 2,
+   "per_image_recall": [
+    0.8764044943820225,
+    0.6623376623376623
+   ]
+  },
+  {
+   "checkpoint": "run 9  (trained at keep=0.50)",
+   "keep_ratio": 0.2,
+   "select_mode": "ink",
+   "visual_tokens": 960,
+   "word_recall_pct": 63.06726980884284,
+   "mean_ned": 0.534178583470517,
+   "retained_ink": 0.6922562420368195,
+   "mean_gen_tokens": 293.0,
+   "avg_latency_ms": 14590.526600000885,
+   "num_eval_samples": 2,
+   "per_image_recall": [
+    0.5730337078651685,
+    0.6883116883116883
+   ]
+  }
+ ],
+ "curve_vs_unpruned": [
+  {
+   "checkpoint": "run 11 (5 epochs at keep=1.00)",
+   "keep_ratio": 0.5,
+   "delta_pts": 0.21158616664235552,
+   "se_pts": 5.406391361447539,
+   "t": 0.03913630229419873
+  },
+  {
+   "checkpoint": "run 11 (5 epochs at keep=1.00)",
+   "keep_ratio": 0.35,
+   "delta_pts": -1.4738070917846073,
+   "se_pts": 3.7209981030205768,
+   "t": -0.39607843137254545
+  },
+  {
+   "checkpoint": "run 11 (5 epochs at keep=1.00)",
+   "keep_ratio": 0.25,
+   "delta_pts": -16.780971837151604,
+   "se_pts": 1.1965562527360234,
+   "t": -14.024390243902486
+  },
+  {
+   "checkpoint": "run 11 (5 epochs at keep=1.00)",
+   "keep_ratio": 0.2,
+   "delta_pts": -28.804902962206324,
+   "se_pts": 1.5321756894790575,
+   "t": -18.80000000000003
+  },
+  {
+   "checkpoint": "run 9  (trained at keep=0.50)",
+   "keep_ratio": 0.5,
+   "delta_pts": 2.210710637676925,
+   "se_pts": 5.581497154530865,
+   "t": 0.396078431372548
+  },
+  {
+   "checkpoint": "run 9  (trained at keep=0.50)",
+   "keep_ratio": 0.35,
+   "delta_pts": -1.4592149423610081,
+   "se_pts": 13.147526630672694,
+   "t": -0.11098779134295218
+  },
+  {
+   "checkpoint": "run 9  (trained at keep=0.50)",
+   "keep_ratio": 0.25,
+   "delta_pts": -9.601634320735442,
+   "se_pts": 0.5107252298263488,
+   "t": -18.800000000000164
+  },
+  {
+   "checkpoint": "run 9  (trained at keep=0.50)",
+   "keep_ratio": 0.2,
+   "delta_pts": -23.47147234787684,
+   "se_pts": 16.977965854370353,
+   "t": -1.3824666953158569
+  }
+ ],
+ "iso": [
+  {
+   "keep_ratio": 0.5,
+   "iso_pts": -1.9991244710345697,
+   "se_pts": 10.987888515978405,
+   "t": -0.1819389110225751,
+   "resolution_pts": 21.97577703195681,
+   "delta_focus_pts": 0.21158616664235552,
+   "delta_reference_pts": 2.210710637676925,
+   "per_image_corr": NaN,
+   "sd_delta_focus": 7.645791986855852,
+   "sd_delta_reference": 7.893428974284388,
+   "identity_gap": 0.0
+  },
+  {
+   "keep_ratio": 0.35,
+   "iso_pts": -0.01459214942359921,
+   "se_pts": 16.86852473369327,
+   "t": -0.0008650519031135416,
+   "resolution_pts": 33.73704946738654,
+   "delta_focus_pts": -1.4738070917846073,
+   "delta_reference_pts": -1.4592149423610081,
+   "per_image_corr": NaN,
+   "sd_delta_focus": 5.262285982856259,
+   "sd_delta_reference": 18.593410472758766,
+   "identity_gap": 0.0
+  },
+  {
+   "keep_ratio": 0.25,
+   "iso_pts": -7.179337516416162,
+   "se_pts": 0.6858310229096743,
+   "t": -10.468085106382974,
+   "resolution_pts": 1.3716620458193487,
+   "delta_focus_pts": -16.780971837151604,
+   "delta_reference_pts": -9.601634320735442,
+   "per_image_corr": NaN,
+   "sd_delta_focus": 1.6921860807616131,
+   "sd_delta_reference": 0.7222745466665386,
+   "identity_gap": 0.0
+  },
+  {
+   "keep_ratio": 0.2,
+   "iso_pts": -5.333430614329483,
+   "se_pts": 15.445790164891296,
+   "t": -0.3452999527633437,
+   "resolution_pts": 30.89158032978259,
+   "delta_focus_pts": -28.804902962206324,
+   "delta_reference_pts": -23.47147234787684,
+   "per_image_corr": NaN,
+   "sd_delta_focus": 2.166823639999631,
+   "sd_delta_reference": 24.010469572757867,
+   "identity_gap": 0.0
+  }
+ ]
+}

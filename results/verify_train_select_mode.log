@@ -1,0 +1,81 @@
+==============================================================================
+verify_train_select_mode -- select_mode threaded into the TRAINING path
+==============================================================================
+
+[1] The knob exists on BOTH paths, with the safe default.
+  [PASS] forward() accepts select_mode
+  [PASS] generate() accepts select_mode
+  [PASS] forward() defaults to 'router' (preserves runs 2-14) -- default='router'
+  [PASS] generate() default unchanged
+
+[2] REFACTOR SAFETY: new shared helper == old inline dispatch, bit-for-bit.
+    (generate() is the path every recorded result came through.)
+  [PASS] mode router              identical to old inline code -- both None
+  [PASS] mode negated             identical to old inline code -- both None
+  [PASS] mode random              identical to old inline code -- max|diff|=0.000e+00
+  [PASS] mode ink                 identical to old inline code -- max|diff|=0.000e+00
+  [PASS] mode stratified          identical to old inline code -- max|diff|=0.000e+00
+  [PASS] mode stratified_negated  identical to old inline code -- max|diff|=0.000e+00
+
+    NON-VACUITY: the six modes must not all be the same selection,
+    or the equality checks above would be trivially satisfiable.
+  [PASS] at least 5 of 6 modes select a distinct token set -- 6 distinct sets from 6 modes
+
+[3] forward() honours the mode, and 'ink' really means ink.
+  [PASS] forward() REPORTS the mode it ran (telemetry, not transcription)
+  [PASS] router and ink select different tokens in forward() -- overlap 19/24
+  [PASS] forward(select_mode='ink') == exact top-K of patch_ink -- 24/24 match
+  [PASS] ink is the STRICT argmax of retained ink over all 6 modes -- ink 0.7415 vs best other (router) 0.7400, margin +0.0014
+  [PASS] 'negated' retains LESS ink than 'router' (invert flag is wired) -- negated 0.2600 < router 0.7400
+
+[4] GRADIENT ROUTING -- the check that stops a silently-untrained arm.
+    Under an override the STE is skipped (router.py:92), so the SCORER
+    gets no task gradient. The DECODER must still get one.
+      router     mode: scorer grad 1.914637e-01 | decoder grad 4.024982e+01
+      ink        mode: scorer grad 0.000000e+00 | decoder grad 3.991134e+01
+      stratified mode: scorer grad 0.000000e+00 | decoder grad 4.161476e+01
+  [PASS] DECODER receives gradient under 'ink' (the arm actually trains) -- 3.991e+01
+  [PASS] scorer receives gradient under 'router' (STE alive on default path) -- 1.915e-01
+  [PASS] scorer receives NO task gradient under 'ink' -- 0.000e+00
+  [PASS] patch_ink carries NO autograd graph (so ink's zero above is structural) -- requires_grad=False
+  [PASS] stratified's override DOES carry a graph (so the guard is load-bearing there) -- requires_grad=True
+  [PASS] scorer receives NO task gradient under 'stratified' (STE truly skipped) -- 0.000e+00
+  [PASS] DECODER still receives gradient under 'stratified' -- 4.161e+01
+
+[5] Unknown modes RAISE on both paths (no silent fallthrough).
+  [PASS] forward() rejects 'oracle'
+  [PASS] forward() rejects 'Router'
+  [PASS] forward() rejects ''
+  [PASS] forward() rejects 'ink '
+  [PASS] _selection_signal rejects unknown mode
+
+[6] TRAIN/EVAL AGREEMENT -- the property the shared helper exists for.
+    A mode must mean the same thing in training as at eval, or run 18's
+    arms are trained on one distribution and scored on another.
+  [PASS] mode router      selects identically in train() and eval()
+  [PASS] mode ink         selects identically in train() and eval()
+  [PASS] mode negated     selects identically in train() and eval()
+  [PASS] mode stratified  selects identically in train() and eval()
+
+[7] The default path is untouched (runs 2-14 reproducibility).
+  [PASS] forward() with no select_mode == forward(select_mode='router')
+
+==============================================================================
+RESULT: 33 passed, 0 failed
+==============================================================================
+
+==============================================================================
+SABOTAGE SUITE -- can this verifier actually fail?
+==============================================================================
+Each row breaks the code under test in a way that would still produce a
+plausible run 18. A green row means THIS FILE CAUGHT IT.
+
+  [PASS] S1 ink silently falls through to router          -> caught by 6 check(s): mode ink                 identical to old inline code
+  [PASS] S2 ink differs between train() and eval()        -> caught by 4 check(s): mode ink                 identical to old inline code
+  [PASS] S3 unknown mode falls through instead of raising -> caught by 5 check(s): forward() rejects 'oracle'
+  [PASS] S4 stratified_negated loses its negate flag      -> caught by 1 check(s): mode stratified_negated  identical to old inline code
+  [PASS] S5 STE not skipped under an external ranking     -> caught by 1 check(s): scorer receives NO task gradient under 'stratified' (STE truly skipped)
+
+  5 of 5 sabotages detected. The checks above are load-bearing.
+
+OVERALL: PASS

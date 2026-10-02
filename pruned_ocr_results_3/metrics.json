@@ -1,0 +1,9 @@
+{
+  "word_recall_pct": 53.8550848739153,
+  "character_accuracy_pct": 38.4243032021926,
+  "word_order_pct": 22.61066119033034,
+  "mean_ned": 0.615756967978074,
+  "avg_token_savings_pct": 0.0,
+  "avg_latency_ms": 2953.9135745400195,
+  "num_eval_samples": 50
+}

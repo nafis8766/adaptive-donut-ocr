@@ -1,0 +1,83 @@
+==============================================================================
+WHY DOES PRUNING HELP? -- H1 train/test matching vs H2 inference-time denoising
+==============================================================================
+  device cpu | transformers 5.4.0 | MAX_WORDS=128 MAX_LEN=512
+  selector 'ink' (weight-independent -> identical tokens for both checkpoints)
+  budgets keep=1.00 + (0.5, 0.35, 0.25, 0.2)
+  H1 predicts run 5 PEAKS at keep=1.00.  H2 predicts run 5 IMPROVES under pruning.
+Loading base backbone naver-clova-ix/donut-base (dtype=torch.float32)...
+Loading weights:   0%|          | 0/484 [00:00<?, ?it/s]Loading weights: 100%|██████████| 484/484 [00:00<00:00, 41821.21it/s]
+Freezing Swin vision encoder (saves ~12 GB VRAM). Training Router & Decoder!
+Using the latest cached version of the dataset since nielsr/funsd couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'default' at C:\Users\Nafis\.cache\huggingface\datasets\nielsr___funsd\default\0.0.0\7e7eeeedd84ce86540eb83cbbf7c75a3fcc7c7a5 (last modified on Tue Aug 25 12:38:54 2026).
+  50 FUNSD test images, gold capped at MAX_WORDS=128
+
+------------------------------------------------------------------------------
+run 5  (no pruning in training)  <- run 5\checkpoints\adaptive_donut_funsd.pt  (missing=0, unexpected=0)
+------------------------------------------------------------------------------
+  keep=1.00 router recall  74.72  ink 1.000  tok 4800   12.8s/img   ETA  96.5 min
+  keep=0.50 ink    recall  73.16  ink 0.994  tok 2400   12.8s/img   ETA  85.7 min
+  keep=0.35 ink    recall  68.70  ink 0.950  tok 1680   12.6s/img   ETA  74.5 min
+  keep=0.25 ink    recall  63.25  ink 0.847  tok 1200   14.2s/img   ETA  65.7 min
+  keep=0.20 ink    recall  54.39  ink 0.754  tok  960   14.7s/img   ETA  56.0 min
+
+------------------------------------------------------------------------------
+run 9  (trained at keep=0.50)  <- run 9\adaptive_donut_pruned.pt  (missing=0, unexpected=0)
+------------------------------------------------------------------------------
+  keep=1.00 router recall  77.62  ink 1.000  tok 4800   14.9s/img   ETA  45.7 min
+  keep=0.50 ink    recall  78.22  ink 0.994  tok 2400   12.9s/img   ETA  34.0 min
+  keep=0.35 ink    recall  77.37  ink 0.950  tok 1680   12.8s/img   ETA  22.5 min
+  keep=0.25 ink    recall  70.67  ink 0.847  tok 1200   12.0s/img   ETA  11.1 min
+  keep=0.20 ink    recall  64.61  ink 0.754  tok  960   11.8s/img   ETA   0.0 min
+
+==============================================================================
+THE CURVES -- recall vs budget, identical ink-selected tokens, paired per image
+==============================================================================
+
+  run 5  (no pruning in training)   unpruned ceiling 74.72
+     keep   tok  recall  vs 1.00    SE      t    ink
+     1.00  4800   74.72       --    --     --  1.000
+     0.50  2400   73.16    -1.57  2.60  -0.60   0.994
+     0.35  1680   68.70    -6.03  2.31  -2.61 * 0.950
+     0.25  1200   63.25   -11.47  2.50  -4.58 * 0.847
+     0.20   960   54.39   -20.34  2.80  -7.26 * 0.754
+
+  run 9  (trained at keep=0.50)   unpruned ceiling 77.62
+     keep   tok  recall  vs 1.00    SE      t    ink
+     1.00  4800   77.62       --    --     --  1.000
+     0.50  2400   78.22    +0.60  1.38  +0.43   0.994
+     0.35  1680   77.37    -0.26  1.41  -0.18   0.950
+     0.25  1200   70.67    -6.96  2.46  -2.82 * 0.847
+     0.20   960   64.61   -13.01  2.40  -5.42 * 0.754
+
+  (* = |t| >= 2.0, pre-registered. 'vs 1.00' is paired within a checkpoint: same images, same weights, only the budget differs.)
+
+==============================================================================
+CONTROLS
+==============================================================================
+  [PASS] selection fixed keep=0.50: ink 0.993997 vs 0.993997 -> |gap| 0.00e+00 (must be ~0: same tokens)
+  [PASS] selection fixed keep=0.35: ink 0.950189 vs 0.950189 -> |gap| 0.00e+00 (must be ~0: same tokens)
+  [PASS] selection fixed keep=0.25: ink 0.847365 vs 0.847365 -> |gap| 0.00e+00 (must be ~0: same tokens)
+  [PASS] selection fixed keep=0.20: ink 0.753743 vs 0.753743 -> |gap| 0.00e+00 (must be ~0: same tokens)
+  [PASS] ink oracle keep=0.50: local 0.994 vs Kaggle 0.994 -> |gap| 0.000 (tol 0.10)
+  [PASS] ink oracle keep=0.35: local 0.950 vs Kaggle 0.950 -> |gap| 0.000 (tol 0.10)
+  [FAIL] harness anchor (run 5 @ keep=1.00): local 74.72 vs run 6 77.74 -> |gap| 3.02 (tol 1.5, same 50 images)
+
+  resolution -- smallest detectable 'vs 1.00' delta at |t|=2 (want <= 3.0 pts):
+    run 5  keep=0.50  SE  2.60  detectable >=  5.20 pts  UNDERPOWERED
+    run 5  keep=0.35  SE  2.31  detectable >=  4.62 pts  UNDERPOWERED
+    run 5  keep=0.25  SE  2.50  detectable >=  5.01 pts  UNDERPOWERED
+    run 5  keep=0.20  SE  2.80  detectable >=  5.60 pts  UNDERPOWERED
+    run 9  keep=0.50  SE  1.38  detectable >=  2.76 pts  OK
+    run 9  keep=0.35  SE  1.41  detectable >=  2.81 pts  OK
+    run 9  keep=0.25  SE  2.46  detectable >=  4.93 pts  UNDERPOWERED
+    run 9  keep=0.20  SE  2.40  detectable >=  4.80 pts  UNDERPOWERED
+
+==============================================================================
+THE ANSWER
+==============================================================================
+  WITHHELD. A control failed, so the curves above cannot be read as a weights-only comparison. Do not use them to choose between H1 and H2.
+
+wrote results\why_pruning_helps_local.json   (109.9 min)
+
+[exited with code 0]

@@ -1,0 +1,97 @@
+==========================================================================
+1. STATIC SHAPE  (kaggle_token_pruning_ocr.ipynb)
+==========================================================================
+  [PASS] cell 15 has a PROVENANCE block
+  [PASS] exactly one PROVENANCE assignment
+  [PASS] provenance reaches BOTH json writes   partial (after every row) and final
+  [PASS] block lands AFTER `rows = []`   verify_harness_control.py extracts src[BEGIN:index('\nrows = []')]
+  [PASS] harness-control block is unchanged by this patch   that verifier keeps testing what it was written to test
+  [PASS] both checkpoint variables are defined before the block reads them
+  [PASS] the dict is proven JSON-able at build time   the first write lands minutes of GPU in, not at the top of the cell
+  [PASS] block cannot abort the run ('raise' absent)   provenance is bookkeeping; it must never cost a session
+  [PASS] block cannot abort the run ('assert' absent)   provenance is bookkeeping; it must never cost a session
+  [PASS] block cannot abort the run ('sys.exit' absent)   provenance is bookkeeping; it must never cost a session
+
+==========================================================================
+2. EXECUTION
+==========================================================================
+
+  A. happy path
+
+PROVENANCE  torch 2.12.1+cpu  transformers 5.4.0  cpu (cpu)
+    eval ckpt     {'path': 'C:\\Users\\Nafis\\AppData\\Local\\Temp\\provenance_dj7254el\\adaptive_donut_pruned.pt', 'mtime': '2026-10-02T12:58:14Z', 'size_bytes': 4096}
+    control ckpt  {'path': 'C:\\Users\\Nafis\\AppData\\Local\\Temp\\provenance_dj7254el\\run5.pt', 'mtime': '2026-10-02T12:58:14Z', 'size_bytes': 512}
+  [PASS] all seven fields present   control_ckpt, device, device_name, eval_ckpt, torch, transformers, written
+  [PASS] eval checkpoint path recorded
+  [PASS] eval size read off disk   4096 B
+  [PASS] control size read off disk   the two stamps are not the same object
+  [PASS] no error key on the happy path
+  [PASS] torch version stamped   2.12.1+cpu
+  [PASS] transformers version stamped   5.4.0
+  [PASS] cpu device recorded
+  [PASS] written timestamp is ISO-ish UTC   2026-10-02T12:58:16Z
+
+  B. the stamp READS THE FILE -- mutate it and the stamp must move
+     (a constant-returning _ckpt_stamp passes every other check in this file)
+
+PROVENANCE  torch 2.12.1+cpu  transformers 5.4.0  cpu (cpu)
+    eval ckpt     {'path': 'C:\\Users\\Nafis\\AppData\\Local\\Temp\\provenance_dj7254el\\adaptive_donut_pruned.pt', 'mtime': '2026-10-02T12:58:17Z', 'size_bytes': 4196}
+    control ckpt  {'path': 'C:\\Users\\Nafis\\AppData\\Local\\Temp\\provenance_dj7254el\\run5.pt', 'mtime': '2026-10-02T12:58:14Z', 'size_bytes': 512}
+  [PASS] size_bytes tracks the file   4096 -> 4196
+  [PASS] mtime tracks the file   2026-10-02T12:58:14Z -> 2026-10-02T12:58:17Z
+  [PASS] path is stable across the mutation
+
+  C. degraded inputs -- each must RECORD a reason, never raise
+
+PROVENANCE  torch 2.12.1+cpu  transformers 5.4.0  cpu (cpu)
+    eval ckpt     {'path': 'C:\\Users\\Nafis\\AppData\\Local\\Temp\\provenance_dj7254el\\does_not_exist.pt', 'error': "FileNotFoundError: [WinError 2] The system cannot find the file specified: 'C:\\\\Users\\\\Nafis\\\\AppData\\\\Local\\\\Temp\\\\provenance_dj7254el\\\\does_not_exist.pt'"}
+    control ckpt  {'path': 'C:\\Users\\Nafis\\AppData\\Local\\Temp\\provenance_dj7254el\\run5.pt', 'mtime': '2026-10-02T12:58:14Z', 'size_bytes': 512}
+  [PASS] missing file -> error string   {'path': 'C:\\Users\\Nafis\\AppData\\Local\\Temp\\provenance_dj7254el\\does_not_exist.pt', 'error': "FileNotFoundError: [WinError 2] The system cannot find the file specified: 'C:\\\\Users\\\\Nafis\\\\AppData\\\\Local\\\\Temp\\\\provenance_dj7254el\\\\does_not_exist.pt'"}
+  [PASS] missing file still records the path it looked for   'we looked and it was not there' != 'this file predates provenance'
+
+PROVENANCE  torch 2.12.1+cpu  transformers 5.4.0  cpu (cpu)
+    eval ckpt     {'path': None, 'error': 'no checkpoint variable set (EVAL_CKPT / RESUME_CKPT)'}
+    control ckpt  {'path': 'C:\\Users\\Nafis\\AppData\\Local\\Temp\\provenance_dj7254el\\run5.pt', 'mtime': '2026-10-02T12:58:14Z', 'size_bytes': 512}
+  [PASS] unset checkpoint -> explicit reason   {'path': None, 'error': 'no checkpoint variable set (EVAL_CKPT / RESUME_CKPT)'}
+
+PROVENANCE  torch 2.12.1+cpu  transformers 5.4.0  unknown (unknown)
+    eval ckpt     {'path': 'C:\\Users\\Nafis\\AppData\\Local\\Temp\\provenance_dj7254el\\adaptive_donut_pruned.pt', 'mtime': '2026-10-02T12:58:17Z', 'size_bytes': 4196}
+    control ckpt  {'path': 'C:\\Users\\Nafis\\AppData\\Local\\Temp\\provenance_dj7254el\\run5.pt', 'mtime': '2026-10-02T12:58:14Z', 'size_bytes': 512}
+  [PASS] model with no parameters -> device 'unknown'
+
+PROVENANCE  torch 2.12.1+cpu  transformers 5.4.0  cuda:0 (NVIDIA STUB (cuda:0))
+    eval ckpt     {'path': 'C:\\Users\\Nafis\\AppData\\Local\\Temp\\provenance_dj7254el\\adaptive_donut_pruned.pt', 'mtime': '2026-10-02T12:58:17Z', 'size_bytes': 4196}
+    control ckpt  {'path': 'C:\\Users\\Nafis\\AppData\\Local\\Temp\\provenance_dj7254el\\run5.pt', 'mtime': '2026-10-02T12:58:14Z', 'size_bytes': 512}
+  [PASS] cuda device -> name comes from torch.cuda.get_device_name   NVIDIA STUB (cuda:0)
+
+PROVENANCE  torch 2.12.1  transformers 5.4.0  cuda:0 (cuda (name unavailable))
+    eval ckpt     {'path': 'C:\\Users\\Nafis\\AppData\\Local\\Temp\\provenance_dj7254el\\adaptive_donut_pruned.pt', 'mtime': '2026-10-02T12:58:17Z', 'size_bytes': 4196}
+    control ckpt  {'path': 'C:\\Users\\Nafis\\AppData\\Local\\Temp\\provenance_dj7254el\\run5.pt', 'mtime': '2026-10-02T12:58:14Z', 'size_bytes': 512}
+  [PASS] a raising get_device_name degrades instead of killing the run
+
+PROVENANCE  torch 2.12.1+cpu  transformers unavailable (ModuleNotFoundError)  cpu (cpu)
+    eval ckpt     {'path': 'C:\\Users\\Nafis\\AppData\\Local\\Temp\\provenance_dj7254el\\adaptive_donut_pruned.pt', 'mtime': '2026-10-02T12:58:17Z', 'size_bytes': 4196}
+    control ckpt  {'path': 'C:\\Users\\Nafis\\AppData\\Local\\Temp\\provenance_dj7254el\\run5.pt', 'mtime': '2026-10-02T12:58:14Z', 'size_bytes': 512}
+  [PASS] an unimportable transformers degrades to a recorded reason   unavailable (ModuleNotFoundError)
+  [PASS] and the other fields still populate
+
+PROVENANCE  torch unknown  transformers 5.4.0  cpu (cpu)
+    eval ckpt     {'path': 'C:\\Users\\Nafis\\AppData\\Local\\Temp\\provenance_dj7254el\\adaptive_donut_pruned.pt', 'mtime': '2026-10-02T12:58:17Z', 'size_bytes': 4196}
+    control ckpt  {'path': 'C:\\Users\\Nafis\\AppData\\Local\\Temp\\provenance_dj7254el\\run5.pt', 'mtime': '2026-10-02T12:58:14Z', 'size_bytes': 512}
+  [PASS] a torch without __version__ degrades to 'unknown'
+
+==========================================================================
+3. THE WRITES -- provenance must land on disk, not just in the source
+==========================================================================
+
+PROVENANCE  torch 2.12.1+cpu  transformers 5.4.0  cpu (cpu)
+    eval ckpt     {'path': 'C:\\Users\\Nafis\\AppData\\Local\\Temp\\provenance_dj7254el\\adaptive_donut_pruned.pt', 'mtime': '2026-10-02T12:58:17Z', 'size_bytes': 4196}
+    control ckpt  {'path': 'C:\\Users\\Nafis\\AppData\\Local\\Temp\\provenance_dj7254el\\run5.pt', 'mtime': '2026-10-02T12:58:14Z', 'size_bytes': 512}
+  [PASS] partial write (after every row): provenance round-trips to disk intact
+  [PASS] partial write (after every row): the checkpoint stamp survives serialisation
+  [PASS] final write: provenance round-trips to disk intact
+  [PASS] final write: the checkpoint stamp survives serialisation
+
+==========================================================================
+35 passed, 0 failed
+==========================================================================

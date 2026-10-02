@@ -1,0 +1,180 @@
+
+HARNESS CONTROL skipped: DO_TRAIN is off, so `model` still holds the control weights and row 0 below already IS the harness control.
+
+PROVENANCE  torch 2.10.0+cu128  transformers 5.0.0  cuda:0 (Tesla T4)
+    eval ckpt     {'path': '/kaggle/input/datasets/nafis8766/adaptive-donut-run9/adaptive_donut_pruned.pt', 'mtime': '2026-09-17T08:48:22Z', 'size_bytes': 1045901771}
+    control ckpt  {'path': '/kaggle/input/datasets/nafis8766/adaptive-donut-run9/adaptive_donut_pruned.pt', 'mtime': '2026-09-17T08:48:22Z', 'size_bytes': 1045901771}
+--- keep=1.00 router CONTROL
+    -> recall 77.30  charAcc 64.21  ink 1.000  2943 ms/img  [2.6 min]
+--- keep=0.50 router
+    -> recall 79.63  charAcc 64.81  ink 0.922  2689 ms/img  [4.9 min]
+--- keep=0.50 NEGATED
+    -> recall 15.65  charAcc 23.76  ink 0.078  2190 ms/img  [6.8 min]
+--- keep=0.50 random
+    -> recall 62.56  charAcc 53.71  ink 0.497  2427 ms/img  [9.0 min]
+--- keep=0.50 ink ORACLE
+    -> recall 76.89  charAcc 62.45  ink 0.994  2629 ms/img  [11.3 min]
+--- keep=0.50 stratified
+    -> recall 73.13  charAcc 61.80  ink 0.758  2555 ms/img  [13.5 min]
+--- keep=0.50 strat NEGATED
+    -> recall 19.51  charAcc 24.60  ink 0.242  2176 ms/img  [15.5 min]
+--- keep=0.75 router
+    -> recall 79.41  charAcc 65.08  ink 0.986  2799 ms/img  [17.9 min]
+--- keep=0.75 random
+    -> recall 74.75  charAcc 64.45  ink 0.749  2691 ms/img  [20.3 min]
+--- keep=0.75 ink ORACLE
+    -> recall 77.84  charAcc 64.05  ink 1.000  2825 ms/img  [22.7 min]
+--- keep=0.75 strat NEGATED
+    -> recall 49.43  charAcc 41.58  ink 0.527  2471 ms/img  [24.9 min]
+--- keep=0.35 router
+    -> recall 75.85  charAcc 62.50  ink 0.826  2658 ms/img  [27.2 min]
+--- keep=0.35 random
+    -> recall 49.02  charAcc 44.74  ink 0.349  2319 ms/img  [29.3 min]
+--- keep=0.35 ink ORACLE
+    -> recall 77.60  charAcc 61.23  ink 0.950  2666 ms/img  [31.6 min]
+--- keep=0.35 strat NEGATED
+    -> recall 10.37  charAcc 19.31  ink 0.129  2025 ms/img  [33.4 min]
+--- keep=1.00 m=0.20 router
+    -> recall 79.70  charAcc 65.41  ink 1.000  2858 ms/img  [35.9 min]
+--- keep=0.80 router TWIN
+    -> recall 76.58  charAcc 63.99  ink 0.991  2753 ms/img  [38.3 min]
+--- keep=0.50 m=0.20 router
+    -> recall 80.17  charAcc 64.45  ink 0.922  2669 ms/img  [40.6 min]
+--- keep=0.40 router TWIN
+    -> recall 77.31  charAcc 60.79  ink 0.868  2679 ms/img  [43.0 min]
+--- keep=0.35 m=0.20 router
+    -> recall 73.63  charAcc 57.27  ink 0.826  2657 ms/img  [45.3 min]
+--- keep=0.28 router TWIN
+    -> recall 73.85  charAcc 58.03  ink 0.748  2695 ms/img  [47.7 min]
+--- keep=0.50 m=0.40 router
+    -> recall 75.77  charAcc 59.02  ink 0.922  2578 ms/img  [49.9 min]
+--- keep=0.30 router TWIN
+    -> recall 77.05  charAcc 60.78  ink 0.773  2694 ms/img  [52.3 min]
+--- keep=0.50 m=0.20 ink
+    -> recall 78.79  charAcc 63.11  ink 0.994  2664 ms/img  [54.6 min]
+--- keep=0.40 ink TWIN
+    -> recall 76.51  charAcc 61.98  ink 0.974  2687 ms/img  [57.0 min]
+--- keep=0.35 m=0.20 ink
+    -> recall 75.94  charAcc 58.46  ink 0.950  2709 ms/img  [59.3 min]
+--- keep=0.28 ink TWIN
+    -> recall 71.88  charAcc 57.29  ink 0.888  2623 ms/img  [61.6 min]
+--- keep=0.50 m=0.20 RANKPAR
+    -> recall 80.46  charAcc 64.86  ink 0.922  2724 ms/img  [64.0 min]
+
+=========================================================================================================
+config                       tok   ink minCov  recall  charAcc   order    NED   len%  cap%  json%      ms
+---------------------------------------------------------------------------------------------------------
+keep=1.00 router CONTROL    4800 1.000  1.000   77.30    64.21   54.14  0.358   98.6     0   80.0    2943
+keep=0.50 router            2400 0.922  0.601   79.63    64.81   54.08  0.352  107.8     0   86.0    2689
+keep=0.50 NEGATED           2400 0.078  0.002   15.65    23.76    8.97  0.762   57.9     0   48.0    2190
+keep=0.50 random            2400 0.497  0.265   62.56    53.71   40.16  0.463   87.0     0   80.0    2427
+keep=0.50 ink ORACLE        2400 0.994  0.955   76.89    62.45   51.93  0.376  101.5     0   76.0    2629
+keep=0.50 stratified        2400 0.758  0.495   73.13    61.80   50.42  0.382   97.0     0   84.0    2555
+keep=0.50 strat NEGATED     2400 0.242  0.001   19.51    24.60    9.51  0.754   64.1     0   56.0    2176
+keep=0.75 router            3600 0.986  0.862   79.41    65.08   53.92  0.349  103.8     0   90.0    2799
+keep=0.75 random            3600 0.749  0.539   74.75    64.45   53.03  0.356   94.8     0   86.0    2691
+keep=0.75 ink ORACLE        3600 1.000  0.998   77.84    64.05   53.67  0.360  104.2     0   86.0    2825
+keep=0.75 strat NEGATED     3600 0.527  0.026   49.43    41.58   27.12  0.584   80.2     0   74.0    2471
+keep=0.35 router            1680 0.826  0.392   75.85    62.50   49.88  0.375  106.8     0   78.0    2658
+keep=0.35 random            1680 0.349  0.137   49.02    44.74   28.39  0.553   81.5     0   66.0    2319
+keep=0.35 ink ORACLE        1680 0.950  0.739   77.60    61.23   49.68  0.388  109.4     0   82.0    2666
+keep=0.35 strat NEGATED     1680 0.129  0.000   10.37    19.31    4.94  0.807   53.1     2   42.0    2025
+keep=1.00 m=0.20 router     3840 1.000  1.000   79.70    65.41   54.88  0.346  103.3     0   84.0    2858
+keep=0.80 router TWIN       3840 0.991  0.901   76.58    63.99   53.47  0.360   98.0     0   90.0    2753
+keep=0.50 m=0.20 router     1920 0.922  0.601   80.17    64.45   53.48  0.355  108.4     0   84.0    2669
+keep=0.40 router TWIN       1920 0.868  0.474   77.31    60.79   48.96  0.392  108.0     0   78.0    2679
+keep=0.35 m=0.20 router     1344 0.826  0.392   73.63    57.27   44.32  0.427  109.3     0   76.0    2657
+keep=0.28 router TWIN       1344 0.748  0.266   73.85    58.03   45.85  0.420  110.6     0   78.0    2695
+keep=0.50 m=0.40 router     1440 0.922  0.601   75.77    59.02   48.25  0.410  102.7     0   88.0    2578
+keep=0.30 router TWIN       1440 0.773  0.308   77.05    60.78   48.18  0.392  110.5     0   74.0    2694
+keep=0.50 m=0.20 ink        1920 0.994  0.955   78.79    63.11   52.43  0.369  107.2     0   88.0    2664
+keep=0.40 ink TWIN          1920 0.974  0.828   76.51    61.98   50.20  0.380  108.4     0   82.0    2687
+keep=0.35 m=0.20 ink        1344 0.950  0.739   75.94    58.46   46.77  0.415  112.1     0   84.0    2709
+keep=0.28 ink TWIN          1344 0.888  0.529   71.88    57.29   45.23  0.427  104.6     0   78.0    2623
+keep=0.50 m=0.20 RANKPAR    1920 0.922  0.601   80.46    64.86   53.21  0.351  112.0     0   88.0    2724
+=========================================================================================================
+
+CONTROL vs run 6 (77.74, 64.7, 53.05)
+  got (77.30, 64.21, 54.14)   max drift 1.09 pts
+  WARNING - harness does NOT match run 6 (different weights, sampling, or transformers version). Rows are still comparable TO EACH OTHER and to this control, but do not quote them against run 6 absolutely.
+
+Q1. Does negating the router help? (keep=0.50)
+  router    79.63 recall   ink 0.922   minCov 0.601
+  negated   15.65 recall   ink 0.078   minCov 0.002
+  random    62.56 recall   ink 0.497   minCov 0.265
+  => negation does not beat random: retaining ink is NECESSARY BUT NOT SUFFICIENT (D2). Do not adopt it as the fix.
+
+Q2. Are half these tokens droppable at all? (the row that can kill 1a)
+  keep=1.00 CONTROL   77.30 recall  (4800 tokens)
+  keep=0.50 ORACLE    76.89 recall  (2400 tokens, ink 0.994)   -0.42 vs control
+  => PREMISE HOLDS: an ink-ranked half of the tokens nearly matches the full page, so the headroom a trained router could reach is real.
+  at keep=0.50 the router sits at 79.63, between a floor of 62.56 (random) and a ceiling of 76.89 (oracle).
+
+Q4. Is the bug the selection RULE or the scorer? (keep=0.50, D2/Pending 1d)
+  router               79.63 recall   ink 0.922   minCov 0.601
+  stratified           73.13 recall   ink 0.758   minCov 0.495
+  stratified_negated   19.51 recall   ink 0.242   minCov 0.001
+  random               62.56 recall   ink 0.497   minCov 0.265
+  ink                  76.89 recall   ink 0.994   minCov 0.955
+  => THE SELECTION RULE WAS THE BUG. A per-row budget on the SAME scores reaches the random floor or better, so the scorer is salvageable and 1a should train WITH stratified selection rather than replace the scorer.
+
+Q5. keep_ratio curve (Pending 1c) -- recall by ranking signal, cost per row
+   keep   tok  router  random  oracle  stratN  ms/img
+   1.00  4800   77.30       -       -       -    2943
+   0.75  3600   79.41   74.75   77.84   49.43    2799
+   0.50  2400   79.63   62.56   76.89   19.51    2689
+   0.35  1680   75.85   49.02   77.60   10.37    2658
+  NOTE: there is NO encoder-side saving. The router runs AFTER the frozen
+        Swin, so all 4800 tokens are computed at every keep_ratio; the only
+        saving is decoder cross-attention KV length.
+  NOTE: latency is decoder-bound. D11 (n=50, 5 budgets, 2 checkpoints)
+        measured 4800 -> 960 tokens buying 1.04x wall-clock (1.05x max),
+        because generation runs 243-280 autoregressive steps while the
+        encoder runs once. The tok column is a TOKEN-COUNT axis, not an
+        efficiency one; any latency or throughput claim is false.
+
+Q3. Which statistic predicts per-image recall? (all pruned rows, n=1000)
+  statistic              family        Spearman vs recall
+  --------------------------------------------------------
+  retained_ink           aggregate                  0.597
+  mean_line_cov          aggregate                  0.609
+  p10_line_cov           worst-case                 0.584
+  min_line_cov           worst-case                 0.518
+  => D2 FALSIFIED per-image: summed ink is the better predictor after all. D2 was a 4-row coincidence; revise it and re-check 1a/1d.
+
+  within-mode (controls for the mode -- image-to-image variation only):
+    router              ink  0.080   min-cov  0.088   (n=350)
+    negated             ink  0.398   min-cov  0.070   (n=50)
+    random              ink  0.619   min-cov  0.608   (n=150)
+    ink                 ink  0.045   min-cov  0.085   (n=250)
+    stratified          ink  0.064   min-cov -0.014   (n=50)
+    stratified_negated  ink  0.784   min-cov  0.132   (n=150)
+
+================================================================================================================
+Q6. TOKEN-MATCHED: merge to M vs prune to the same M   (paired by document, 95% bootstrap CI)
+================================================================================================================
+  pair                             M   merge   prune   delta             95% CI   res  verdict
+  ------------------------------------------------------------------------------------------------------------
+  keep1.00 m0.20 vs keep0.80    3840   79.70   76.58   +3.12     [+0.21, +6.05]   2.9  MERGING WINS at equal M
+  keep0.50 m0.20 vs keep0.40    1920   80.17   77.31   +2.86     [-0.09, +6.16]   3.1  UNDERPOWERED (res 3.1 > 3.0 pts bar) -- not a null
+  keep0.35 m0.20 vs keep0.28    1344   73.63   73.85   -0.22     [-3.42, +2.86]   3.1  UNDERPOWERED (res 3.1 > 3.0 pts bar) -- not a null
+  keep0.50 m0.40 vs keep0.30    1440   75.77   77.05   -1.29     [-4.81, +2.26]   3.5  UNDERPOWERED (res 3.5 > 3.0 pts bar) -- not a null
+  ink keep0.50 m0.20 vs 0.40    1920   78.79   76.51   +2.28     [-0.30, +5.05]   2.7  indistinguishable (res 2.7 pts at n=50)
+  ink keep0.35 m0.20 vs 0.28    1344   75.94   71.88   +4.06     [+0.43, +8.05]   3.8  MERGING WINS at equal M
+================================================================================================================
+  2 pair(s) favour merging, 0 favour pruning, 1 indistinguishable, 3 underpowered, of 6 measured.
+  6 pairs + 1 sabotage row = 7 uncorrected comparisons; read the pattern across
+  the router/ink pairs, not a single row that just clears zero.
+  => MERGING BEATS PRUNING AT EQUAL M, on weights that never saw a merged token.
+     That is a stronger result than this run was designed to find; check the ink
+     pair specifically, since it isolates the mechanism from the router's weakness.
+
+SABOTAGE CONTROL: the pre-fix rank-parity split, same M, same weights
+  M=1920   checkerboard 80.17   rank_parity 80.46   delta -0.29 pts   [-3.10, +2.76]   res 2.9 pts  (n=50)
+  => NO MEASURABLE RECALL DIFFERENCE: |delta| 0.29 against this row's own
+     resolution of 2.9 pts at n=50.
+     The checkerboard fix is CORRECT about the partition and UNPROVEN about the
+     outcome. Report it that way: 49.2%/50.5% -> 0.0%/0.0% is a claim about the
+     split, not about OCR accuracy.
+
+Wrote /kaggle/working/ablation_selection.json  (64.0 min total)

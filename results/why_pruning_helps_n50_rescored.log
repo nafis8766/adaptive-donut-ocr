@@ -1,0 +1,30 @@
+  [PASS] harness anchor (run 9 @ keep=1.00 reproduces D11): local 77.62 vs D11 local 77.62 -> |gap| 0.00 (tol 0.5; same device/transformers/images, so this must reproduce)
+  [INFO] run 5 @ keep=1.00: local 74.72 vs Kaggle run 6 77.74 -> |gap| 3.02. INFORMATIONAL ONLY -- D11 showed generation does not reproduce across environments (levels drift up to 3.4 pts on bit-identical selections). Gates nothing.
+
+  resolution -- smallest detectable 'vs 1.00' delta at |t|=2 (want <= 3.0 pts):
+    run 5  keep=0.50  SE  2.60  detectable >=  5.20 pts  UNDERPOWERED
+    run 5  keep=0.35  SE  2.31  detectable >=  4.62 pts  UNDERPOWERED
+    run 5  keep=0.25  SE  2.50  detectable >=  5.01 pts  UNDERPOWERED
+    run 5  keep=0.20  SE  2.80  detectable >=  5.60 pts  UNDERPOWERED
+    run 9  keep=0.50  SE  1.38  detectable >=  2.76 pts  OK
+    run 9  keep=0.35  SE  1.41  detectable >=  2.81 pts  OK
+    run 9  keep=0.25  SE  2.46  detectable >=  4.93 pts  UNDERPOWERED
+    run 9  keep=0.20  SE  2.40  detectable >=  4.80 pts  UNDERPOWERED
+
+==============================================================================
+THE ANSWER
+==============================================================================
+  run 5  (no pruning in training): peaks at keep=1.00 (74.72)
+  run 9  (trained at keep=0.50): peaks at keep=0.50 (78.22)
+
+  => UNDERPOWERED, not flat. Run 5's keep=0.50 delta is -1.57 pts with SE 2.60, so nothing below 5.20 pts is detectable and neither hypothesis is excluded. Do not report this as 'pruning is neutral'.
+
+  Did the retrain help, holding the token set fixed? (run 9 - run 5, identical ink tokens)
+    keep=0.50   +5.07 pts  SE  2.22  t  +2.28 *
+    keep=0.35   +8.67 pts  SE  1.87  t  +4.63 *
+    keep=0.25   +7.42 pts  SE  2.47  t  +3.01 *
+    keep=0.20  +10.23 pts  SE  1.84  t  +5.56 *
+    SCOPE: run 9 differs from run 5 by pruning-aware training AND five more epochs of it.
+    These rows cannot attribute the difference to pruning; they only say whether it exists.
+
+wrote results\why_pruning_helps_rescored.json   (0.0 min)

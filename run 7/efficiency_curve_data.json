@@ -1,0 +1,13 @@
+{
+  "source": "results_3/ablation_selection.json (Run 8, router retrained WITH ink-BCE saliency supervision)",
+  "metric": "word_recall_pct",
+  "x": "visual_tokens",
+  "note": "Forward router is now correctly signed; no negation needed.",
+  "points": {
+    "router_forward (working pruner)": {"4800": 78.25, "3600": 75.19, "2400": 80.17, "1680": 77.80},
+    "random (floor)":                  {"3600": 72.10, "2400": 60.75, "1680": 48.37},
+    "ink_oracle (ceiling proxy)":      {"3600": 75.96, "2400": 74.79, "1680": 74.24},
+    "negated (now broken)":            {"3600": 38.80, "2400": 8.25,  "1680": 3.00}
+  },
+  "keep_ratio_map": {"1.00": 4800, "0.75": 3600, "0.50": 2400, "0.35": 1680}
+}

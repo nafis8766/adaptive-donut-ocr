@@ -1,0 +1,349 @@
+{
+  "meta": {
+    "checkpoint": "C:\\Users\\Nafis\\Desktop\\Project\\run 5\\checkpoints\\adaptive_donut_funsd.pt",
+    "num_eval_samples": 4,
+    "keep_ratio": 0.5,
+    "transformers": "5.4.0",
+    "device": "cpu",
+    "max_words": 128,
+    "run6_reference": [
+      77.74,
+      64.7,
+      53.05
+    ],
+    "control_drift_pts": 8.885771933889409,
+    "seed": 0
+  },
+  "rows": [
+    {
+      "config": "keep=1.00 router (CONTROL)",
+      "keep_ratio": 1.0,
+      "select_mode": "router",
+      "visual_tokens": 4800,
+      "retained_ink": 0.9999999850988388,
+      "mean_min_line_cov": 1.0,
+      "word_recall_pct": 83.67196198061418,
+      "character_accuracy_pct": 70.11599021462054,
+      "word_order_pct": 61.935771933889406,
+      "mean_ned": 0.29884009785379456,
+      "mean_pred_words": 123.25,
+      "mean_gold_words": 126.5,
+      "len_ratio_pct": 97.43083003952569,
+      "mean_gen_tokens": 282.25,
+      "hit_max_length_pct": 0.0,
+      "valid_json_pct": 50.0,
+      "avg_latency_ms": 17397.10447500147,
+      "num_eval_samples": 4,
+      "per_image": [
+        {
+          "i": 0,
+          "recall": 0.898876404494382,
+          "ned": 0.2894190871369295,
+          "retained_ink": 0.9999998807907104,
+          "gen_tokens": 391,
+          "min_line_cov": 1.0,
+          "p10_line_cov": 1.0,
+          "mean_line_cov": 1.0,
+          "n_text_rows": 46
+        },
+        {
+          "i": 1,
+          "recall": 0.7532467532467533,
+          "ned": 0.41713483146067415,
+          "retained_ink": 1.0,
+          "gen_tokens": 248,
+          "min_line_cov": 1.0,
+          "p10_line_cov": 1.0,
+          "mean_line_cov": 1.0,
+          "n_text_rows": 40
+        },
+        {
+          "i": 2,
+          "recall": 0.8775510204081632,
+          "ned": 0.22974607013301088,
+          "retained_ink": 0.9999999403953552,
+          "gen_tokens": 276,
+          "min_line_cov": 1.0,
+          "p10_line_cov": 1.0,
+          "mean_line_cov": 1.0,
+          "n_text_rows": 52
+        },
+        {
+          "i": 3,
+          "recall": 0.8172043010752689,
+          "ned": 0.25906040268456376,
+          "retained_ink": 1.0000001192092896,
+          "gen_tokens": 214,
+          "min_line_cov": 1.0,
+          "p10_line_cov": 1.0,
+          "mean_line_cov": 1.0,
+          "n_text_rows": 52
+        }
+      ]
+    },
+    {
+      "config": "keep=0.50 router",
+      "keep_ratio": 0.5,
+      "select_mode": "router",
+      "visual_tokens": 2400,
+      "retained_ink": 0.38084516674280167,
+      "mean_min_line_cov": 0.02897712115146343,
+      "word_recall_pct": 30.193802124625925,
+      "character_accuracy_pct": 25.05403842703534,
+      "word_order_pct": 9.115497840022297,
+      "mean_ned": 0.7494596157296466,
+      "mean_pred_words": 96.75,
+      "mean_gold_words": 126.5,
+      "len_ratio_pct": 76.48221343873517,
+      "mean_gen_tokens": 226.25,
+      "hit_max_length_pct": 0.0,
+      "valid_json_pct": 25.0,
+      "avg_latency_ms": 14784.494099999392,
+      "num_eval_samples": 4,
+      "per_image": [
+        {
+          "i": 0,
+          "recall": 0.449438202247191,
+          "ned": 0.7283464566929134,
+          "retained_ink": 0.39072391390800476,
+          "gen_tokens": 294,
+          "min_line_cov": 0.031920716828508285,
+          "p10_line_cov": 0.06486527855569713,
+          "mean_line_cov": 0.37709241851091096,
+          "n_text_rows": 46
+        },
+        {
+          "i": 1,
+          "recall": 0.4025974025974026,
+          "ned": 0.6853932584269663,
+          "retained_ink": 0.45787104964256287,
+          "gen_tokens": 264,
+          "min_line_cov": 0.02707862128988986,
+          "p10_line_cov": 0.11295061036293579,
+          "mean_line_cov": 0.4257908181861206,
+          "n_text_rows": 40
+        },
+        {
+          "i": 2,
+          "recall": 0.1836734693877551,
+          "ned": 0.7908101571946796,
+          "retained_ink": 0.33746615052223206,
+          "gen_tokens": 221,
+          "min_line_cov": 0.05690914648745558,
+          "p10_line_cov": 0.10142809527566916,
+          "mean_line_cov": 0.3078600443434614,
+          "n_text_rows": 52
+        },
+        {
+          "i": 3,
+          "recall": 0.17204301075268819,
+          "ned": 0.7932885906040269,
+          "retained_ink": 0.337319552898407,
+          "gen_tokens": 126,
+          "min_line_cov": 0.0,
+          "p10_line_cov": 0.06777805102097528,
+          "mean_line_cov": 0.3232515000238395,
+          "n_text_rows": 52
+        }
+      ]
+    },
+    {
+      "config": "keep=0.50 NEGATED",
+      "keep_ratio": 0.5,
+      "select_mode": "negated",
+      "visual_tokens": 2400,
+      "retained_ink": 0.6191548258066177,
+      "mean_min_line_cov": 0.1334995978792039,
+      "word_recall_pct": 56.22260189455861,
+      "character_accuracy_pct": 48.88313756058508,
+      "word_order_pct": 35.00100160256411,
+      "mean_ned": 0.5111686243941492,
+      "mean_pred_words": 97.25,
+      "mean_gold_words": 126.5,
+      "len_ratio_pct": 76.87747035573122,
+      "mean_gen_tokens": 229.5,
+      "hit_max_length_pct": 0.0,
+      "valid_json_pct": 50.0,
+      "avg_latency_ms": 14814.560150000034,
+      "num_eval_samples": 4,
+      "per_image": [
+        {
+          "i": 0,
+          "recall": 0.4157303370786517,
+          "ned": 0.6377952755905512,
+          "retained_ink": 0.6092759966850281,
+          "gen_tokens": 233,
+          "min_line_cov": 0.13273929636385062,
+          "p10_line_cov": 0.351078533078637,
+          "mean_line_cov": 0.6229075814890891,
+          "n_text_rows": 46
+        },
+        {
+          "i": 1,
+          "recall": 0.5194805194805194,
+          "ned": 0.5463483146067416,
+          "retained_ink": 0.5421290397644043,
+          "gen_tokens": 251,
+          "min_line_cov": 0.14313634323989358,
+          "p10_line_cov": 0.24663125525952687,
+          "mean_line_cov": 0.5742091818138795,
+          "n_text_rows": 40
+        },
+        {
+          "i": 2,
+          "recall": 0.7653061224489796,
+          "ned": 0.279322853688029,
+          "retained_ink": 0.6625337600708008,
+          "gen_tokens": 257,
+          "min_line_cov": 0.18333333333333332,
+          "p10_line_cov": 0.3976376045097605,
+          "mean_line_cov": 0.6921399556565385,
+          "n_text_rows": 52
+        },
+        {
+          "i": 3,
+          "recall": 0.5483870967741935,
+          "ned": 0.5812080536912752,
+          "retained_ink": 0.6626805067062378,
+          "gen_tokens": 177,
+          "min_line_cov": 0.07478941857973806,
+          "p10_line_cov": 0.36878889124432696,
+          "mean_line_cov": 0.6767484999761605,
+          "n_text_rows": 52
+        }
+      ]
+    },
+    {
+      "config": "keep=0.50 random",
+      "keep_ratio": 0.5,
+      "select_mode": "random",
+      "visual_tokens": 2400,
+      "retained_ink": 0.5013357549905777,
+      "mean_min_line_cov": 0.29679898230651375,
+      "word_recall_pct": 70.60811045562248,
+      "character_accuracy_pct": 63.47194900145992,
+      "word_order_pct": 51.953125,
+      "mean_ned": 0.36528050998540085,
+      "mean_pred_words": 104.75,
+      "mean_gold_words": 126.5,
+      "len_ratio_pct": 82.80632411067194,
+      "mean_gen_tokens": 241.75,
+      "hit_max_length_pct": 0.0,
+      "valid_json_pct": 75.0,
+      "avg_latency_ms": 15199.571850000211,
+      "num_eval_samples": 4,
+      "per_image": [
+        {
+          "i": 0,
+          "recall": 0.5955056179775281,
+          "ned": 0.48293963254593175,
+          "retained_ink": 0.5035246014595032,
+          "gen_tokens": 283,
+          "min_line_cov": 0.3505056296185134,
+          "p10_line_cov": 0.382736312757301,
+          "mean_line_cov": 0.4983901411391948,
+          "n_text_rows": 46
+        },
+        {
+          "i": 1,
+          "recall": 0.7662337662337663,
+          "ned": 0.34831460674157305,
+          "retained_ink": 0.4879986047744751,
+          "gen_tokens": 243,
+          "min_line_cov": 0.1929594036466008,
+          "p10_line_cov": 0.3928911389020025,
+          "mean_line_cov": 0.4874082605388514,
+          "n_text_rows": 40
+        },
+        {
+          "i": 2,
+          "recall": 0.7959183673469388,
+          "ned": 0.21644498186215236,
+          "retained_ink": 0.5015228986740112,
+          "gen_tokens": 261,
+          "min_line_cov": 0.3197403200087977,
+          "p10_line_cov": 0.39745727697394095,
+          "mean_line_cov": 0.49760899527017066,
+          "n_text_rows": 52
+        },
+        {
+          "i": 3,
+          "recall": 0.6666666666666666,
+          "ned": 0.4134228187919463,
+          "retained_ink": 0.5122969150543213,
+          "gen_tokens": 180,
+          "min_line_cov": 0.3239905759521431,
+          "p10_line_cov": 0.41023772751437937,
+          "mean_line_cov": 0.516553051256481,
+          "n_text_rows": 52
+        }
+      ]
+    },
+    {
+      "config": "keep=0.50 ink ORACLE",
+      "keep_ratio": 0.5,
+      "select_mode": "ink",
+      "visual_tokens": 2400,
+      "retained_ink": 1.0,
+      "mean_min_line_cov": 1.0,
+      "word_recall_pct": 83.65658810890002,
+      "character_accuracy_pct": 66.1575459264308,
+      "word_order_pct": 57.23950690582844,
+      "mean_ned": 0.338424540735692,
+      "mean_pred_words": 135.25,
+      "mean_gold_words": 126.5,
+      "len_ratio_pct": 106.91699604743083,
+      "mean_gen_tokens": 299.25,
+      "hit_max_length_pct": 0.0,
+      "valid_json_pct": 50.0,
+      "avg_latency_ms": 16117.702075000125,
+      "num_eval_samples": 4,
+      "per_image": [
+        {
+          "i": 0,
+          "recall": 0.9325842696629213,
+          "ned": 0.29863301787592006,
+          "retained_ink": 1.0,
+          "gen_tokens": 389,
+          "min_line_cov": 1.0,
+          "p10_line_cov": 1.0,
+          "mean_line_cov": 1.0,
+          "n_text_rows": 46
+        },
+        {
+          "i": 1,
+          "recall": 0.6883116883116883,
+          "ned": 0.5517711171662125,
+          "retained_ink": 1.0,
+          "gen_tokens": 313,
+          "min_line_cov": 1.0,
+          "p10_line_cov": 1.0,
+          "mean_line_cov": 1.0,
+          "n_text_rows": 40
+        },
+        {
+          "i": 2,
+          "recall": 0.9081632653061225,
+          "ned": 0.22007255139056833,
+          "retained_ink": 1.0,
+          "gen_tokens": 277,
+          "min_line_cov": 1.0,
+          "p10_line_cov": 1.0,
+          "mean_line_cov": 1.0,
+          "n_text_rows": 52
+        },
+        {
+          "i": 3,
+          "recall": 0.8172043010752689,
+          "ned": 0.2832214765100671,
+          "retained_ink": 1.0,
+          "gen_tokens": 218,
+          "min_line_cov": 1.0,
+          "p10_line_cov": 1.0,
+          "mean_line_cov": 1.0,
+          "n_text_rows": 52
+        }
+      ]
+    }
+  ]
+}

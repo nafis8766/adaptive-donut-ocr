@@ -1,0 +1,44 @@
+# ---------------------------------------------------------------------------
+# Large binaries. The working tree is ~18 GB; ~9.4 GB of that is weights and
+# per-run archives, every individual file of which is ~1 GB and therefore over
+# GitHub's hard 100 MB per-file limit.
+#
+# Excluding them is safe for reproducibility: every diagnostic in scripts/
+# re-derives its numbers from results/*.json and the per-run
+# ablation_*.json, all of which ARE versioned. See AGENTS.md, "File map".
+#
+# NOTE (AGENTS.md, "Transcribe the verdict"): each run's pruned_ocr_results.zip
+# holds the *executed* __notebook__.ipynb, which is the only place the printed
+# Q1-Q6 verdicts live. Those zips are ~970 MB each and cannot be versioned here.
+# If a verdict log needs to be public, extract the notebook out of the zip and
+# commit that file on its own -- the pattern already used for
+# `run 12/_cell15.txt`.
+# ---------------------------------------------------------------------------
+*.pt
+*.bin
+*.zip
+
+# ---------------------------------------------------------------------------
+# Caches, editor and agent-harness state
+# ---------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+.mypy_cache/
+.ipynb_checkpoints/
+.virtual_documents/
+.claude/
+.kilo/
+
+# ---------------------------------------------------------------------------
+# Notebook/tracker backups written by the asserted patchers. Regenerable:
+# kaggle_pruning_run.ipynb comes from scripts/make_kaggle_pruning_notebook.py,
+# and the patchers refuse to overwrite an existing backup. Keeping them out of
+# history avoids shipping eight near-identical multi-MB notebooks.
+# ---------------------------------------------------------------------------
+*.bak-*
+
+# ---------------------------------------------------------------------------
+# Debris. `=4.38.0` is a 0-byte file from a shell-quoting slip in a
+# `pip install transformers>=4.38.0`.
+# ---------------------------------------------------------------------------
+=4.38.0

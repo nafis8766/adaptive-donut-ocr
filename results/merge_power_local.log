@@ -1,0 +1,149 @@
+================================================================================================
+D13 -- the ToMe blocker is the instrument, not the merger
+     run 13: run 13\ablation_selection.json   run 14: run14\ablation_selection.json
+================================================================================================
+
+[1] CALIBRATION -- reproduce published figures from the raw arrays
+    If this fails, nothing below it is usable.
+
+    contrast                      mean     pub |    res    pub
+    run13 m0.40-m0.00            -3.86   -3.86 |   3.59   3.57
+  [PASS] run13 m0.40-m0.00: mean reproduces to <=0.02 (|d|=0.001)
+  [PASS] run13 m0.40-m0.00: res reproduces to <=0.1 (|d|=0.017)
+    run13 m0.20-m0.00            +0.54   +0.54 |   3.13   3.07
+  [PASS] run13 m0.20-m0.00: mean reproduces to <=0.02 (|d|=0.001)
+  [PASS] run13 m0.20-m0.00: res reproduces to <=0.1 (|d|=0.056)
+    run14 m0.40-m0.00            -0.28   -0.28 |   3.98   3.95
+  [PASS] run14 m0.40-m0.00: mean reproduces to <=0.02 (|d|=0.003)
+  [PASS] run14 m0.40-m0.00: res reproduces to <=0.1 (|d|=0.035)
+    run13 M=1920 mrg-prn         +2.86   +2.86 |   3.16   3.10
+  [PASS] run13 M=1920 mrg-prn: mean reproduces to <=0.02 (|d|=0.002)
+  [PASS] run13 M=1920 mrg-prn: res reproduces to <=0.1 (|d|=0.060)
+    run13 M=3840 mrg-prn         +3.12   +3.12 |   2.92   2.90
+  [PASS] run13 M=3840 mrg-prn: mean reproduces to <=0.02 (|d|=0.003)
+  [PASS] run13 M=3840 mrg-prn: res reproduces to <=0.1 (|d|=0.024)
+
+[2] VARIANCE -- where the per-document noise actually lives
+
+    run 13, m=0.40 vs m=0.00 @ keep=0.50, n=50
+    mean -3.86   median -2.72   sd 12.94
+    5 most extreme deltas: ['-57.0', '+43.9', '-24.7', '-22.2', '+14.4']
+    their share of total sum-of-squares: 75.6%
+    documents with exactly zero change: 6/50
+    documents moving >10 pts either way: 12/50
+
+    Is it document length? CUPED on `n_text_rows`:
+      m=0.40 vs m=0.00     res 3.59 -> 3.45  (+3.7%)
+      m=0.20 vs m=0.00     res 3.13 -> 3.13  (+0.0%)
+      M=1920 mrg-prn       res 3.16 -> 3.16  (+0.1%)
+  [PASS] variance is concentrated: top 5 of 50 docs carry 75.6% of SS (>50%)
+  [PASS] document length is NOT the driver: best CUPED gain +3.7% (<10%)
+
+[3] ESTIMATOR -- bootstrap-on-means vs a 10% trimmed mean (TM standard error)
+    Bootstrap endpoints are ONE DRAW (seed 0).
+
+    contrast                         |   mean   res               CI  x0 |   trim   res               CI  x0
+    --------------------------------------------------------------------------------------------------------
+    13 m=0.40 vs m=0.00 @keep0.50    |  -3.86  3.59 [ -7.44, -0.33] YES |  -3.23  2.47 [ -5.85, -0.97] YES
+    13 m=0.20 vs m=0.00 @keep0.50    |  +0.54  3.13 [ -2.37, +3.81]  no |  -0.65  1.72 [ -2.45, +1.77]  no
+    13 M=3840 merge vs prune         |  +3.12  2.92 [ +0.20, +6.02] YES |  +2.23  2.09 [ +0.59, +4.58] YES
+    13 M=1920 merge vs prune         |  +2.86  3.16 [ -0.08, +6.17]  no |  +1.35  2.68 [ -0.95, +4.36]  no
+    13 M=1344 merge vs prune         |  -0.22  3.16 [ -3.47, +2.89]  no |  -0.21  2.53 [ -2.72, +2.55]  no
+    13 M=1440 merge vs prune         |  -1.29  3.55 [ -4.77, +2.19]  no |  -1.65  2.09 [ -3.82, +1.11]  no
+    14 m=0.40 vs m=0.00 @keep0.50    |  -0.28  3.98 [ -4.51, +3.41]  no |  -0.17  2.23 [ -2.29, +2.30]  no
+    13 SABOTAGE ckb - rank_parity    |  -0.29  2.94 [ -3.09, +2.77]  no |  -0.90  2.10 [ -3.12, +1.17]  no
+    14 SABOTAGE ckb - rank_parity    |  -0.88  4.34 [ -5.23, +3.32]  no |  -0.24  2.60 [ -3.40, +2.26]  no
+    13 NEGATED - router @keep0.50    | -63.98  5.31 [-69.17,-58.67] YES | -64.56  6.09 [-70.47,-58.56] YES
+
+  [PASS] trimmed res is tighter on 6/6 MERGE contrasts (heavy-tailed, which is the case it is for)
+  [PASS] trimming is NOT uniformly tighter -- it is wider on the light-tailed control (13 NEGATED - router @keep0.50: 5.31->6.09), which is what makes the gain above a measurement and not an artifact
+  [PASS] null control stays null under trimming: 14 m=0.40 vs m=0.00 @keep0.50
+  [PASS] null control stays null under the mean:   14 m=0.40 vs m=0.00 @keep0.50
+  [PASS] null control stays null under trimming: 13 SABOTAGE ckb - rank_parity
+  [PASS] null control stays null under the mean:   13 SABOTAGE ckb - rank_parity
+  [PASS] null control stays null under trimming: 14 SABOTAGE ckb - rank_parity
+  [PASS] null control stays null under the mean:   14 SABOTAGE ckb - rank_parity
+  [PASS] huge control resolves under BOTH estimators: 13 NEGATED - router @keep0.50
+  [PASS] naive trimmed SE understates: 1.66 < TM 2.47 (33% too small)
+  [PASS] verdicts stable across trim g in {0.05,0.10,0.15} (0 flips)
+
+[4] REQUIRED n -- the n at which each contrast's CI half-width reaches a target
+    Same variance, more documents. FUNSD test = 50 and is exhausted.
+
+    contrast                             sd |         3.0         2.0         1.5         1.0
+                                            |   mean/trim   mean/trim   mean/trim   mean/trim
+    13 m=0.40 vs m=0.00 @keep0.50     12.94 |    72/34      161/77      286/136     644/305  
+  [PASS] required n is monotone in target: 13 m=0.40 vs m=0.00 @keep0.50
+    13 m=0.20 vs m=0.00 @keep0.50     11.28 |    55/17      123/37      218/66      489/148  
+  [PASS] required n is monotone in target: 13 m=0.20 vs m=0.00 @keep0.50
+    13 M=3840 merge vs prune          10.55 |    48/25      107/55      191/98      428/219  
+  [PASS] required n is monotone in target: 13 M=3840 merge vs prune
+    13 M=1920 merge vs prune          11.40 |    56/40      125/90      222/160     500/360  
+  [PASS] required n is monotone in target: 13 M=1920 merge vs prune
+    13 M=1344 merge vs prune          11.40 |    56/36      125/81      222/143     500/321  
+  [PASS] required n is monotone in target: 13 M=1344 merge vs prune
+    13 M=1440 merge vs prune          12.81 |    71/25      158/55      281/98      631/219  
+  [PASS] required n is monotone in target: 13 M=1440 merge vs prune
+
+    The single most consequential number in this table:
+      M=1920 merge-vs-prune -- the question ToMe exists to answer -- observed
+      +2.86 pts at res 3.16. To resolve its OWN effect
+      it needed n >= 62, and run 13 had 50. It missed by 12 documents.
+  [PASS] M=1920 was underpowered for its own effect (needed 62, had 50)
+
+[5] TAIL -- what both location estimators hide
+    A location statistic answers 'what happened on average'. The claim is
+    'merging is free', which is a claim about EVERY document.
+
+    contrast                         |   mean   trim     p10     min | |z|max   kurt | null |z|
+    ----------------------------------------------------------------------------------------------
+    13 m=0.40 vs m=0.00 @keep0.50    |  -3.86  -3.23  -16.84  -56.98 |   4.11   6.87 |     2.33
+    13 m=0.20 vs m=0.00 @keep0.50    |  +0.54  -0.65   -6.67  -22.45 |   4.20   5.60 |     2.33
+    13 M=3840 merge vs prune         |  +3.12  +2.23   -2.15  -38.95 |   3.99   5.44 |     2.33
+    13 M=1920 merge vs prune         |  +2.86  +1.35   -6.25  -15.56 |   3.84   3.48 |     2.33
+    13 M=1344 merge vs prune         |  -0.22  -0.21  -12.36  -42.86 |   3.74   3.13 |     2.33
+    13 M=1440 merge vs prune         |  -1.29  -1.65  -11.11  -47.67 |   3.62   3.69 |     2.33
+    14 m=0.40 vs m=0.00 @keep0.50    |  -0.28  -0.17   -9.68  -72.34 |   5.01  11.30 |     2.33
+    13 SABOTAGE ckb - rank_parity    |  -0.29  -0.90  -12.26  -22.45 |   3.84   4.46 |     2.33
+    14 SABOTAGE ckb - rank_parity    |  -0.88  -0.24  -14.14  -55.10 |   3.47   4.04 |     2.33
+  [PASS] every contrast's worst document is >1.4x further out than its matched-normal null's worst (min ratio 1.49, 14 SABOTAGE ckb - rank_parity)
+  [PASS] matched normal null never exceeds 3.0 sd (max 2.33) -- so (1) is about the tail, not about n
+  [PASS] 'no measured cost' coexists with a -72.34 pt document: 14 m=0.40 vs m=0.00 @keep0.50 (trimmed mean -0.17)
+
+    push worst doc -25 pts: 13 m=0.40 vs m=0.00 @keep0.50    mean  -3.86-> -4.36 (-0.50)   trim  -3.23-> -3.23 (+0.00)
+    push worst doc -25 pts: 13 m=0.20 vs m=0.00 @keep0.50    mean  +0.54-> +0.04 (-0.50)   trim  -0.65-> -0.65 (+0.00)
+    push worst doc -25 pts: 13 M=3840 merge vs prune         mean  +3.12-> +2.62 (-0.50)   trim  +2.23-> +2.23 (+0.00)
+    push worst doc -25 pts: 13 M=1920 merge vs prune         mean  +2.86-> +2.36 (-0.50)   trim  +1.35-> +1.35 (+0.00)
+    push worst doc -25 pts: 13 M=1344 merge vs prune         mean  -0.22-> -0.72 (-0.50)   trim  -0.21-> -0.21 (+0.00)
+    push worst doc -25 pts: 13 M=1440 merge vs prune         mean  -1.29-> -1.79 (-0.50)   trim  -1.65-> -1.65 (+0.00)
+  [PASS] trimmed mean is EXACTLY unchanged by a -25 pt push on the worst document, on 6/6 merge contrasts
+  [PASS] one further-degraded document moves the plain mean by 225% of its own effect (13 M=1344 merge vs prune) while the trimmed mean is unmoved -- so (4) is a property of trimming, not of a push too small to matter
+  [PASS] ranking contrasts by worst-case differs from ranking by mean -- the tail is not a restatement of the location
+
+================================================================================================
+CONTROLS: 36/36 PASS
+================================================================================================
+
+WHAT THIS LICENSES
+
+  - "UNDERPOWERED" on the merge axis is a property of n=50 against a per-document
+    sd of 11-13 pts, not a property of ToMe. The merger executes and is correct
+    (verify_tome_merge_port.py 89/89); its effects are simply the same size as the
+    instrument's resolution.
+  - A 10% trimmed mean with a Tukey-McLaughlin SE buys ~30% of resolution for zero
+    GPU time, and it is discriminating rather than permissive: every published null
+    stays null, and the -64 pt control still resolves.
+  - It does NOT rescue the merge axis on its own. Resolving a 2-pt effect still needs
+    n ~ 55-90 documents even trimmed, and the m=0.20 "free" claim as a TIGHT null
+    (+-1 pt) needs n ~ 150-360.
+
+WHAT IT DOES NOT LICENSE
+
+  - Switching estimator after seeing an effect. This is filed as an input to Pending
+    18 and must be written into run 17's pre-registration BEFORE any run-17 number
+    exists. The justification on record is the variance structure in section 2, not
+    the sign of any contrast.
+  - Reading the trimmed point estimate as "the" effect. It is a different estimand.
+    Note it flips m=0.20's sign from +0.54 to -0.65 -- both nulls, but "free" is not
+    sign-robust, which cuts against this project's own claim 3 rather than for it.
+

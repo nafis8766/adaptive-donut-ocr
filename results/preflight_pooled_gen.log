@@ -1,0 +1,91 @@
+==========================================================================
+T4 PRE-FLIGHT -- pooled corpus (FUNSD + SROIE), before any GPU booking
+==========================================================================
+
+==========================================================================
+1. SCHEMA -- can the existing pipeline index a pooled sample at all?
+==========================================================================
+Using the latest cached version of the dataset since nielsr/funsd couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'default' at C:\Users\Nafis\.cache\huggingface\datasets\nielsr___funsd\default\0.0.0\7e7eeeedd84ce86540eb83cbbf7c75a3fcc7c7a5 (last modified on Tue Aug 25 12:38:54 2026).
+Using the latest cached version of the dataset since sizhkhy/SROIE couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'default' at C:\Users\Nafis\.cache\huggingface\datasets\sizhkhy___sroie\default\0.0.0\eed022b377460aff1b94a84b94dfb40317e1dc4d (last modified on Thu Sep 24 09:11:33 2026).
+  [PASS] FUNSD test n=50
+  [PASS] SROIE test n=347
+  [PASS] pool n=397 matches T2's 397
+  [info] FUNSD columns: ['bboxes', 'id', 'image', 'ner_tags', 'words']
+  [info] SROIE columns: ['bboxes', 'fields', 'images', 'ner_tags', 'words']
+  [PASS] FUNSD has `image`; SROIE does NOT -- the column name differs between corpora
+  [PASS] SROIE has `images` (plural); FUNSD does NOT
+  [PASS] column sets differ: only-FUNSD=['id', 'image'], only-SROIE=['fields', 'images']
+  [info] naive sample['image'] on SROIE raises KeyError: 'image'
+  [PASS] NON-VACUITY: the shipped `sample['image']` access RAISES on SROIE -- so cell 9, cell 15's eval loop and src/evaluate.py:149 all need the adapter, and it cannot be dropped as redundant later
+  [PASS] adapter returns a decodable FUNSD image (754, 1000)
+  [PASS] adapter returns a decodable SROIE image (932, 2212)
+  [PASS] both corpora expose `words`
+  [PASS] both expose boxes (FUNSD via `bboxes`, SROIE via `bboxes`) -- reading_order_words is usable
+  [PASS] SROIE words<->boxes aligned 1:1 on doc0 (141) -- per-WORD boxes, re-confirming T2 on the sample this script will actually run
+
+==========================================================================
+2. TARGET TEXT -- does the shipped reading-order builder survive receipts?
+==========================================================================
+  [info] imported reading_order_words + MAX_TARGET_WORDS=128 from src.dataset
+  [info] FUNSD  target words after truncation: mean  112.8  truncated at 128: 32/50 docs
+  [info] SROIE  target words after truncation: mean  107.7  truncated at 128: 104/347 docs
+  [PASS] both corpora produce non-empty targets
+  [PASS] SROIE is NOT uniformly truncated (104/347) -- its documents vary in length, so the corpus is not a constant-cost block
+  [PASS] SROIE targets are SHORTER than FUNSD's (107.7 vs 112.8 words) -- the prediction that receipts are cheaper, stated before generation runs
+      => length-based prediction: SROIE costs 0.95x a FUNSD doc.
+         Section 3 tests it. The model is OUT OF DOMAIN on receipts and can
+         run to the 512 cap regardless of how short the gold is, which would
+         invert this. A prediction from gold length is not a measurement.
+
+==========================================================================
+3. GENERATION -- n=4/corpus, keep=0.5, merge=0.2, CPU
+==========================================================================
+   Checkpoint: run 9's, the weights run 13 evaluated. Absolute latency here is
+   NOT comparable to Kaggle (D11/D12 both record this); the per-corpus RATIO is
+   what section 4 uses, multiplied by run 13's own Kaggle anchor.
+Loading base backbone naver-clova-ix/donut-base (dtype=torch.float32)...
+Loading weights:   0%|          | 0/484 [00:00<?, ?it/s]Loading weights: 100%|##########| 484/484 [00:00<00:00, 45352.94it/s]
+Freezing Swin vision encoder (saves ~12 GB VRAM). Training Router & Decoder!
+  [PASS] loaded run 9/adaptive_donut_pruned.pt (strict=True, so a silent architecture drift would have raised)
+      FUNSD  doc0: gen  355 tok    14.3s  M=1920  recall~ 97.8
+      FUNSD  doc1: gen  319 tok    13.2s  M=1920  recall~ 84.4
+      FUNSD  doc2: gen  272 tok    11.8s  M=1920  recall~ 86.7
+      FUNSD  doc3: gen  318 tok    12.1s  M=1920  recall~ 83.9
+      SROIE  doc0: gen  150 tok     9.7s  M=1920  recall~ 42.1
+      SROIE  doc1: gen  206 tok    10.4s  M=1920  recall~ 89.5
+      SROIE  doc2: gen  210 tok    10.6s  M=1920  recall~ 71.4
+      SROIE  doc3: gen  262 tok    11.4s  M=1920  recall~ 72.7
+  [PASS] SROIE generated end-to-end without a schema error (4 docs) -- the adapter is sufficient, not just necessary
+  [PASS] visual-token budget is identical across corpora (M=1920) -- the budget is set by keep_ratio and the 4800-token grid, not by document content
+  [info] FUNSD mean generated tokens 316, cap-rate 0%, 12.8 s/doc local
+  [info] SROIE mean generated tokens 207, cap-rate 0%, 10.5 s/doc local
+  [PASS] SROIE/FUNSD generated-token ratio is 0.66 -- OUTSIDE the +/-10% band in which the naive 397/50 arithmetic would have stood unchanged
+  [PASS] SROIE does not hit the 512-token cap more often than FUNSD (0% vs 0%) -- the out-of-domain runaway that would have INVERTED section 2's prediction did not occur
+
+   diagnostic scaffolding, NOT a result: mean recall FUNSD 88.2 / SROIE 68.9 at n=4.
+   SROIE is out of domain and n is tiny. Do not quote these; they exist to show
+   the decoder emits text rather than the unprompted-garbage failure mode.
+
+==========================================================================
+4. COST OF THE POOLED SWEEP -- run 13's Kaggle anchor, scaled by the measured ratio
+==========================================================================
+  [info] run 13 measured: 2609 ms/image x 28 rows x n=50 = 60.9 min of generate()
+
+   scope                                   rows  eff docs   hours  fits 9 h?
+   full sweep (all 28 rows)                  28       277    5.63  yes
+   T1 primary + control + random + ctl        4       277    0.80  yes
+   primary pair only                          2       277    0.40  yes
+  [PASS] the measured ratio moves the 28-row projection by -30% (8.06 h -> 5.63 h) -- the arithmetic-only estimate was not good enough to book against
+  [PASS] the full 28-row pooled sweep fits Kaggle's 9 h cap at 5.63 h (margin 3.37 h)
+
+   ⚠ generate() only. Excludes model load, dataset download, image preprocessing
+     and the per-row ink/coverage statistics, which run 13 paid outside this figure
+     (its wall clock was 64.0 min against 60.9 min of generate(), i.e. 1.05x).
+     Applying run 13's own overhead factor: 5.92 h. Still fits.
+  [PASS] with run 13's measured 1.05x overhead the full sweep is 5.92 h -- inside the cap
+
+==========================================================================
+CONTROLS: 23/23 PASS
+==========================================================================

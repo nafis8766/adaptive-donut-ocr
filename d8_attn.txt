@@ -1,0 +1,27 @@
+Using the latest cached version of the dataset since nielsr/funsd couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'default' at C:\Users\Nafis\.cache\huggingface\datasets\nielsr___funsd\default\0.0.0\7e7eeeedd84ce86540eb83cbbf7c75a3fcc7c7a5 (last modified on Tue Aug 25 12:38:54 2026).
+Loading base backbone naver-clova-ix/donut-base (dtype=torch.float32)...
+Loading weights:   0%|          | 0/484 [00:00<?, ?it/s]Loading weights: 100%|██████████| 484/484 [00:00<00:00, 27709.36it/s]
+Freezing Swin vision encoder (saves ~12 GB VRAM). Training Router & Decoder!
+loaded run 5 (missing=0, unexpected=0)
+    (target 310 tokens, 4 decoder layers, 16 heads)
+  page 0: N=4800  r(attn,ink) +0.097  r(attn,score) -0.004  r(score,ink) -0.237  overlap(attn,ink)@K 0.621  overlap(attn,score)@K 0.425  attn mass in top-K 0.898  in top-5% 0.282  ink pos-rate 0.361
+    (target 310 tokens, 4 decoder layers, 16 heads)
+  page 1: N=4800  r(attn,ink) +0.088  r(attn,score) -0.068  r(score,ink) -0.063  overlap(attn,ink)@K 0.620  overlap(attn,score)@K 0.420  attn mass in top-K 0.911  in top-5% 0.268  ink pos-rate 0.321
+==============================================================================
+D8 SUMMARY (mean over pages)
+==============================================================================
+  | quantity | value |
+  |---|---|
+  | r(attn, ink) | +0.092 |
+  | r(attn, router score) | -0.036 |
+  | r(router score, ink) | -0.150 |
+  | top-K overlap attn vs ink | 0.620 |
+  | top-K overlap attn vs score | 0.423 |
+  | attn mass inside top-K | 0.904 |
+  | attn mass inside top-5% | 0.275 |
+  | ink positive rate at thr 0.15 | 0.341 |
+
+  VERDICT: attention is a genuinely DIFFERENT target from ink. 13(b) survives
+  the cheap falsification and is worth building.
+==============================================================================

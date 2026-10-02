@@ -1,0 +1,94 @@
+Using the latest cached version of the dataset since nielsr/funsd couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'default' at C:\Users\Nafis\.cache\huggingface\datasets\nielsr___funsd\default\0.0.0\7e7eeeedd84ce86540eb83cbbf7c75a3fcc7c7a5 (last modified on Tue Aug 25 12:38:54 2026).
+loading donut processor + FUNSD test split (both cached locally)...
+  pixel_values (2, 3, 2560, 1920)  (2 page(s))
+building AdaptiveDonutOCR (keep_ratio=0.50, merge_ratio=0.0)...
+Loading base backbone naver-clova-ix/donut-base (dtype=torch.float32)...
+Loading weights:   0%|          | 0/484 [00:00<?, ?it/s]Loading weights: 100%|██████████| 484/484 [00:00<00:00, 43406.67it/s]
+Freezing Swin vision encoder (saves ~12 GB VRAM). Training Router & Decoder!
+==============================================================================
+A. ROUTER SCORE DISTRIBUTION PER CHECKPOINT
+==============================================================================
+Hypothesis: run 7's sparsity(2.0)+entropy(0.05) collapsed the scores toward 0.5,
+so its null result is about those terms, not about STE being a weak signal.
+A collapsed router has small std and mean ~0.50; `torch.topk` on near-constant
+scores returns essentially the first K indices, i.e. selection stops being learned.
+
+  run 5  N= 4800  mean 0.4529  std 0.2059  min 0.0102  max 0.9888  r(ink) -0.150   (missing=0, unexpected=0)
+          base; STE at keep=1.0 (K=N, so STE multiplier is exactly 1.0 -> router never received routing gradient)
+  run 7  N= 4800  mean 0.3343  std 0.3817  min 0.0004  max 0.9973  r(ink) -0.121   (missing=0, unexpected=0)
+          STE + sparsity 2.0 + entropy 0.05, no ink supervision  <-- the 'STE-only' run
+  run 8  N= 4800  mean 0.1607  std 0.3317  min 0.0003  max 0.9981  r(ink) +0.537   (missing=0, unexpected=0)
+          STE + ink-BCE (double-sigmoid bug live, D4)
+  run 9  N= 4800  mean 0.3214  std 0.3266  min 0.0028  max 0.9952  r(ink) +0.748   (missing=0, unexpected=0)
+          STE + ink-BCE 0.5 (D4 fixed), sparsity 0.0, entropy 0.0
+
+  | run | mean | std | min | max | r(ink) |
+  |---|---|---|---|---|---|
+  | run 5 | 0.4529 | 0.2059 | 0.0102 | 0.9888 | -0.150 |
+  | run 7 | 0.3343 | 0.3817 | 0.0004 | 0.9973 | -0.121 |
+  | run 8 | 0.1607 | 0.3317 | 0.0003 | 0.9981 | +0.537 |
+  | run 9 | 0.3214 | 0.3266 | 0.0028 | 0.9952 | +0.748 |
+
+  run 7 std / run 5 std = 1.854   (<<1 would be collapse; ~1 or more is not)
+  run 7 |mean - 0.5|     = 0.1657   (~0 would be the sparsity pull landing)
+==============================================================================
+B. PER-TERM GRADIENT MAGNITUDE AT THE ROUTER SCORER (run-5 weights)
+==============================================================================
+Each term is backwarded ALONE with grads zeroed between, so the numbers are
+attributable. Reported as the L2 norm over router.scorer parameters only --
+that is the tensor 13(a) is about. keep_ratio=0.50, training mode (STE live).
+
+  targets: 620 non-ignored label positions over 2 page(s) (max_len=512, max_words=128, ignore_index=-100)
+  first target: <s_doc>{"text": "ATT. GEN. ADMIN. OFFICE Fax: 614 -466 -5087 Dec 10 '98 17 :46 P. 01 Attorney Ge...
+  --- at run 5 (start of run 7) weights ---
+    ||grad|| 7.040123e+00   term value +3.145294   CE through STE      (13a's ONLY signal)
+    ||grad|| 1.991027e-01   term value +0.002982   sparsity x2.0         (run 7 had this)
+    ||grad|| 2.438689e-02   term value -0.029553   entropy  x0.05        (run 7 had this)
+    ||grad|| 8.828262e-01   term value +0.440881   ink-BCE  x0.5         (run 9 had this)
+    ratio to CE-through-STE (>1 means the term OUTWEIGHS 13a's signal):
+         0.0283x   sparsity x2.0         (run 7 had this)
+         0.0035x   entropy  x0.05        (run 7 had this)
+         0.1254x   ink-BCE  x0.5         (run 9 had this)
+         0.0317x   run 7's two auxiliaries COMBINED
+
+  --- at run 7 (end of run 7) weights ---
+    ||grad|| 3.929510e+00   term value +3.250090   CE through STE      (13a's ONLY signal)
+    ||grad|| 2.700196e-01   term value +0.025594   sparsity x2.0         (run 7 had this)
+    ||grad|| 2.716971e-02   term value -0.012194   entropy  x0.05        (run 7 had this)
+    ||grad|| 1.630285e+00   term value +1.011376   ink-BCE  x0.5         (run 9 had this)
+    ratio to CE-through-STE (>1 means the term OUTWEIGHS 13a's signal):
+         0.0687x   sparsity x2.0         (run 7 had this)
+         0.0069x   entropy  x0.05        (run 7 had this)
+         0.4149x   ink-BCE  x0.5         (run 9 had this)
+         0.0756x   run 7's two auxiliaries COMBINED
+
+==============================================================================
+C. STE GRADIENT COVERAGE AND THE SELECTION BOUNDARY
+==============================================================================
+  N = 4800, K = round(N*0.5) = 2400
+  tokens with NONZERO score gradient: 2400 of 4800  (= K? YES)
+  -> the N-K dropped tokens are stationary: they receive no gradient, so a
+     dropped token can only enter the budget when a KEPT token's score falls
+     below it. This is the exploration limit of hard top-k + STE.
+
+  score at the K/K+1 boundary: 0.485207 / 0.485092   gap 1.151e-04
+  tokens within 1e-3 of the boundary: 21  (how many are one nudge from flipping)
+  mean |d(CE)/d(score)| over the K kept: 3.566e-03
+  one AdamW step at lr=0.0001 moves a parameter ~0.0001; the score
+     change per step is that times d(score)/d(param), so compare the boundary
+     gap above against it to judge whether selection can reorder in 5 epochs.
+==============================================================================
+D. CROSS-PAGE GRADIENT AGREEMENT (direction, not magnitude)
+==============================================================================
+  Norm says how hard a term pushes; cosine says whether the pushes agree.
+  A term with small norm and cosine ~1 can out-displace a large incoherent one.
+
+  CE through STE   cos(page0, page1) = +0.2141   |g0| 1.2413e+01  |g1| 6.2954e+00
+  ink-BCE          cos(page0, page1) = +0.8964   |g0| 1.0099e+00  |g1| 9.0369e-01
+
+  Read together with Part B: displacement over training scales roughly as
+  norm x coherence, so compare the PRODUCTS, not the norms.
+==============================================================================
+D7 done. Interpretation belongs in AGENTS.md, not here.
+==============================================================================

@@ -1,0 +1,86 @@
+﻿==============================================================================
+DECODER CROSS-ATTENTION KV MEMORY vs VISUAL TOKEN BUDGET (Pending 8c)
+==============================================================================
+  Scope, stated first: cross-attention KV ONLY. Not total, not peak, not encoder.
+  The frozen Swin computes all 4800 tokens at every budget (Pending 7), so there is
+  NO encoder-side saving to report. Self-attention KV is unaffected by pruning and is
+  listed separately. Latency is already settled: 1.04x (D11), not reported here.
+Loading base backbone naver-clova-ix/donut-base (dtype=torch.float32)...
+python : 
+At line:1 char:409
++ ... ATASETS_OFFLINE="1"; python -u scripts/eval_kv_memory.py 2>&1 | Tee-O ...
++                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Loading weights:   0%|          | 0/484 [00:00<?, ?it/s]
+Loading weights: 100%|██████████| 484/484 [00:00<00:00, 21286.64it/s]
+Freezing Swin vision encoder (saves ~12 GB VRAM). Training Router & Decoder!
+
+  decoder: 4 layers x 16 heads x 64 head_dim (d_model 1024), 4 bytes/element
+  model parameters: 771 MiB  <- the scale to read KV against
+  checkpoint: run 9\adaptive_donut_pruned.pt
+Using the latest cached version of the dataset since nielsr/funsd couldn't be found on the Hugging Face Hub (offline 
+mode is enabled).
+Found the latest cached dataset configuration 'default' at 
+C:\Users\Nafis\.cache\huggingface\datasets\nielsr___funsd\default\0.0.0\7e7eeeedd84ce86540eb83cbbf7c75a3fcc7c7a5 (last 
+modified on Tue Aug 25 12:38:54 2026).
+  keep=1.00  tok 4800  cross-KV analytic  150.00 MiB  observed  150.00 MiB  self-KV  10.69 MiB (gen 343)
+  keep=0.50  tok 2400  cross-KV analytic   75.00 MiB  observed   75.00 MiB  self-KV  10.38 MiB (gen 333)
+  keep=0.35  tok 1680  cross-KV analytic   52.50 MiB  observed   52.50 MiB  self-KV   9.56 MiB (gen 307)
+  keep=0.25  tok 1200  cross-KV analytic   37.50 MiB  observed   37.50 MiB  self-KV  10.19 MiB (gen 327)
+  keep=0.20  tok  960  cross-KV analytic   30.00 MiB  observed   30.00 MiB  self-KV   7.72 MiB (gen 248)
+
+==============================================================================
+THE TABLE -- cross-attention KV only
+==============================================================================
+   keep   tok  cross-KV MiB  vs keep=1.00  % of params  self-KV MiB
+   1.00  4800        150.00             -       19.46%        10.69
+   0.50  2400         75.00        -50.0%        9.73%        10.38
+   0.35  1680         52.50        -65.0%        6.81%         9.56
+   0.25  1200         37.50        -75.0%        4.86%        10.19
+   0.20   960         30.00        -80.0%        3.89%         7.72
+
+==============================================================================
+CONTROLS
+==============================================================================
+  [PASS] analytic == observed at keep=1.00: 150.00 vs 150.00 MiB -> rel gap 0.0000 (tol 0.01)
+  [PASS] analytic == observed at keep=0.50: 75.00 vs 75.00 MiB -> rel gap 0.0000 (tol 0.01)
+  [PASS] analytic == observed at keep=0.35: 52.50 vs 52.50 MiB -> rel gap 0.0000 (tol 0.01)
+  [PASS] analytic == observed at keep=0.25: 37.50 vs 37.50 MiB -> rel gap 0.0000 (tol 0.01)
+  [PASS] analytic == observed at keep=0.20: 30.00 vs 30.00 MiB -> rel gap 0.0000 (tol 0.01)
+  [PASS] proportional to tokens at keep=1.00: token ratio 1.0000 vs byte ratio 1.0000
+  [PASS] proportional to tokens at keep=0.50: token ratio 0.5000 vs byte ratio 0.5000
+  [PASS] proportional to tokens at keep=0.35: token ratio 0.3500 vs byte ratio 0.3500
+  [PASS] proportional to tokens at keep=0.25: token ratio 0.2500 vs byte ratio 0.2500
+  [PASS] proportional to tokens at keep=0.20: token ratio 0.2000 vs byte ratio 0.2000
+  [PASS] hooked tensor is generate()'s own at keep=1.00: cache seq_len 4800 == meta['compressed_tokens'] 4800
+  [PASS] hooked tensor is generate()'s own at keep=0.50: cache seq_len 2400 == meta['compressed_tokens'] 2400
+  [PASS] hooked tensor is generate()'s own at keep=0.35: cache seq_len 1680 == meta['compressed_tokens'] 1680
+  [PASS] hooked tensor is generate()'s own at keep=0.25: cache seq_len 1200 == meta['compressed_tokens'] 1200
+  [PASS] hooked tensor is generate()'s own at keep=0.20: cache seq_len 960 == meta['compressed_tokens'] 960
+  [PASS] unpruned baseline is the documented 4800-token grid: got 4800 (80x60 at stride 32)
+  [PASS] D12 accuracy pairing resolved from disk (not hardcoded): keep=0.35 -> -0.255 pts t -0.18 n=50; keep=0.20 -> -13.012 pts t -5.42
+  [PASS] the headline budget keep=0.35 really is free: |t| 0.18 < 2.0, i.e. D12 found no detectable accuracy cost there
+  [PASS] self-KV is non-zero (something was actually measured): range 7.72-10.69 MiB
+  [PASS] self-KV tracks GENERATED length, not budget, at keep=1.00: gen 342 tok predicts 10.69 MiB, observed 10.69 MiB -> rel gap 0.0000
+  [PASS] self-KV tracks GENERATED length, not budget, at keep=0.50: gen 332 tok predicts 10.38 MiB, observed 10.38 MiB -> rel gap 0.0000
+  [PASS] self-KV tracks GENERATED length, not budget, at keep=0.35: gen 306 tok predicts 9.56 MiB, observed 9.56 MiB -> rel gap 0.0000
+  [PASS] self-KV tracks GENERATED length, not budget, at keep=0.25: gen 326 tok predicts 10.19 MiB, observed 10.19 MiB -> rel gap 0.0000
+  [PASS] self-KV tracks GENERATED length, not budget, at keep=0.20: gen 247 tok predicts 7.72 MiB, observed 7.72 MiB -> rel gap 0.0000
+  [PASS] self-KV is NOT monotone in keep (while cross-KV is): at least one lower budget has larger self-KV than a higher one -- the budget is not what drives it
+
+==============================================================================
+THE CLAIM
+==============================================================================
+  HEADLINE, at the budget that costs nothing: keep=0.35 cuts the decoder cross-attention KV cache from 150.00 MiB to 52.50 MiB, a **65.0% reduction**, for -0.26 pts of word recall (t -0.18, n=50 paired -- D12). That pairing is the claim; the percentage alone is not.
+
+  The tightest budget goes further but is NOT free: keep=0.20 reaches 30.00 MiB (80.0%) and costs 13.01 pts (t -5.42, D12). Quote it only with that cost attached.
+  Both figures are exactly proportional to the token count and confirmed by two independent measurements.
+
+  READ IT IN PROPORTION: at keep=1.00 the cross-KV cache is 19.46% of the model's own 771 MiB of parameters, falling to 6.81% at the free budget. The absolute saving there is 98 MiB.
+  That share is NOT negligible -- the docstring's caution that this might be 'a large cut in a small quantity' does not survive the measurement. At fp32 the unpruned cross-KV is a fifth of the weights, and the 98 MiB freed is real working memory.
+  BUT the honest qualifier is dtype and batch, not size: this is fp32 on CPU. At fp16/bf16 every figure halves (75 -> 26 MiB at the free budget), while at batch>1 it scales linearly with batch and the saving grows in absolute terms. The PERCENTAGE is invariant to both.
+  NOT a latency claim (D11: 1.04x). NOT an encoder saving (there is none). NOT peak or total memory. Self-attention KV is unchanged by pruning.
+
+wrote results\kv_memory_local.json   (72 s)

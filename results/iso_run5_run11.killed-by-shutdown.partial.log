@@ -1,0 +1,19 @@
+==============================================================================
+WHY DOES PRUNING HELP? -- H1 train/test matching vs H2 inference-time denoising
+==============================================================================
+  device cpu | transformers 5.4.0 | MAX_WORDS=128 MAX_LEN=512
+  selector 'ink' (weight-independent -> identical tokens for both checkpoints)
+  budgets keep=1.00 + (0.5, 0.35, 0.25, 0.2)
+  H1 predicts run 5 PEAKS at keep=1.00.  H2 predicts run 5 IMPROVES under pruning.
+Loading base backbone naver-clova-ix/donut-base (dtype=torch.float32)...
+Loading weights:   0%|          | 0/484 [00:00<?, ?it/s]Loading weights: 100%|██████████| 484/484 [00:00<00:00, 46112.19it/s]
+Freezing Swin vision encoder (saves ~12 GB VRAM). Training Router & Decoder!
+  50 FUNSD test images, gold capped at MAX_WORDS=128
+
+------------------------------------------------------------------------------
+run 5  (no pruning in training)  <- run 5\checkpoints\adaptive_donut_funsd.pt  (missing=0, unexpected=0)
+------------------------------------------------------------------------------
+  keep=1.00 router recall  74.72  ink 1.000  tok 4800   12.4s/img   ETA  93.7 min
+  keep=0.50 ink    recall  73.16  ink 0.994  tok 2400   11.8s/img   ETA  81.1 min
+  keep=0.35 ink    recall  68.70  ink 0.950  tok 1680   12.1s/img   ETA  70.8 min
+  keep=0.25 ink    recall  63.25  ink 0.847  tok 1200   12.2s/img   ETA  60.8 min

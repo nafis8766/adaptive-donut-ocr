@@ -1,0 +1,98 @@
+==============================================================================
+BUDGET-BINDING SWEEP -- is 13(b) better where the budget actually bites?
+==============================================================================
+  device cpu | transformers 5.4.0 | MAX_WORDS=128 MAX_LEN=512
+  budgets: controls (0.5, 0.35) + new (0.25, 0.2), paired, seed 0
+Loading base backbone naver-clova-ix/donut-base (dtype=torch.float32)...
+Loading weights:   0%|          | 0/484 [00:00<?, ?it/s]Loading weights: 100%|██████████| 484/484 [00:00<00:00, 43802.85it/s]
+Freezing Swin vision encoder (saves ~12 GB VRAM). Training Router & Decoder!
+Using the latest cached version of the dataset since nielsr/funsd couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'default' at C:\Users\Nafis\.cache\huggingface\datasets\nielsr___funsd\default\0.0.0\7e7eeeedd84ce86540eb83cbbf7c75a3fcc7c7a5 (last modified on Tue Aug 25 12:38:54 2026).
+  50 FUNSD test images, gold capped at MAX_WORDS=128
+
+------------------------------------------------------------------------------
+run 9  (ink target)  <- run 9\adaptive_donut_pruned.pt  (missing=0, unexpected=0)
+------------------------------------------------------------------------------
+  keep=1.00 router  recall  77.62  ink 1.000  tok 4800   12.9s/img   ETA 183.9 min
+  keep=0.50 router  recall  80.46  ink 0.922  tok 2400   12.7s/img   ETA 171.4 min
+  keep=0.50 random  recall  62.77  ink 0.503  tok 2400   12.0s/img   ETA 157.4 min
+  keep=0.35 router  recall  79.25  ink 0.826  tok 1680   12.5s/img   ETA 146.8 min
+  keep=0.35 random  recall  51.84  ink 0.353  tok 1680   11.6s/img   ETA 134.3 min
+  keep=0.25 router  recall  71.15  ink 0.704  tok 1200   12.4s/img   ETA 124.1 min
+  keep=0.25 random  recall  37.20  ink 0.251  tok 1200   11.5s/img   ETA 112.6 min
+  keep=0.20 router  recall  63.10  ink 0.612  tok  960   12.4s/img   ETA 102.6 min
+  keep=0.20 random  recall  33.80  ink 0.201  tok  960   10.9s/img   ETA  91.1 min
+
+------------------------------------------------------------------------------
+run 10 (attn target)  <- run 10\adaptive_donut_pruned.pt  (missing=0, unexpected=0)
+------------------------------------------------------------------------------
+  keep=1.00 router  recall  76.36  ink 1.000  tok 4800   12.5s/img   ETA  81.3 min
+  keep=0.50 router  recall  80.66  ink 0.675  tok 2400   11.9s/img   ETA  71.0 min
+  keep=0.50 random  recall  64.83  ink 0.503  tok 2400   12.1s/img   ETA  60.8 min
+  keep=0.35 router  recall  75.41  ink 0.511  tok 1680   12.3s/img   ETA  50.8 min
+  keep=0.35 random  recall  51.60  ink 0.353  tok 1680   12.0s/img   ETA  40.6 min
+  keep=0.25 router  recall  65.52  ink 0.355  tok 1200   12.3s/img   ETA  30.5 min
+  keep=0.25 random  recall  42.28  ink 0.251  tok 1200   11.9s/img   ETA  20.3 min
+  keep=0.20 router  recall  50.30  ink 0.257  tok  960   12.2s/img   ETA  10.1 min
+  keep=0.20 random  recall  32.80  ink 0.201  tok  960   11.8s/img   ETA   0.0 min
+
+==============================================================================
+TABLE -- word recall, paired on the same images
+==============================================================================
+ keep mode      run 9  run 10   delta    SE      t   ink 9 ink 10
+ 1.00 router    77.62   76.36   -1.27  1.86  -0.68   1.000  1.000 
+ 0.50 router    80.46   80.66   +0.20  1.58  +0.13   0.922  0.675 
+ 0.50 random    62.77   64.83   +2.06  1.73  +1.18   0.503  0.503 
+ 0.35 router    79.25   75.41   -3.84  1.78  -2.15 * 0.826  0.511 
+ 0.35 random    51.84   51.60   -0.24  1.41  -0.17   0.353  0.353 
+ 0.25 router    71.15   65.52   -5.63  2.35  -2.40 * 0.704  0.355 
+ 0.25 random    37.20   42.28   +5.08  1.98  +2.57 * 0.251  0.251 
+ 0.20 router    63.10   50.30  -12.81  2.06  -6.23 * 0.612  0.257 
+ 0.20 random    33.80   32.80   -1.01  1.71  -0.59   0.201  0.201 
+  (* = |t| >= 2.0, pre-registered; delta and t are run 10 minus run 9)
+
+==============================================================================
+CONTROLS
+==============================================================================
+  [PASS] pairing keep=0.50: random-mode ink 0.503068 vs 0.503068 -> |gap| 0.00e+00 (must be ~0: same masks)
+  [PASS] pairing keep=0.35: random-mode ink 0.352564 vs 0.352564 -> |gap| 0.00e+00 (must be ~0: same masks)
+  [PASS] pairing keep=0.25: random-mode ink 0.250998 vs 0.250998 -> |gap| 0.00e+00 (must be ~0: same masks)
+  [PASS] pairing keep=0.20: random-mode ink 0.201155 vs 0.201155 -> |gap| 0.00e+00 (must be ~0: same masks)
+  [PASS] ink run 9  (ink target) keep=1.00: local 1.000 vs Kaggle 1.000 -> |gap| 0.000 (tol 0.10)
+  [PASS] ink run 9  (ink target) keep=0.50: local 0.922 vs Kaggle 0.922 -> |gap| 0.000 (tol 0.10)
+  [PASS] ink run 9  (ink target) keep=0.35: local 0.826 vs Kaggle 0.826 -> |gap| 0.000 (tol 0.10)
+  [PASS] ink run 10 (attn target) keep=1.00: local 1.000 vs Kaggle 1.000 -> |gap| 0.000 (tol 0.10)
+  [PASS] ink run 10 (attn target) keep=0.50: local 0.675 vs Kaggle 0.675 -> |gap| 0.000 (tol 0.10)
+  [PASS] ink run 10 (attn target) keep=0.35: local 0.511 vs Kaggle 0.511 -> |gap| 0.000 (tol 0.10)
+
+  recall-delta consistency with Kaggle (informational, not a gate):
+    keep=0.50  local +0.20 +-1.58  Kaggle -0.22  |gap| 0.42
+    keep=0.35  local -3.84 +-1.78  Kaggle +0.49  |gap| 4.33
+
+  resolution -- smallest detectable delta at |t|=2 (want <= 3.0 pts):
+    keep=0.50  SE  1.58  detectable >=  3.15 pts  UNDERPOWERED
+    keep=0.35  SE  1.78  detectable >=  3.57 pts  UNDERPOWERED
+    keep=0.25  SE  2.35  detectable >=  4.70 pts  UNDERPOWERED
+    keep=0.20  SE  2.06  detectable >=  4.11 pts  UNDERPOWERED
+
+==============================================================================
+IS THE BUDGET BINDING? -- the question run 10 could not answer at keep=0.50
+==============================================================================
+  run 9  (ink target): keep=1.00 ceiling 77.62
+    keep=0.50 router  80.46 ( +2.84 vs ceiling) random  62.77 (router-random +17.69)  not binding  selection matters
+    keep=0.35 router  79.25 ( +1.62 vs ceiling) random  51.84 (router-random +27.41)  not binding  selection matters
+    keep=0.25 router  71.15 ( -6.47 vs ceiling) random  37.20 (router-random +33.95)  BINDS        selection matters
+    keep=0.20 router  63.10 (-14.52 vs ceiling) random  33.80 (router-random +29.30)  BINDS        selection matters
+  run 10 (attn target): keep=1.00 ceiling 76.36
+    keep=0.50 router  80.66 ( +4.31 vs ceiling) random  64.83 (router-random +15.84)  not binding  selection matters
+    keep=0.35 router  75.41 ( -0.95 vs ceiling) random  51.60 (router-random +23.81)  not binding  selection matters
+    keep=0.25 router  65.52 (-10.84 vs ceiling) random  42.28 (router-random +23.24)  BINDS        selection matters
+    keep=0.20 router  50.30 (-26.06 vs ceiling) random  32.80 (router-random +17.50)  BINDS        selection matters
+
+==============================================================================
+THE ANSWER
+==============================================================================
+  keep=0.25: budget binds, and the attention target LOSES to ink by -5.63 pts (SE 2.35, t -2.40). This is a real result.
+  keep=0.20: budget binds, and the attention target LOSES to ink by -12.81 pts (SE 2.06, t -6.23). This is a real result.
+
+wrote results\budget_binding_local.json   (182.3 min)

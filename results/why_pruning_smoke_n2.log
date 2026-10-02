@@ -1,0 +1,36 @@
+  [PASS] selection fixed keep=0.50: ink 1.000000 vs 1.000000 -> |gap| 0.00e+00 (must be ~0: same tokens)
+  [PASS] selection fixed keep=0.35: ink 0.990130 vs 0.990130 -> |gap| 0.00e+00 (must be ~0: same tokens)
+  [PASS] selection fixed keep=0.25: ink 0.822926 vs 0.822926 -> |gap| 0.00e+00 (must be ~0: same tokens)
+  [PASS] selection fixed keep=0.20: ink 0.692256 vs 0.692256 -> |gap| 0.00e+00 (must be ~0: same tokens)
+  [PASS] ink oracle keep=0.50: local 1.000 vs Kaggle 0.994 -> |gap| 0.006 (tol 0.10)
+  [PASS] ink oracle keep=0.35: local 0.990 vs Kaggle 0.950 -> |gap| 0.040 (tol 0.10)
+  [SKIP] harness anchor (run 5 @ keep=1.00): local 82.61 over n=2 vs run 6 77.74 over 50 -- |gap| 4.87, NOT COMPARABLE (different image sets; a 2-image mean has several pts of sampling error). Needs --n 50.
+
+  resolution -- smallest detectable 'vs 1.00' delta at |t|=2 (want <= 3.0 pts):
+    run 5  keep=0.50  SE  4.93  detectable >=  9.86 pts  SE UNRELIABLE (n=2 < 10)
+    run 5  keep=0.35  SE  1.56  detectable >=  3.12 pts  SE UNRELIABLE (n=2 < 10)
+    run 5  keep=0.25  SE  3.21  detectable >=  6.42 pts  SE UNRELIABLE (n=2 < 10)
+    run 5  keep=0.20  SE  2.40  detectable >=  4.80 pts  SE UNRELIABLE (n=2 < 10)
+    run 9  keep=0.50  SE  5.58  detectable >= 11.16 pts  SE UNRELIABLE (n=2 < 10)
+    run 9  keep=0.35  SE 13.15  detectable >= 26.30 pts  SE UNRELIABLE (n=2 < 10)
+    run 9  keep=0.25  SE  0.51  detectable >=  1.02 pts  SE UNRELIABLE (n=2 < 10)
+    run 9  keep=0.20  SE 16.98  detectable >= 33.96 pts  SE UNRELIABLE (n=2 < 10)
+
+==============================================================================
+THE ANSWER
+==============================================================================
+  run 5  (no pruning in training): peaks at keep=0.35 (87.54)
+  run 9  (trained at keep=0.50): peaks at keep=0.50 (88.75)
+
+  (n=2 of 50 -- SUBSAMPLE. The harness anchor was skipped and the verdict below is a code path being exercised, not a result.)
+  => UNDERPOWERED, not flat. Run 5's keep=0.50 delta is -1.56 pts with SE 4.93, so nothing below 9.86 pts is detectable and neither hypothesis is excluded. Do not report this as 'pruning is neutral'.
+
+  Did the retrain help, holding the token set fixed? (run 9 - run 5, identical ink tokens)
+    keep=0.50   +7.70 pts  SE  6.58  t  +1.17
+    keep=0.35   -2.46 pts  SE  7.65  t  -0.32
+    keep=0.25   +5.41 pts  SE  0.21  t +25.55
+    keep=0.20   +5.33 pts  SE 15.45  t  +0.35
+    SCOPE: run 9 differs from run 5 by pruning-aware training AND five more epochs of it.
+    These rows cannot attribute the difference to pruning; they only say whether it exists.
+
+wrote results\why_pruning_helps_local.json   (4.5 min)

@@ -1,0 +1,180 @@
+==============================================================================
+T3 -- RUNS 13/14 UNDER THE RUN-17 PRE-REGISTRATION, AND CLAIM 3's OWN ROWS
+==============================================================================
+
+==============================================================================
+0. CALIBRATION -- reproduce figures T1 recorded BEFORE this file existed
+==============================================================================
+  [PASS] run 13: contrast A is token-matched at M=1920 on disk (1920 vs 1920)
+  [PASS] run 13: contrast A direction pinned per s3's amendment -- treatment merges more (m=0.20 vs 0.00)
+  [PASS] run 14: contrast A is token-matched at M=1920 on disk (1920 vs 1920)
+  [PASS] run 14: contrast A direction pinned per s3's amendment -- treatment merges more (m=0.20 vs 0.00)
+  [PASS] `word_order` is absent from per_image, so the family is scorable on 2 of 3 quantities -- s4's premise, checked rather than assumed
+  [PASS] run 14 contrast-A trimmed mean reproduces T1's +0.02 pts (got +0.0176)
+  [PASS] run 14 worst document reproduces T1's -40.00 pts (got -40.00)
+  [PASS] run 14 matched-null expectation reproduces T1's -12.43 (got -12.43)
+  [PASS] run 14 worst-document ratio reproduces T1's 3.22 (got 3.219)
+  [PASS] harmed counts reproduce T1's 5 (run 14) and 4 (run 13) (got 5 and 4)
+  [PASS] res reproduces T1 s6's 2.48 (run 13) and 1.92 (run 14) (got 2.477 / 1.919)
+  [PASS] the n=50 ratio null reproduces T1's median 1.20 / p95 1.74 (got 1.20 / 1.74)
+  [PASS] the n=307 ratio null reproduces T1's p95 of 1.52 (got 1.530) -- the bar TIGHTENS with n, which a constant could not do
+  [PASS] the n=397 ratio null reproduces T1's p95 of 1.51 (got 1.512) -- the bar TIGHTENS with n, which a constant could not do
+  [PASS] score_d derives the bar from the data's own n: the same contrast truncated to 25 documents moves p95 1.74 -> 1.80. Nothing is inherited -- when the pooled artifact lands, its n sets its own bar
+  [PASS] POOLED_N/FUNSD_N are never passed to null_ratio/null_count/blom (by ast, not by grep -- a comment naming them is not a use). They size the REPORT, never a threshold, so the 397 on line 69 cannot become a bar run 17 is scored against
+
+==============================================================================
+1. DISCRIMINATING CONTROLS -- does each pinned choice change the result?
+==============================================================================
+  [PASS] the naive SE is 35% smaller than Tukey-McLaughlin (0.6383 vs 0.9792) -- pinning the SE formula is not cosmetic
+  [PASS] difference-then-trim and trim-then-difference differ by +0.2555 pts here -- naming 'trimmed mean' alone does not determine the estimate
+  [PASS] ...and the PLAIN mean's gap is identically zero (-8.55e-15), so the non-additivity is a property of trimming, not of the data
+  [PASS] sign-flipping `ned` changes the tail it reports (worst -23.50 -> -29.66, mean +1.70 -> -1.70) -- load-bearing, not decorative
+  [PASS] assert_direction REJECTS contrast A with the arms swapped -- the orientation whose absence s3's amendment was filed to fix
+  [PASS] ...and REJECTS a pair merge_ratio cannot order, rather than defaulting to the caller's argument order -- an unorderable pair is an unanswered question, not a direction of zero
+  [PASS] CONTRAST A DOES NOT FLIP, and that is reported rather than assumed: the ratio moves 3.22 -> 3.18 under the swap (so the statistic is not reversal-invariant) but both clear p95 1.74, so run 14's gate failure is NOT an artifact of the orientation. The 10-of-28 flip is real and is measured in s5 on the cross-run family -- it is not a property of every pair, and asserting it here would have been asserting it where it happens not to hold
+  [PASS] on the stored [0,1] field the harm rule counts 0 and in points it counts 5 -- this scorer converts first, so D14 s1d's unfalsifiable gate cannot recur here
+  [PASS] the ratio gate FIRES on run 14 (3.22 > 1.74) and does NOT on run 13 (1.11 < 1.74) -- a gate firing on both or neither would be untested by this pair
+  [PASS] run 14's contrast A is FLAT on location (CI [-1.90, +1.94] includes 0) yet FAILS a tail gate -- the exact case s3 was written to catch
+  [PASS] the harmed-count bar is matched per row, not fixed: p95 is 7 on run 13 and 4 on run 14, because run 13's spread is wider -- so counts are NOT comparable across rows and must be quoted with their null
+
+==============================================================================
+2. CONTRAST A -- T1 s1's PRE-REGISTERED primary (this is what run 17 is judged on)
+==============================================================================
+   keep=0.50 m=0.20 ink  vs  keep=0.40 ink TWIN   (M=1920 vs M=1920, token-matched)
+
+   --- run 13 --------------------------------------------------------
+   recall  [primary   ] trimmed  +1.66 pts                  95% CI [ -0.81,  +4.14]   res 2.48
+           worst doc  -17.78 vs matched-null -16.03  ratio 1.11 vs p95 1.74  [PASS]
+           harmed      4     vs null p95 7 (exp 4.04)                 [PASS]
+   ned     [co-primary] trimmed  +0.61 pts (sign-flipped)   95% CI [ -2.02,  +3.23]   res 2.62
+           worst doc  -18.20 vs matched-null -16.98  ratio 1.07 vs p95 1.74  [PASS]
+           harmed      6     vs null p95 8 (exp 4.65)                 [PASS]
+   s5 discard set: 5 documents per tail of 50 (at pooled n=397 it is 39 vs FUNSD's 50)
+   s4 Holm: recall p=0.1881 vs 0.01667 retain, ned p=0.6510 vs 0.02500 retain
+   s7 VERDICT: **UNDERPOWERED**
+
+   --- run 14 --------------------------------------------------------
+   recall  [primary   ] trimmed  +0.02 pts                  95% CI [ -1.90,  +1.94]   res 1.92
+           worst doc  -40.00 vs matched-null -12.43  ratio 3.22 vs p95 1.74  [FAIL]
+           harmed      5     vs null p95 4 (exp 1.78)                 [FAIL]
+   ned     [co-primary] trimmed  -1.70 pts (sign-flipped)   95% CI [ -4.98,  +1.58]   res 3.28
+           worst doc  -29.66 vs matched-null -21.23  ratio 1.40 vs p95 1.74  [PASS]
+           harmed     10     vs null p95 12 (exp 7.26)                 [PASS]
+   s5 discard set: 5 documents per tail of 50 (at pooled n=397 it is 39 vs FUNSD's 50)
+   s4 Holm: recall p=0.9856 vs 0.02500 retain, ned p=0.3087 vs 0.01667 retain
+   s7 VERDICT: **UNDERPOWERED**
+
+==============================================================================
+3. CONTRASTS B and C -- claim 3's OWN rows.  NOT the pre-registered primary.
+==============================================================================
+   Claim 3 says: 'prune to keep=0.50 then merge m=0.20 -> M=1920 tokens,
+   cross-KV 150.00 -> 60.00 MiB (2.50x), for +0.54 pts of word recall,
+   95% CI [-2.36, +3.83], n=50 paired (run 13) -- the CI includes zero, so
+   there is no measured cost.  Do not quote the deeper 3.33x at M=1440 without
+   its price: -3.86 pts [-7.45, -0.30], resolved and negative.'
+   Those figures are SAME-KEEP-FRACTION router rows. Contrast A above is a
+   token-matched ink pair. Different questions; scored apart, never pooled.
+
+   row                        run    plain    trim    res             95% CI    worst  ratio   gate
+   B  m=0.20 vs no-merge      13     +0.54   -0.65   1.72 [  -2.36,  +1.07]   -22.45   2.02  FIRES
+   B  m=0.20 vs no-merge      14     -1.12   +0.16   1.55 [  -1.38,  +1.71]   -53.06   5.29  FIRES
+   C  m=0.40 vs no-merge      13     -3.86   -3.23   2.47 [  -5.70,  -0.76]   -56.98   3.56  FIRES
+   C  m=0.40 vs no-merge      14     -0.28   -0.17   2.23 [  -2.40,  +2.06]   -72.34   5.01  FIRES
+
+   caveat (i) -- the sign flip, re-derived:
+  [PASS] claim 3's +0.54 reproduces as the PLAIN mean and T1's estimator gives -0.65 on the same row -- the sign flips, exactly as D13 recorded
+  [PASS] both are nulls: T1's CI [-2.36, +1.07] includes zero, so 'no measured cost' SURVIVES the estimator change
+  [PASS] but the sign is not run-robust either: the SAME row is -0.65 in run 13 and +0.16 in run 14 -- so 'free' is fragile in TWO directions, estimator and replicate, and only one of those is in T3's caveat list
+
+   caveat (ii) -- the tail, re-derived on the row that holds it:
+  [PASS] the -72.34 pt page is in run 14's m=0.40 row (got -72.34) -- claim 3's own M=1440 contrast, not contrast A
+  [PASS] the PLAIN mean hides it: -0.28 pts against res 2.23, so a 72 pt page fits inside the resolution
+  [PASS] and the TRIMMED mean is blind to the last bit: pushing that page 25 pts further down moves it by 0.0e+00 (the plain mean moves -0.50, 181% of the effect)
+  [PASS] T1's WORST-DOCUMENT gate does SURFACE what both estimators hide: ratio 5.01 vs null p95 1.74. Surfacing is not attributing -- section 5 shows the same gate fires on unmerged rows, so read this as 'the page is visible', not 'merging caused it'
+  [PASS] but T1's HARMED-COUNT gate does NOT catch it (4 vs p95 6) -- one page at -72 is one document, and the count gate scales with the row's own spread; do not report 'the tail gates catch it' plural
+
+   NOT in T3's caveat list -- found while re-deriving:
+  [PASS] claim 3's 'resolved and negative' M=1440 price does NOT replicate: run 13 gives -3.23 [-5.70, -0.76] (excludes zero) but run 14 gives -0.17 [-2.40, +2.06] (includes zero) -- the sentence states a resolved fact that one of two runs denies
+  [PASS] run 13's plain mean does reproduce claim 3's -3.86 exactly (-3.86), so the non-replication is between RUNS, not an artifact of re-deriving with a different estimator
+
+==============================================================================
+4. BASELINE CONSISTENCY -- claim 3's two halves are measured against two baselines
+==============================================================================
+   token counts on disk: keep=1.00 M=4800, keep=0.50 M=2400, keep=0.50+m=0.20 M=1920
+  [PASS] claim 3's '150.00 -> 60.00 MiB (2.50x)' is M=4800/M=1920 = 2.5000 -- so the MEMORY figure's baseline is keep=1.00
+  [PASS] but the +0.54's control row is M=2400, and M=2400/M=1920 = 1.25x -- the ACCURACY figure's baseline is keep=0.50
+  [PASS] the 3.33x at M=1440 is also vs keep=1.00 (4800/1440 = 3.3333), so both memory ratios share a baseline that neither accuracy figure uses
+   => the sentence pairs a PRUNE+MERGE memory ratio with a MERGE-ONLY accuracy
+      delta. Read as one intervention it overstates what +0.54 pts bought: the
+      merge step alone is 1.25x, and the remaining 2.0x is the pruning step,
+      whose accuracy delta is a separate measurement.
+      prune+merge vs keep=1.00  run 13: trimmed  +2.29 [ -0.44,  +5.01]  res 2.72  worst  -29.47
+      prune+merge vs keep=1.00  run 14: trimmed  +0.09 [ -2.21,  +2.39]  res 2.30  worst  -40.00
+      prune only  vs keep=1.00  run 13: trimmed  +1.35 [ -0.61,  +3.31]  res 1.96  worst  -28.57
+      prune only  vs keep=1.00  run 14: trimmed  +0.19 [ -2.20,  +2.59]  res 2.40  worst  -37.33
+  [PASS] the direction matters and it is NOT the flattering one: on a CONSISTENT keep=1.00 baseline run 13's accuracy delta is +2.29 pts, BETTER than the +0.54 claim 3 quotes -- fixing the mismatch improves the number, so this is a consistency defect, not an inflated result, and must be filed as such
+  [PASS] it changes no verdict either: both runs stay null on the consistent baseline ([-0.44, +5.01] and [-2.21, +2.39]) -- so the fix is to the SENTENCE, and no downstream number moves
+
+==============================================================================
+5. IS THE TAIL GATE SPECIFIC TO MERGING?  (the control D13 s5 did not run)
+==============================================================================
+  [PASS] no config is evaluated twice within either run (28 and 28 rows, all distinct) -- so there is NO zero-treatment replicate on disk to calibrate the gate against, and decoding is bit-identical on re-run anyway (noise floor 0.000e+00), so one would be degenerate
+  [PASS] all 28 cross-run pairs hold the config fixed and vary only the checkpoint, so s3's amendment orders them by run -- treatment is run 14
+   checkpoint DiD (run 14 - run 13), the direction the design forces; normal-null p95 = 1.74
+   config                          worst    wsd  ratio  merge
+   keep=0.75 ink ORACLE           -80.85   6.63   5.43    NONE
+   keep=0.75 random               -80.85   6.75   5.34    NONE
+   keep=0.50 m=0.40 router        -74.47   7.18   4.62  m=0.40
+   keep=1.00 m=0.20 router        -45.26   4.43   4.56  m=0.20
+   keep=0.50 m=0.20 router        -50.00   6.53   3.41  m=0.20
+   keep=0.80 router TWIN          -33.68   4.53   3.32    NONE
+
+   rows with NO merging: 13/21 fire the gate   |   rows WITH merging: 6/7 fire
+  [PASS] the gate fires on 13 of 21 contrasts that contain NO merging at all -- so clearing 1.74 is not evidence about merging
+  [PASS] the single worst per-document loss in the whole sweep is -80.85 pts on `keep=0.75 ink ORACLE` -- keep=0.75, m=0, no merging -- and it has the highest ratio (5.43), above every merge row (max 4.62)
+  [PASS] and it is not a small-denominator artifact: its winsorized sd is 6.63 pts, in line with the sweep, so the ratio is driven by a real 81 pt loss
+  [PASS] the gate is not reversal-invariant: swapping which arm is 'treatment' flips the verdict on 10 of 28 configs (min(d) is one-sided) -- s3 pins direction per QUANTITY and leaves direction of the CONTRAST unwritten
+  [PASS] the one comparator with neither pruning nor merging (`keep=1.00 router CONTROL`, keep=1.00 m=0) does pass at 1.47 -- so the gate is not firing on literally everything, and the failure is one of SPECIFICITY, not of sensitivity
+   => the -72.34 page is real and both location estimators still hide it. But at
+      the normal-null bar the gate cannot attribute it to merging, and run 17
+      would fail this gate on rows where nothing is merged. The bar has to come
+      from an active non-merge comparator, which is the `random` arm at the
+      trained budget that run 17 already requires -- and that D14 measured as
+      ABSENT from both runs. T3's fix and T4's missing arm are the same row.
+
+==============================================================================
+6. THE DISCARD SET, IN DOCUMENTS, PER CORPUS (T1 s5 -- prose until now)
+==============================================================================
+   run 13  g=0.10  discards 5/tail = 10/50 docs  [funsd 10/50 (20%)]
+  [PASS] run 13: g stays at 0.1 -- FUNSD-only at n=50 discards 10/50 = 20% of the one corpus present, under the 50% bar
+  [PASS] run 13: the unlabelled artifacts read as single-corpus 'funsd', so runs 13/14 need no second code path (['funsd'])
+   run 14  g=0.10  discards 5/tail = 10/50 docs  [funsd 10/50 (20%)]
+  [PASS] run 14: g stays at 0.1 -- FUNSD-only at n=50 discards 10/50 = 20% of the one corpus present, under the 50% bar
+  [PASS] run 14: the unlabelled artifacts read as single-corpus 'funsd', so runs 13/14 need no second code path (['funsd'])
+  [PASS] the synthetic pool is the real one: 50 FUNSD + 347 SROIE = 397
+
+   corpus-aligned synthetic  g=0.10  discards 39/tail = 78/397 docs  [funsd 50/50 (100%), sroie 28/347 (8%)]  <<< VIOLATES s5
+  [PASS] at n=397, g=0.1 discards 39 per tail -- derived here, not quoted: 39 against FUNSD's 50 is 78% of it
+  [PASS] NON-VACUITY: a corpus-aligned tail TRIPS s5 -- FUNSD loses 100% of its documents while SROIE loses 8%
+   after choose_g            g=0.03  discards 11/tail = 22/397 docs  [funsd 22/50 (44%), sroie 0/347 (0%)]
+  [PASS] s5 is a CONSTRAINT, not a warning: g reduced 0.1 -> 0.03, FUNSD's loss 100% -> 44%
+  [PASS] and the reduction is in DOCUMENTS, which is the unit s5 specifies: 39 -> 11 per tail
+   SROIE-aligned synthetic   g=0.10  discards 39/tail = 78/397 docs  [funsd 0/50 (0%), sroie 78/347 (22%)]
+  [PASS] SPECIFICITY: the same n and the same g do NOT trip s5 when the tail is SROIE's -- FUNSD 0%, SROIE 22%, so the constraint tracks corpus alignment and not pooling as such
+  [PASS] a single mislabelled document RAISES rather than pairing FUNSD against SROIE -- by-position pairing is now checked, not assumed
+
+==============================================================================
+7. WHAT THE VERDICTS LICENSE
+==============================================================================
+  [PASS] contrast A scores UNDERPOWERED in both runs (13: UNDERPOWERED, 14: UNDERPOWERED) -- s6 predicted exactly this at n=50, where res is ~2.5 pts against a 1.0 pt MDE
+  [PASS] no confirmatory quantity survives Holm in either run -- consistent with D14 s1d's independent finding of zero survivors over the wider 12-test family
+  [PASS] run 14 is NOT scored FREE despite a +0.02 pt trimmed mean -- the tail gates block it, which is the single behaviour s3 exists to produce
+  [PASS] n required for res <= 1.0 pt reproduces T1 s6's 307 (got 307), and T2's pool of 397 clears it
+
+   UNDERPOWERED licenses NOTHING -- not 'merging is free', not 'no measured
+   cost'. Quote the required n (307) with it. Claim 3's corpus-average null
+   is TRUE and is not a sentence about an arbitrary document.
+
+==============================================================================
+CONTROLS: 64/64 PASS
+==============================================================================

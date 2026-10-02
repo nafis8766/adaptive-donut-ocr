@@ -1,0 +1,38 @@
+=== Testing End-to-End Pipeline ===
+Device: cpu
+
+1. Testing dataset & processor loading (2 samples from FUNSD)...
+Loading nielsr/funsd (test split) from Hugging Face...
+Using the latest cached version of the dataset since nielsr/funsd couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'default' at C:\Users\Nafis\.cache\huggingface\datasets\nielsr___funsd\default\0.0.0\7e7eeeedd84ce86540eb83cbbf7c75a3fcc7c7a5 (last modified on Tue Aug 25 12:38:54 2026).
+Loaded 2 samples for test split.
+Sample pixel shape: torch.Size([3, 2560, 1920])
+Batch pixel_values shape: torch.Size([2, 3, 2560, 1920])
+Batch labels shape: torch.Size([2, 512])
+
+2. Initializing AdaptiveDonutOCR model...
+Loading base backbone naver-clova-ix/donut-base (dtype=torch.float32)...
+Loading weights:   0%|          | 0/484 [00:00<?, ?it/s]Loading weights: 100%|##########| 484/484 [00:00<00:00, 41367.82it/s]
+Freezing Swin vision encoder (saves ~12 GB VRAM). Training Router & Decoder!
+
+3. Testing Forward Pass with Pruning & Merging...
+Original visual tokens: 4800
+Compressed visual tokens fed to decoder: 1344
+Visual token compression ratio: 72.0%
+
+4. Testing Multi-Task Loss & Backpropagation...
+Total Loss: 5.1713
+CE Loss: 4.9813
+Sparsity Loss: 0.1097
+Backward pass completed successfully! Gradients verified.
+
+5. Testing Fast Inference Generation...
+Generated text sample: ...
+
+6. Testing Overlay Visualization...
+Saved saliency overlay visualization to: visualizations/test_overlay.png
+Visualization saved successfully to visualizations/test_overlay.png!
+
+==========================================
+ALL END-TO-END PIPELINE TESTS PASSED 100%!
+==========================================

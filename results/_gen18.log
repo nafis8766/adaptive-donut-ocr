@@ -1,0 +1,12 @@
+A. cell 2 -- DO_TRAIN config
+B. cell 9 -- build train_loader when DO_TRAIN
+C. cell 11 -- DO_TRAIN branch (retrain with pruning ON)
+D. cell 7 -- attn_topk_target helper + expose pre-prune visual_tokens
+E. cell 4 -- real BipartiteTokenMerger (checkerboard split) from src/tome.py
+   spliced 176 lines from src/tome.py (checkerboard_color + BipartiteTokenMerger)
+F. cell 7 -- _token_grid/_tome_partition, both merger call sites, tome_split
+G. cell 15 -- token-matched merge rows + Q6 verdict
+H. cell 7 -- _selection_signal spliced from src/model.py; select_mode in forward()
+   spliced 59 lines from src/model.py (_selection_signal); forward() and generate() now share it
+
+wrote kaggle_pruning_run.ipynb -- all code cells parse; original notebook untouched

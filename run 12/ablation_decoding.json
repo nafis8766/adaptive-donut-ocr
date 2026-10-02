@@ -1,0 +1,93 @@
+[
+  {
+    "config": "baseline (run5)",
+    "overrides": {
+      "repetition_penalty": 1.3,
+      "no_repeat_ngram_size": 3
+    },
+    "word_recall_pct": 50.5588491782227,
+    "character_accuracy_pct": 40.97330691690949,
+    "word_order_pct": 26.493330101771,
+    "mean_ned": 0.5902669308309051,
+    "mean_pred_words": 80.54,
+    "mean_gold_words": 112.96,
+    "len_ratio_pct": 71.29957507082155,
+    "mean_gen_tokens": 176.76,
+    "hit_max_length_pct": 0.0,
+    "valid_json_pct": 0.0,
+    "num_eval_samples": 50
+  },
+  {
+    "config": "no ngram block",
+    "overrides": {
+      "repetition_penalty": 1.3,
+      "no_repeat_ngram_size": 0
+    },
+    "word_recall_pct": 50.5588491782227,
+    "character_accuracy_pct": 40.97330691690949,
+    "word_order_pct": 26.493330101771,
+    "mean_ned": 0.5902669308309051,
+    "mean_pred_words": 80.54,
+    "mean_gold_words": 112.96,
+    "len_ratio_pct": 71.29957507082155,
+    "mean_gen_tokens": 176.76,
+    "hit_max_length_pct": 0.0,
+    "valid_json_pct": 0.0,
+    "num_eval_samples": 50
+  },
+  {
+    "config": "no rep penalty",
+    "overrides": {
+      "repetition_penalty": 1.0,
+      "no_repeat_ngram_size": 3
+    },
+    "word_recall_pct": 77.73756569694308,
+    "character_accuracy_pct": 64.69846621362068,
+    "word_order_pct": 53.04633791035573,
+    "mean_ned": 0.3530153378637933,
+    "mean_pred_words": 111.88,
+    "mean_gold_words": 112.96,
+    "len_ratio_pct": 99.04390934844193,
+    "mean_gen_tokens": 252.48,
+    "hit_max_length_pct": 0.0,
+    "valid_json_pct": 82.0,
+    "num_eval_samples": 50
+  },
+  {
+    "config": "both off",
+    "overrides": {
+      "repetition_penalty": 1.0,
+      "no_repeat_ngram_size": 0
+    },
+    "word_recall_pct": 71.02921629830912,
+    "character_accuracy_pct": 59.16432051782212,
+    "word_order_pct": 51.30483657100701,
+    "mean_ned": 0.4083567948217788,
+    "mean_pred_words": 140.8,
+    "mean_gold_words": 112.96,
+    "len_ratio_pct": 124.64589235127481,
+    "mean_gen_tokens": 328.18,
+    "hit_max_length_pct": 22.0,
+    "valid_json_pct": 70.0,
+    "num_eval_samples": 50
+  },
+  {
+    "config": "both off + minlen",
+    "overrides": {
+      "repetition_penalty": 1.0,
+      "no_repeat_ngram_size": 0,
+      "min_new_tokens": 64
+    },
+    "word_recall_pct": 71.02921629830912,
+    "character_accuracy_pct": 59.16432051782212,
+    "word_order_pct": 51.30483657100701,
+    "mean_ned": 0.4083567948217788,
+    "mean_pred_words": 140.8,
+    "mean_gold_words": 112.96,
+    "len_ratio_pct": 124.64589235127481,
+    "mean_gen_tokens": 328.18,
+    "hit_max_length_pct": 22.0,
+    "valid_json_pct": 70.0,
+    "num_eval_samples": 50
+  }
+]
