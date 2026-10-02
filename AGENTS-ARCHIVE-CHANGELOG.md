@@ -2390,6 +2390,41 @@ separately on purpose so those changes stay distinguishable.
   file's own standing rule, *a bulk operation needs a check on what it was NOT supposed to
   change*, had no mechanism behind it for the project's entire history to date.
 
+- **2026-10-02 (later) — corpus decision made (option 1), and a stated cost of it measured
+  away.** The user ruled to **re-source SROIE from the official ICDAR competition** rather than
+  apply T1 §7 and report `UNDERPOWERED`. That ruling went against the recommendation on record
+  and was reaffirmed when restated, so it stands. Two consequences were then worked out rather
+  than assumed.
+  **(a) Why no agent can take the first step, and why retrying is pointless.** The RRC terms
+  have now defeated two consecutive sessions, and the reasons are **structural**: `WebSearch` is
+  **unsupported for this model** — the harness rejects the tool type, so it is not rate-limiting
+  and will not recover — and the RRC host serves a TLS certificate for a **different domain**
+  than the one requested, so the connection cannot be verified. A licensing decision must not
+  rest on a source that cannot be authenticated, which makes registration and download the
+  **user's** step. Recorded so a third session does not spend another attempt on it.
+  **(b) The "re-deriving word GT changes the recall denominator" cost is FALSE on the primary
+  quantity, and true on the other two.** `scripts/diagnose_gt_granularity.py` (4/4 non-vacuity
+  controls, exit 0, `results/_d_gt_granularity.log`) aggregates FUNSD's per-word GT into
+  reconstructed lines and re-scores through the **shipped** `reading_order_words` and
+  `compute_word_metrics`. Result: the recall denominator `len(set(gold))` is identical on
+  **50/50** documents and recall moved in **0 of 35** metric mismatches, while the gold
+  *sequence* differs on **21/50** and word_order moved in **35 of 35**. The mechanism is one
+  line — `compute_word_metrics` joins and re-tokenises the GT, so recall literally cannot see
+  annotation granularity; `reading_order_words` clusters **boxes** into rows, and line boxes
+  cluster differently from word boxes, so order can. **T1's primary quantity is therefore safe
+  under line-level annotation; its two co-primaries are not, and T1 §5's per-corpus
+  stratification is what has to carry them.** Note this does *not* break within-contrast
+  pairing — both arms score against the same GT — so it is a cross-corpus comparability issue.
+  ⚠ **The warning that was struck had been stated as fact and was never tested**; it took one
+  local script and no GPU to split it in half. ⚠ And one of that script's own non-vacuity
+  controls failed on first run **as the script's fault**: it sabotaged by reversing the input
+  *list*, which `reading_order_words` **undoes by design** by re-sorting on bbox, so the control
+  read as a defect in the function. *A sabotage the code under test is specified to repair is
+  not a sabotage.* Replaced with a vertical flip of the box geometry. ⚠ **Scope:** measured on
+  FUNSD with *reconstructed* lines because official SROIE is not on this machine — it
+  establishes a property of the pipeline's reading-order step, not of SROIE's real annotations,
+  and must be re-run against the downloaded corpus before any pooled number is quoted.
+
 ---
 
 ## Kilo (tencent/hy3:free) — contributions (2026-08-29)

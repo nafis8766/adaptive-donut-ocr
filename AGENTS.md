@@ -308,12 +308,32 @@ fourth consecutive UNDERPOWERED.
   regenerated at 18:57 (cell 2 only), and **five** verifiers green against it with mtimes
   confirmed newer: **14/14 · 96/96 · 35/35 · 62/62 · 64/64**, exit 0 each. The new guard is
   sabotage-tested (8/14, exit 1). **The corpus licence is now the only remaining blocker.**
-  **Two ways forward, both needing a user call:** re-source SROIE from the official ICDAR
-  competition (zero code churn, every T1 number intact — but the terms were **unreadable this
-  session** and official SROIE is line-level where the mirror is per-word, so word GT may need
-  re-deriving), or apply **T1 §7 honestly**, report `UNDERPOWERED` with `n ≳ 307`, and rescope
-  T4/T6/T7 instead of booking them.
-  Same sweep, more documents. **The pool is FUNSD (50) + `sizhkhy/SROIE` test (347) = 397**,
+  ~~**Two ways forward, both needing a user call:**~~ **✅ DECIDED 2026-10-02 — the user chose
+  OPTION 1: re-source SROIE from the official ICDAR competition.** This was chosen *against* a
+  recommendation to apply T1 §7 instead (the ground given for §7 was the ~10–12 week CV
+  deadline, not the science); the ruling was reaffirmed when restated, so it stands and is not
+  to be re-litigated. The rejected branch, for the record: apply **T1 §7 honestly**, report
+  `UNDERPOWERED` with `n ≳ 307`, and rescope T4/T6/T7 instead of booking them.
+  **What option 1 now requires, and the first step is NOT an agent's to take:**
+  1. ⚠ **The user must register at the ICDAR RRC portal, read the terms, and download.** Two
+     consecutive sessions failed to read those terms and the reasons are now known to be
+     **structural, not transient**: `WebSearch` is **unsupported for this model** (the harness
+     rejects the tool type outright, so retrying cannot help), and the RRC host serves a
+     certificate for a **different domain** than the one requested, so the connection cannot be
+     verified. **A licensing decision must not rest on an unauthenticatable source** — which is
+     why this step is the user's, not a third agent attempt. Do not spend another session on it.
+  2. ~~word GT may need re-deriving~~ **Measured and half-retired 2026-10-02** —
+     `scripts/diagnose_gt_granularity.py`, 4/4 controls: **word recall is granularity-invariant**
+     (denominator identical 50/50), **word order and NED are not**. See the amendment in
+     `## Corpus re-examination after the SROIE ruling (2026-10-02)`. The primary quantity is
+     safe; the co-primaries need T1 §5's per-corpus stratification to carry them.
+  3. Once the corpus is on disk: re-run `verify_corpus_grain.py` and
+     `diagnose_gt_granularity.py` **against the real annotations** (both are built to be
+     re-pointed), then the `PooledTestSet` adapter in PATCH I cell 9 may need a schema change —
+     it currently expects the mirror's `words`/`bboxes` naming, and `verify_pooled_corpus_port.py`
+     **asserts** that the image column is the pool's only schema divergence, so a rename fails
+     the check rather than surfacing at document 51.
+  Same sweep, more documents. **The pool is FUNSD (50) + SROIE test (347) = 397**,
   fixed by T2; CORD is excluded on denotation and must never enter it (`## Corpus decision
   (T2)`). At n=397 the resolution drops ~2.8× to **≈1.0 pt**, which is finally smaller than
   the effects ToMe produces.
@@ -707,6 +727,7 @@ one, because in several cases the caveat is the finding.
 | — | `scripts/verify_attn_train_step.py` | The only check that executes the 13(b) *composition* rather than its pieces: cell 11's verbatim prologue + body on real pages. **13/13** fast, **24/24** with `--full`. Found three defects, incl. the `gc` cross-cell coupling. |
 | — | `scripts/verify_tome_merge_port.py` | The gate that had to be green before run 12: merger output equal to `src/tome.py` **bit-for-bit**, every equality paired with a non-vacuity check. **96/96** (was 89/89 — T4 added `doc_image`, a mixed-schema fixture and six per-corpus checks). |
 | — | `scripts/verify_corpus_grain.py` | **T2's artifact.** Confirms the second corpus **by loading it** and measures whether T1's point-denominated thresholds port. CORD excluded on **denotation**, not size. **21/21**. |
+| — | `scripts/diagnose_gt_granularity.py` | **Does line-level GT change the metrics?** Aggregates FUNSD's per-word GT into reconstructed lines and re-scores through the **shipped** `reading_order_words`/`compute_word_metrics`. **Recall is granularity-invariant (denominator identical 50/50, recall moved in 0 of 35 mismatches); word order is not (sequence differs on 21/50).** Retires the "changes the recall denominator" cost on T4's option 1. **4/4** non-vacuity controls — one of which failed first time *as the probe's own fault*. Measured on reconstructed lines, so **re-run against official SROIE** before quoting it. |
 | — | `scripts/score_preregistered.py` | **T3's artifact — the executable form of T1 §§2–7**, which existed only as prose. Runs 13/14 score `UNDERPOWERED`; §5 shows T1 §3's tail gate is **not specific to merging**. **64/64** (was 45/45 — T4 added T1 §5's per-corpus discard constraint and §3's direction pin). |
 | — | `scripts/verify_pooled_corpus_port.py` | **T4's artifact.** Checks PATCH I by loading **both** corpora and reading the **generated** notebook by `ast`: pool size, schema divergence, the 29th row, token-matching of the new `random` arm, and the per-corpus stratification. **62/62**. |
 | — | `scripts/verify_eval_only_ckpt_gate.py` | **The eval-only checkpoint gate (2026-10-02).** Execs the shipped `if RESUME_CKPT:` statement under **four scenarios, two of which must raise** — the verdicts **invert** on both `DO_TRAIN` and checkpoint era, which is what proves the train-side and eval-side guards oppose each other. Closes a gap PATCH A's comment claimed was closed. **14/14**; **8/14 exit 1 under sabotage**. |
@@ -1456,9 +1477,61 @@ number in T1's pre-registration intact (n=397, §3's null p95 1.51, the 29-row s
 5.92 h cost, all four green verifiers) at **zero code churn**, which is the only reason it is
 worth checking at all. ⚠ One real cost if it is taken: official SROIE ships **line-level**
 transcriptions while the mirror carries **per-word** boxes, so the mirror likely tokenised the
-GT itself — re-sourcing may require re-deriving word-level ground truth, which changes the
-recall denominator and requires `verify_corpus_grain.py` to be re-run before any pooled number
-is quoted.
+GT itself — re-sourcing may require re-deriving word-level ground truth, ~~which changes the
+recall denominator and~~ and requires `verify_corpus_grain.py` to be re-run before any pooled
+number is quoted.
+
+#### ⚠ AMENDED 2026-10-02 — that cost is HALF WRONG, and the wrong half is the primary quantity
+
+**User ruled for option 1 (re-source from official ICDAR) on 2026-10-02**, against the
+recommendation to apply T1 §7. The sentence above was then tested rather than inherited:
+`scripts/diagnose_gt_granularity.py` (**4/4 non-vacuity controls, exit 0**,
+`results/_d_gt_granularity.log`) aggregates FUNSD's per-word GT into reconstructed lines and
+re-scores through the **shipped** `reading_order_words` and `compute_word_metrics`.
+
+| quantity | granularity-invariant? | measured |
+|---|---|---|
+| **word recall** (T1's **primary**) | **YES** | recall denominator `len(set(gold))` identical on **50/50** documents; of 35 metric mismatches, recall moved in **0** |
+| **word order** (co-primary) | **NO** | gold sequence differs on **21/50** documents; word_order moved in **35/35** of the mismatches |
+| **NED** (co-primary) | **NO** (inferred, not measured here) | character-level over the target string, so sequence-sensitive by the same mechanism |
+
+**Why, and it is one line of code:** `compute_word_metrics` (`src/evaluate.py:54`) does
+`gold = re.findall(r"\w+", " ".join(gt_words).lower())` — it **joins and re-tokenises** the
+ground truth. So `["ABC","COMPANY"]` and `["ABC COMPANY"]` are indistinguishable downstream,
+and **recall cannot see annotation granularity at all.** What *does* see it is
+`reading_order_words`, which re-derives reading order by clustering **boxes** into rows: line
+boxes cluster differently from word boxes, so the gold *sequence* moves even though the gold
+*set* does not.
+
+**Consequences, in the order they matter:**
+
+1. **The blocking cost on T1's primary quantity is retired.** "Changes the recall denominator"
+   is **false, measured 50/50**. Official SROIE's line-level transcriptions need **no word-box
+   re-derivation** for word recall — which is the quantity the pre-registered primary contrast
+   is stated in (T1 §1).
+2. **The two co-primaries are on a different footing for a line-annotated corpus.** This is
+   **not** a within-contrast defect: both arms of a contrast score against the same GT, so each
+   per-document difference `d_i` stays internally valid, and T1's estimand is a trimmed mean of
+   those differences. It **is** a cross-corpus comparability issue, and **T1 §5's per-corpus
+   stratification is what must carry it** — report word_order and NED per corpus, never pooled
+   alone, and say which granularity each stratum was annotated at.
+3. ⚠ **`word_order` was already the weakest link in the family** — T3 could not score it on
+   runs 13/14 at all (not on disk, not derivable), so the three-quantity family has been
+   *written* since T1 and *exercised* never. Run 17 would be its first exercise, on a pool
+   where one stratum is line-annotated. Do not let that pass silently.
+4. ⚠ **Scope, stated because it limits the finding:** measured on FUNSD with **reconstructed**
+   lines, because official SROIE is not on this machine. It establishes that *the pipeline's
+   reading-order step is sensitive to box granularity*; it does **not** measure official
+   SROIE's actual annotations. **Re-run it against the real corpus once downloaded** — the
+   script takes the corpus as its only input and is built to be re-pointed.
+
+⚠ **One control of this probe failed first time, and it was the probe's fault** — the
+project's "suspect the verifier first" rule landing again. S1 originally sabotaged by reversing
+the *list* (`lines[::-1]`), which `reading_order_words` **undoes by design** because it re-sorts
+its input by bbox; the control read as a failure of the function. Replaced with a vertical flip
+of the box geometry, which actually reverses reading order. **A sabotage that the code under
+test is specified to repair is not a sabotage.**
+
 
 **T4's status is therefore `BLOCKED — no licensed corpus`, not `ready to book`.** The fallback,
 if the official terms are unacceptable or not pursued, is **T1 §7 applied honestly**: report

@@ -1,0 +1,56 @@
+==========================================================================
+Line-level vs word-level ground truth: pipeline equivalence probe
+==========================================================================
+editdistance: INSTALLED (exact word-order metric)
+Using the latest cached version of the dataset since nielsr/funsd couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'default' at C:\Users\Nafis\.cache\huggingface\datasets\nielsr___funsd\default\0.0.0\7e7eeeedd84ce86540eb83cbbf7c75a3fcc7c7a5 (last modified on Tue Aug 25 12:38:54 2026).
+corpus: nielsr/funsd test, n=50
+
+-- 1. gold token sequence is identical under line aggregation --
+  MEASURED gold token sequence identical: 29/50 documents
+  MEASURED recall denominator len(set(gold)) identical: 50/50 documents
+           ^ this is the quantity AGENTS.md says changes
+         (aggregation is real, not a no-op: doc 45 went 433 words -> 60 lines)
+
+-- 2. shipped compute_word_metrics returns identical values --
+  MEASURED (recall, word_order) identical: 65/100 comparisons
+           of 35 mismatches: recall moved in 0, word_order moved in 35
+         (metrics are live, not degenerate: doc 0 perfect-pred recall=1.0000 order=1.0000)
+
+-- 3. NON-VACUITY: each sabotage must produce a DIFFERENCE --
+  [PASS] S1 flipping line geometry vertically changes the sequence -- equal=False (list-reversal would NOT work here: reading_order_words re-sorts by box)
+  [PASS] S2 dropping one line changes the sequence AND the denominator -- 146 vs 147 unique tokens
+  [PASS] S3 a wrong prediction moves recall (metric is not constant) -- recall 1.0000 -> 0.0000
+  [PASS] S4 removing boxes changes the sequence (so boxes ARE load-bearing for order) -- equal=False -- confirms LINE boxes still matter, only per-WORD boxes do not
+
+==========================================================================
+CONTROLS: 4/4 PASS
+==========================================================================
+MEASURED (these are data verdicts, NOT check failures -- the same
+distinction AGENTS.md draws for score_preregistered.log):
+  recall denominator identical : 50/50 documents
+  gold sequence identical      : 29/50 documents
+  (recall, order) both identical: 65/100 comparisons
+
+VERDICT: SPLIT, and it splits AGENTS.md's warning in half.
+  * RECALL is granularity-INVARIANT. The recall denominator
+    len(set(gold)) is identical on every document, because
+    compute_word_metrics joins and re-tokenises the GT. The
+    specific cost AGENTS.md names -- 'changes the recall
+    denominator' -- is FALSE, measured.
+  * WORD ORDER (and NED, which is also sequence-sensitive) are
+    NOT invariant: reading order is re-derived from box geometry,
+    and line boxes cluster differently from word boxes.
+  CONSEQUENCE for T1 section 4's three-quantity family: the PRIMARY
+  quantity is safe. The two co-primaries are computed on a
+  different footing for a line-annotated corpus. Paired
+  per-document differences stay internally valid -- both arms of a
+  contrast score against the same GT -- so this is a
+  CROSS-CORPUS COMPARABILITY issue, not a within-contrast one,
+  and T1 section 5's per-corpus stratification is what must carry it.
+==========================================================================
+SCOPE: measured on FUNSD with RECONSTRUCTED lines, because official
+       SROIE is not on this machine. It establishes that the pipeline's
+       reading-order step is sensitive to box granularity; it does not
+       measure official SROIE's actual line annotations. Re-run against
+       the real corpus before quoting a number from it.
