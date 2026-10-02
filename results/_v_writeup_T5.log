@@ -1,0 +1,182 @@
+==========================================================================
+1. THE BUDGET TABLE  (WRITEUP.md, section 2)
+==========================================================================
+  [PASS] budget table has five rows   5 found
+  [PASS] keep=1.00 token count   4800 vs 4800
+  [PASS] keep=1.00 cross-attn KV MiB   150.00 MiB vs 150.00
+  [PASS] keep=1.00 word recall   77.62 vs 77.62
+  [PASS] keep=0.50 token count   2400 vs 2400
+  [PASS] keep=0.50 cross-attn KV MiB   75.00 MiB (-50.0%) vs 75.00
+  [PASS] keep=0.50 KV reduction %   -50.0 vs -50.0
+  [PASS] keep=0.50 recall delta   +0.60 vs 0.60
+  [PASS] keep=0.50 t   0.43 vs 0.43
+  [PASS] keep=0.50 word recall   78.22 vs 78.22
+  [PASS] keep=0.35 token count   1680 vs 1680
+  [PASS] keep=0.35 cross-attn KV MiB   52.50 MiB (-65.0%) vs 52.50
+  [PASS] keep=0.35 KV reduction %   -65.0 vs -65.0
+  [PASS] keep=0.35 recall delta   -0.26 vs -0.26
+  [PASS] keep=0.35 t   -0.18 vs -0.18
+  [PASS] keep=0.35 word recall   77.37 vs 77.37
+  [PASS] keep=0.25 token count   1200 vs 1200
+  [PASS] keep=0.25 cross-attn KV MiB   37.50 MiB (-75.0%) vs 37.50
+  [PASS] keep=0.25 KV reduction %   -75.0 vs -75.0
+  [PASS] keep=0.25 recall delta   -6.96 vs -6.96
+  [PASS] keep=0.25 t   -2.82 vs -2.82
+  [PASS] keep=0.25 word recall   70.67 vs 70.67
+  [PASS] keep=0.20 token count   960 vs 960
+  [PASS] keep=0.20 cross-attn KV MiB   30.00 MiB (-80.0%) vs 30.00
+  [PASS] keep=0.20 KV reduction %   -80.0 vs -80.0
+  [PASS] keep=0.20 recall delta   -13.01 vs -13.01
+  [PASS] keep=0.20 t   -5.42 vs -5.42
+  [PASS] keep=0.20 word recall   64.61 vs 64.61
+  [PASS] keep=0.50 stated power floor   'free (powered ≥ 2.76)' vs 2.76
+  [PASS] keep=0.50 really is flat   a 'free' row whose t clears significance is mislabelled
+  [PASS] keep=0.35 stated power floor   'free (powered ≥ 2.81)' vs 2.81
+  [PASS] keep=0.35 really is flat   a 'free' row whose t clears significance is mislabelled
+
+==========================================================================
+2. THE SELECTION TABLE (section 3)
+==========================================================================
+  [PASS] selection table has four rows   4 found
+  [PASS] keep=0.50 token count
+  [PASS] keep=0.50 router recall   80.46 vs 80.46
+  [PASS] keep=0.50 random recall   62.77 vs 62.77
+  [PASS] keep=0.50 margin is router-minus-random   +17.7 vs +17.7
+  [PASS] keep=0.50 margin is positive
+  [PASS] keep=0.35 token count
+  [PASS] keep=0.35 router recall   79.25 vs 79.25
+  [PASS] keep=0.35 random recall   51.84 vs 51.84
+  [PASS] keep=0.35 margin is router-minus-random   +27.4 vs +27.4
+  [PASS] keep=0.35 margin is positive
+  [PASS] keep=0.25 token count
+  [PASS] keep=0.25 router recall   71.15 vs 71.15
+  [PASS] keep=0.25 random recall   37.20 vs 37.20
+  [PASS] keep=0.25 margin is router-minus-random   +34.0 vs +34.0
+  [PASS] keep=0.25 margin is positive
+  [PASS] keep=0.20 token count
+  [PASS] keep=0.20 router recall   63.10 vs 63.10
+  [PASS] keep=0.20 random recall   33.80 vs 33.80
+  [PASS] keep=0.20 margin is router-minus-random   +29.3 vs +29.3
+  [PASS] keep=0.20 margin is positive
+
+==========================================================================
+3. THE DiD TABLE (section 4)
+==========================================================================
+  [PASS] DiD table has four rows   4 found
+  [PASS] keep=0.50 run 5 delta   -1.57 vs -1.57
+  [PASS] keep=0.50 run 9 delta   +0.60 vs 0.60
+  [PASS] keep=0.50 DiD == run5 - run9   -2.17 vs -2.17
+  [PASS] keep=0.35 run 5 delta   -6.03 vs -6.03
+  [PASS] keep=0.35 run 9 delta   -0.26 vs -0.26
+  [PASS] keep=0.35 DiD == run5 - run9   -5.77 vs -5.77
+  [PASS] keep=0.25 run 5 delta   -11.47 vs -11.47
+  [PASS] keep=0.25 run 9 delta   -6.96 vs -6.96
+  [PASS] keep=0.25 DiD == run5 - run9   -4.52 vs -4.52
+  [PASS] keep=0.20 run 5 delta   -20.34 vs -20.34
+  [PASS] keep=0.20 run 9 delta   -13.01 vs -13.01
+  [PASS] keep=0.20 DiD == run5 - run9   -7.33 vs -7.33
+  [PASS] run 5 declines at EVERY budget   the fact that rejects H2
+  [PASS] run 5's decline is monotone in tightness   the writeup says 'monotonically'
+
+==========================================================================
+4. INLINE CLAIMS
+==========================================================================
+  [PASS] -0.26 pts of word recall (t -0.18, n=50 paired)   headline delta, t and n
+  [PASS] -0.26 ± 1.41   headline standard error
+  [PASS] costs 6.03 pts at the same budget   run 5's cost at keep=0.35
+  [PASS] 65% of the visual tokens   1680/4800 = 35% kept
+  [PASS] frees 65% of ... cross-attention KV   the two 65%s are the same 65%
+  [PASS] 19.46% of the model's 771 MiB   KV share of parameters
+  [PASS] analytic and observed agree   rel gap 0.0000 at all five budgets
+  [PASS] self-KV non-monotone: 0.25 -> 10.19 exceeds 0.35 -> 9.56   a self/cross mix-up cannot pass as a pruning win
+  [PASS] 17 of 17 controls pass (M1)
+  [PASS] run 9 at keep=0.35 with its own router scores 79.25   the +1.62 row, stated as the non-headline
+  [PASS] ink oracle retains 0.994 at keep=0.50   H2's most favourable condition
+  [PASS] bit-identical token sets across checkpoints   verified 0.00e+00, the control the DiD rests on
+  [PASS] attention target loses: -5.63 @0.25, -12.81 @0.20
+  [PASS] run 10 retains 0.257 ink vs random's 0.201 at keep=0.20   the near-ink-agnostic mechanism
+  [PASS] run 5 reads 74.72 local vs 77.74 Kaggle   the cross-venue gap that forces paired deltas
+  [PASS] n = 50 everywhere
+
+==========================================================================
+5. THE FIGURES THE 2026-09-09 AUDIT CORRECTED
+==========================================================================
+  Each of these was WRONG in the first draft. They are pinned here so a future
+  edit cannot quietly restore the error the audit removed.
+
+  [PASS] router is 2.24 pts ABOVE ink at keep=0.50 (not below)   +2.24
+  [PASS] and the paired t is +1.62 (not -1.62)   t +1.6222
+  [PASS] which is UNDER the pre-registered t>=2.0 -- the disclaimer rests on this   not on the direction
+  [PASS] router retains 0.072 LESS ink than the oracle   it is not rediscovering ink
+  [PASS] the writeup says 'above', not 'below'
+  [PASS] 'ten router rows' is the true count   10 router rows, 18 rows total
+  [PASS] router max speed-up is 1.05x   1.051
+  [PASS] the largest speed-up ANYWHERE in D11 is 1.19x (random @0.20)   1.189 -- must be disclosed, it argues against our own claim
+  [PASS] and 1.19 appears in the writeup   quoting only 1.05 understates the counter-evidence to the no-latency claim
+  [PASS] the headline 1.04x is 4800->960 at router selection
+  [PASS] '243-280 autoregressive steps' is the router-row range   242.54-279.52
+  [PASS] M1 logs 25 of 25 controls passing (not 17)   25 PASS / 0 FAIL
+  [PASS] and the writeup quotes that count exactly
+  [PASS] D12 really does report controls_passed=false / WITHHELD   if this ever flips, the disclosure paragraph must be rewritten, not deleted
+  [PASS] exactly one D12 control fails, and it is the harness anchor   harness anchor (run 5 @ keep=1.00)
+  [PASS] the failing gap is 3.02 pts against a 1.5 pt tolerance   local 74.72 vs run 6 77.74 -> |gap| 3.02 (tol 1.5, same 50 images)
+  [PASS] writeup discloses 'controls_passed: false'   the flag itself
+  [PASS] writeup discloses 'WITHHELD'   the verdict
+  [PASS] writeup discloses '3.02'   the size of the failure
+  [PASS] writeup discloses '0.00e+00'   the controls the DiD actually rests on
+  [PASS] the four selection-pairing controls do pass   the disclosure would be misleading if they did not
+  [PASS] keep=0.50 cross-checkpoint gap +5.07 and significant   +5.07, t +2.28
+  [PASS] keep=0.35 cross-checkpoint gap +8.67 and significant   +8.67, t +4.63
+  [PASS] keep=0.25 cross-checkpoint gap +7.42 and significant   +7.42, t +3.01
+  [PASS] keep=0.20 cross-checkpoint gap +10.23 and significant   +10.23, t +5.56
+  [PASS] run 5's resolution at keep=0.50 really is 5.20 pts
+  [PASS] and the writeup quotes 5.20 as the criterion's floor   run 9's floor is 2.76; quoting that arm instead would flatter the criterion, and checking only the JSON value would not notice the swap
+  [PASS] six ink gates, all passing   6 found
+  [PASS] each matched the Kaggle reference to three decimals
+
+==========================================================================
+6. TRANSCRIBED FROM AGENTS.md -- checked for TRANSCRIPTION ONLY
+==========================================================================
+  These figures live in prose, not in a JSON this script can re-derive. Checking
+  them against AGENTS.md proves the writeup copied them correctly and nothing more;
+  it does NOT re-establish them. Listed separately so the distinction stays visible.
+
+  [FAIL] 0.896 (held-out probe's retained teacher-attention mass at K)
+  [FAIL] 0.910 (the teacher's own top-K ceiling, without which 0.896 is unreadable)
+  [PASS] 10.93 (the largest recorded ceiling drift between retrains)
+  [PASS] 1.30 (run 8's ceiling drift)
+  [FAIL] 73.09 (negated mode while the router was inverted)
+  [PASS] 18.80 (forward router while it was inverted)
+  [PASS] 2.70 (negated after the fix -- the role flip)
+  [PASS] 71% (the decoding cap defect)
+  [PASS] 49% (ToMe missed-redundancy rate)
+  [FAIL] 18% (invalid-JSON rate)
+  [PASS] -3.86 (run 13: cost of merging away 40% of the router's kept set)
+  [PASS] -7.45 (lower endpoint of that CI -- the half the claim is usually quoted without)
+  [FAIL] 49.2% (missed horizontal redundancy under score-rank split, precise form)
+  [PASS] 50.5% (missed vertical redundancy under score-rank split, precise form)
+  [PASS] -1.51 (sabotage row, run 12 / run-5 weights: checkerboard minus rank_parity)
+  [FAIL] -3.22 (lower endpoint of the run-12 sabotage CI (the powered one, res 1.7))
+  [PASS] -0.29 (sabotage row, run 13 / run-9 weights)
+  [FAIL] -3.10 (lower endpoint of the run-13 sabotage CI)
+
+==========================================================================
+7. CLAIMS THE WRITEUP MUST NOT MAKE
+==========================================================================
+  Dropping a claim is a decision; it should be enforced, not remembered.
+
+  [PASS] does not claim: beats?\s+the\s+ink\s+oracle   the router-vs-ink margin is t +1.62, under 2.0
+  [PASS] does not claim: H1\s+is\s+(proven|established|isolated\b(?!\.))   H1 is supported, not isolated -- the control has not run
+  [PASS] does not claim: \+14\s+to\s+\+28   superseded range; D11 gives +17.7 to +34.0
+  [PASS] does not claim: \d+(?:\.\d+)?\s*[x×]\s*(?:faster|speed-?up\b)   D11: 1.04x at 5x fewer tokens
+  [PASS] does not claim: \b(?:is|are|runs?)\s+\d+(?:\.\d+)?\s*[x×]\s*faster   same
+  [PASS] does not claim: (?<!not )(?<!no )efficiency\s+(?:win|gain|result)\b   the efficiency story is memory only, and only cross-attention KV
+  [PASS] disclaimer present: 'No latency win'   a banned-phrase check passes trivially on a file with no disclaimers at all
+  [PASS] disclaimer present: 'No encoder-side saving'   a banned-phrase check passes trivially on a file with no disclaimers at all
+  [PASS] disclaimer present: 'No claim that the router beats'   a banned-phrase check passes trivially on a file with no disclaimers at all
+  [PASS] disclaimer present: 'merging result is off-distribution'   a banned-phrase check passes trivially on a file with no disclaimers at all
+  [PASS] disclaimer present: 'not isolated'   a banned-phrase check passes trivially on a file with no disclaimers at all
+
+==========================================================================
+135 passed, 7 failed
+==========================================================================

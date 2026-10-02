@@ -76,7 +76,7 @@ fourth consecutive UNDERPOWERED.
 | T2 | ~~Confirm the second eval corpus exists and is usable~~ **DONE — SROIE n=347** | free | — |
 | T3 | ~~Re-score runs 13/14 under T1's rule~~ **DONE — UNDERPOWERED both runs; claim 3 restated; T1 §3 amended** | free, local | T1 |
 | T4 | Port the 28-row sweep to the pooled corpus (FUNSD+SROIE = 397) | local or Kaggle, eval-only | ~~T1, T2~~ **free** |
-| T5 | Decide where ToMe lives in the architecture | free, but gates T6/T7 | D13 read |
+| T5 | ~~Decide where ToMe lives in the architecture~~ **DONE — STAYS post-encoder; 0% encoder saving is structural, no cheap fix (4.9% cap one stage earlier); T6/T7 NOT moot** | free | ~~D13 read~~ — |
 | T6 | Pending 16 — train `keep=0.30, merge=0.0` | Kaggle T4, ≈4–4.5 h | T4, T5 |
 | T7 | Pending 17 — the redesigned merge run | Kaggle T4, ≈2–3 h | T6 |
 | T8 | Housekeeping: reconcile the prose docs; dead `final_coords` | local, ~40 min | — (fill gaps) |
@@ -409,8 +409,24 @@ fourth consecutive UNDERPOWERED.
   *(The duplicate copy of the `random`-arm warning that stood here until 2026-09-24 has been
   folded into the block above — it was byte-identical and said twice by accident.)*
 
-- [ ] **T5 — Decide explicitly where ToMe lives in the architecture.**
+- [x] **T5 — Decide explicitly where ToMe lives in the architecture.**
   *Free decision, large consequence. Gates T6 and T7.*
+  **DONE 2026-10-02 — the decision is `## ToMe placement decision (T5)`. ToMe STAYS
+  post-encoder; it is NOT moved inside Swin in this project. T6 and T7 are therefore NOT
+  moot and remain valid as designed, blocked on T4.**
+  The reason is quantitative and new: `scripts/analyze_tome_placement.py` (5/5 controls,
+  exit 0) shows the merger is downstream of **all 20** encoder blocks, so its encoder
+  saving is **0% by construction** — not small, zero, which is why D11 measured 1.04×.
+  And **there is no cheap fix**: moving it one stage earlier caps at **4.9%** even at a
+  50% merge, because only **9.7%** of the encoder is downstream of stage 3. The version
+  that pays must go **before stage 2**, which holds **69.2%** of the encoder in **14 of
+  its 20 blocks** — on a 19,200-token grid, inside a *frozen pretrained* encoder, where
+  window partitioning, shifted-window cyclic shift and relative position bias all assume
+  an intact grid, and which would break comparability with the whole run 2–14 table.
+  **What it forbids:** any encoder-FLOPs/speedup/latency framing for the merger (extending
+  the standing latency ban from the router to the merger, which was never explicitly
+  covered); quoting 2.50× as a *merging* result (pruning supplies 2.0×, the merge step
+  alone is **1.25×**); and calling the compression "free" (T3: `UNDERPOWERED` both runs).
   The merger sits **after** the frozen Swin, so it saves no encoder compute and no
   latency (1.04× measured, D11) — its only benefit surface is decoder cross-attention
   KV, which pruning already delivers more simply. So ToMe's entire reason to exist here
@@ -419,10 +435,12 @@ fourth consecutive UNDERPOWERED.
   which is what ToMe was designed for and the only version that buys FLOPs and latency.
   That is a real engineering project (windowed attention assumes an intact spatial grid;
   merged tokens break window partitioning), so it is a next phase, not a fix.
+  ✅ **That last sentence is now specified rather than asserted** — §5 of the decision
+  records what the inside-Swin phase would require, so a future phase does not re-derive it.
   **DONE-WHEN:** the branch is decided *in writing with its reason*, the way Pending
   15's scope-out branch should have been. **If the answer is "move it inside the
   encoder", T6 and T7 as currently designed are moot** — which is exactly why this sits
-  above them.
+  above them. ✅ satisfied; the answer was "keep", so they are not moot.
 
 - [ ] **T6 — Pending 16: train the symmetric checkpoint `keep=0.30, merge=0.0`.**
   *Kaggle T4, ≈4–4.5 h. Blocked by T4 and T5.*
@@ -488,7 +506,7 @@ this file and all five go stale the moment a run lands:
 | `README.md` | results first, then scope limits | **someone arriving from a link, with 30 seconds** | — |
 | **`NOTES.md`** | **caveat first — "read this before quoting a number"** | **a maintainer about to cite a figure** | — |
 | `REPORT.md` | claims + per-run table | someone who knows the project | — |
-| `WRITEUP.md` | results-first, claim by claim | a reviewer checking the claims | `scripts/check_writeup_numbers.py`, 134/134 |
+| `WRITEUP.md` | results-first, claim by claim | a reviewer checking the claims | `scripts/check_writeup_numbers.py`, 142/142 |
 | **`STORY.md`** | **chronology — stage by stage** | **a general reader, no ML background** | **none — see below** |
 
 ⚠ **`NOTES.md` IS the old `README.md`, renamed 2026-10-02, not a new document** — moved with
@@ -727,13 +745,14 @@ one, because in several cases the caveat is the finding.
 | — | `scripts/verify_attn_train_step.py` | The only check that executes the 13(b) *composition* rather than its pieces: cell 11's verbatim prologue + body on real pages. **13/13** fast, **24/24** with `--full`. Found three defects, incl. the `gc` cross-cell coupling. |
 | — | `scripts/verify_tome_merge_port.py` | The gate that had to be green before run 12: merger output equal to `src/tome.py` **bit-for-bit**, every equality paired with a non-vacuity check. **96/96** (was 89/89 — T4 added `doc_image`, a mixed-schema fixture and six per-corpus checks). |
 | — | `scripts/verify_corpus_grain.py` | **T2's artifact.** Confirms the second corpus **by loading it** and measures whether T1's point-denominated thresholds port. CORD excluded on **denotation**, not size. **21/21**. |
+| — | `scripts/analyze_tome_placement.py` | **T5's artifact.** Per-stage analytic FLOPs proxy from `donut-base`'s own config. **The merger is downstream of all 20 encoder blocks, so its encoder saving is 0% by construction** — D11's 1.04× was the expected result. **No cheap fix: one stage earlier caps at 4.9% even at a 50% merge; the version that pays must precede stage 2, which is 69.2% of the encoder in 14 of 20 blocks.** **5/5.** Analytic proxy, not measured FLOPs — see §6 of the decision. |
 | — | `scripts/diagnose_gt_granularity.py` | **Does line-level GT change the metrics?** Aggregates FUNSD's per-word GT into reconstructed lines and re-scores through the **shipped** `reading_order_words`/`compute_word_metrics`. **Recall is granularity-invariant (denominator identical 50/50, recall moved in 0 of 35 mismatches); word order is not (sequence differs on 21/50).** Retires the "changes the recall denominator" cost on T4's option 1. **4/4** non-vacuity controls — one of which failed first time *as the probe's own fault*. Measured on reconstructed lines, so **re-run against official SROIE** before quoting it. |
 | — | `scripts/score_preregistered.py` | **T3's artifact — the executable form of T1 §§2–7**, which existed only as prose. Runs 13/14 score `UNDERPOWERED`; §5 shows T1 §3's tail gate is **not specific to merging**. **64/64** (was 45/45 — T4 added T1 §5's per-corpus discard constraint and §3's direction pin). |
 | — | `scripts/verify_pooled_corpus_port.py` | **T4's artifact.** Checks PATCH I by loading **both** corpora and reading the **generated** notebook by `ast`: pool size, schema divergence, the 29th row, token-matching of the new `random` arm, and the per-corpus stratification. **62/62**. |
 | — | `scripts/verify_eval_only_ckpt_gate.py` | **The eval-only checkpoint gate (2026-10-02).** Execs the shipped `if RESUME_CKPT:` statement under **four scenarios, two of which must raise** — the verdicts **invert** on both `DO_TRAIN` and checkpoint era, which is what proves the train-side and eval-side guards oppose each other. Closes a gap PATCH A's comment claimed was closed. **14/14**; **8/14 exit 1 under sabotage**. |
 | — | `scripts/verify_train_select_mode.py` | PATCH H's `src`-level check (2026-09-25). **Undocumented until 2026-09-27**; log `results/verify_train_select_mode.log`. |
 | — | `scripts/verify_notebook_train_select_mode.py` | PATCH H's **notebook-level** check — execs cells 2/4/7/11 and the shipped saliency block. **Undocumented until 2026-09-27, and it had no log at all.** Run 2026-09-27: **37 passed, 0 failed through section 3, then exit 1 in section 4** (`NameError: epoch_sal`). Three of its own defects were found by running it — see `## Patch H, run 18's staged config, and two select-mode verifiers`. **Do not cite it as green.** |
-| — | `scripts/check_writeup_numbers.py` | Re-derives every figure in `WRITEUP.md` from `results/*.json` — deliberately **not** from this file, because prose checked against prose proves nothing. **142/142**. Found six real errors incl. a double sign inversion. |
+| — | `scripts/check_writeup_numbers.py` | Re-derives every figure in `WRITEUP.md` from `results/*.json` — deliberately **not** from this file for the derivable figures, because prose checked against prose proves nothing. **142/142, exit 0 (re-run 2026-10-02).** Found six real errors incl. a double sign inversion. ⚠ **It was silently FAILING 135/7 for 8 days** — its §6 transcription check read only `AGENTS.md`, and the 2026-09-24 split moved 7 figures into the archives, so it failed on figures that had merely *moved* and were never wrong. Fixed by reading all four tracker files, with a raising assert if one is missing. Sabotage-tested (bogus figure → 1 failure, exit 1). |
 | — | `scripts/probe_generation_determinism.py` | Tests by execution the assumption that greedy generation is bit-identical across runs — the sole justification for bootstrapping over documents only. **6/6** within-process, **6/6** across two processes. |
 | — | `scripts/diagnose_tome_parity.py` | Quantifies the ToMe score-order/parity gotcha (~49% missed redundancy). Imports the **shipped** `checkerboard_color`; a local restatement scored 10/10 under sabotage. |
 | — | `scripts/diagnose_decoder.py` | LEGACY (copy-vs-next-token, settled before run 6). Re-run on run 8: no copy failure (COPY 0.0% / NEXT 74.5%), and the first legible sample of generated text recorded anywhere. |
@@ -742,7 +761,7 @@ one, because in several cases the caveat is the finding.
 
 | Path | Role |
 | --- | --- |
-| [README.md](README.md), [NOTES.md](NOTES.md), [REPORT.md](REPORT.md), [WRITEUP.md](WRITEUP.md), [STORY.md](STORY.md) | **Derived prose, none of them a source of truth** — see the subordination table at the top of this file. `WRITEUP.md` is the only one with a numeric audit (`scripts/check_writeup_numbers.py`, 134/134); `STORY.md` (2026-09-17) is the only one organised chronologically (stage → problem → fix, for a reader with no ML background). **`NOTES.md` is the old `README.md`, renamed 2026-10-02** when the visitor-facing and maintainer-facing jobs were split — it holds the caveat-first detail, the new `README.md` leads with results. Correcting a number in this file leaves all five stale until someone propagates it. |
+| [README.md](README.md), [NOTES.md](NOTES.md), [REPORT.md](REPORT.md), [WRITEUP.md](WRITEUP.md), [STORY.md](STORY.md) | **Derived prose, none of them a source of truth** — see the subordination table at the top of this file. `WRITEUP.md` is the only one with a numeric audit (`scripts/check_writeup_numbers.py`, 142/142); `STORY.md` (2026-09-17) is the only one organised chronologically (stage → problem → fix, for a reader with no ML background). **`NOTES.md` is the old `README.md`, renamed 2026-10-02** when the visitor-facing and maintainer-facing jobs were split — it holds the caveat-first detail, the new `README.md` leads with results. Correcting a number in this file leaves all five stale until someone propagates it. |
 | [kaggle_token_pruning_ocr.ipynb](kaggle_token_pruning_ocr.ipynb) | The **canonical** notebook, 17 cells, edited only via asserted patchers (below). Produced runs 2–6. **It did NOT produce runs 7–8.** |
 | [kaggle_pruning_run.ipynb](kaggle_pruning_run.ipynb) | **The notebook that actually produced runs 7–11.** Generated by `scripts/make_kaggle_pruning_notebook.py`, which copies the canonical notebook and adds the `DO_TRAIN` pruning-ON retrain + `SUPERVISE_SALIENCY` ink-BCE loss, and since 2026-09-16 the **real checkerboard `BipartiteTokenMerger` spliced from `src/tome.py`** plus the 13 token-matched merge rows (PATCH E/F/G), and since 2026-09-26 **PATCH H** — `_selection_signal` spliced from `src/model.py` (59 lines) with `select_mode` threaded into `forward()` so `forward()` and `generate()` share one selection path — and since 2026-09-29 **PATCH I**, the pooled-corpus port (cells 2/9/13/15: FUNSD+SROIE = 397 behind a `PooledTestSet`, a per-document `corpus` label, `word_order` in `per_image`, per-corpus strata on every row, and a 29th sweep row `keep=0.40 random TWIN` at M=1920). ⚠ **This list read "E/F/G" until 2026-09-27, 11 days after H shipped** — see `## Patch H, run 18's staged config, and two select-mode verifiers`. **The mechanism behind the project's headline result lives only here and in its generator — not in `src/`, not in the canonical notebook.** That is a third copy of the model; see the duplication gotcha. Regenerate, never hand-edit. **The merge fix exists ONLY here** — the canonical notebook still carries the broken parity split (gotcha). |
 | [src/](src/) | Library mirror: `model.py`, `router.py`, `tome.py`, `dataset.py`, `train.py`, `evaluate.py`, `loss.py` |
@@ -1827,6 +1846,121 @@ loops — `GRAD_ACCUM = 8` at L114 *and* L367, `LAMBDA_SAL = 0.5` at L106 vs `0.
 loop's scope is being reconstructed**, or the greenest possible section 4 is one measuring the
 branch that did not run.
 
+## ToMe placement decision (T5) — decided 2026-10-02
+
+**DECISION: ToMe stays where it is — after the frozen Swin, before the decoder. It is NOT
+moved inside the encoder in this project.** User ruling, 2026-10-02, on the recommendation
+below. T5's DONE-WHEN requires the branch decided *in writing with its reason*; this section
+is that.
+
+**Consequence for the queue, stated first because it is what T5 was gating:** T5's warning was
+*"if the answer is 'move it inside the encoder', T6 and T7 as currently designed are moot."*
+The answer is **not** that, so **T6 and T7 remain valid as designed** and stay on the queue,
+blocked on T4. T5 does not kill them. What it does is bound what they can be worth — see §4.
+
+### 1. The evidence: the current placement's encoder saving is 0% by construction
+
+`scripts/analyze_tome_placement.py` (**5/5 controls, exit 0**, `results/_d_tome_placement.log`)
+computes an analytic FLOPs proxy per Swin stage from `donut-base`'s own config — window
+attention + projections/MLP, the dominant per-token terms. Geometry: image 2560×1920, patch 4,
+window 10, depths `[2,2,14,2]`, embed_dim 128.
+
+| stage | grid | tokens | blocks | dim | % of encoder |
+|---|---|---|---|---|---|
+| 0 | 640×480 | 307,200 | 2 | 128 | 10.8% |
+| 1 | 320×240 | 76,800 | 2 | 256 | 10.2% |
+| **2** | **160×120** | **19,200** | **14** | **512** | **69.2%** |
+| 3 | 80×60 | **4,800** | 2 | 1024 | 9.7% |
+
+Stage 3's output is 4,800 tokens — which is where the router and merger live, and it matches
+the repo's `TOKEN_GRID = (80, 60)` exactly (asserted as a control, tying the proxy to the code).
+**The merger is downstream of all 20 encoder blocks, so its encoder saving is not small — it is
+zero, by construction.** D11's measured **1.04×** wall-clock was therefore the *expected*
+result, not a disappointing one, and this is the quantitative form of the explanation AGENTS.md
+has carried qualitatively since D11.
+
+### 2. The decisive number: there is no cheap version of "move it inside"
+
+| insert before | downstream share | saving @ 20% merge | @ 50% |
+|---|---|---|---|
+| stage 0 | 100.0% | 20.0% | 50.0% |
+| stage 1 | 89.2% | 17.8% | 44.6% |
+| **stage 2** | **79.0%** | **15.8%** | **39.5%** |
+| stage 3 | **9.7%** | 1.9% | **4.9%** |
+| *after* stage 3 — **current** | **0.0%** | 0.0% | 0.0% |
+
+**The obvious incremental step — move it one stage earlier, before stage 3 — caps at 4.9% of
+encoder FLOPs even at a 50% merge ratio.** Only 9.7% of the encoder is downstream of that
+point. So the choice is not "a little work for a little gain"; it is **zero gain where it is,
+~5% for the easy move, and ~40% only if the merge happens before stage 2** — which holds
+**69.2% of the encoder in 14 of its 20 blocks**.
+
+### 3. Why before-stage-2 is a new project, not a fix
+
+Merging before stage 2 means operating on a **19,200-token grid at dim 512**, inside a
+**frozen pretrained** encoder, where three mechanisms all assume an intact spatial grid:
+
+1. **Window partitioning.** 10×10 windows require a regular H×W grid. Merged tokens are not a
+   grid, so windows cannot be formed without re-gridding, variable-size windows, or restricting
+   merges to within-window pairs — and the last option makes window sizes unequal, which breaks
+   the batched window attention it was meant to preserve.
+2. **Shifted-window attention.** Swin alternates a cyclic shift between blocks; a cyclic shift
+   is defined on a regular grid and has no meaning on an irregular token set.
+3. **Relative position bias**, indexed on a window's internal coordinates. A merged token has
+   no single position, so the bias table has no well-defined entry for it.
+
+⚠ **And it breaks comparability with the entire run 2–14 table.** The frozen encoder is the
+fixed substrate every result in this project rests on; the eval protocol section already says
+changing the *decoding* restarted comparability at run 6. Changing the encoder's internal
+computation is strictly larger: the 77.74 ceiling, run 9's checkpoint, D11, D12 and M1 would all
+need re-establishing. That is months, and it is a different project with the same title.
+
+### 4. What this decision licenses, and what it forbids
+
+**Licensed:** ToMe is described as a **decoder-side cross-attention KV reduction mechanism**,
+evaluated for whether it preserves accuracy better than pruning at a matched token budget.
+That is its whole remit.
+
+**Forbidden, and this is the operative half:**
+- ❌ Any encoder-FLOPs, speedup, throughput or latency framing for the merger. **0.0% is
+  measured and structural.** This extends the existing standing ban on latency claims from the
+  *router* to the *merger*, which was never explicitly covered.
+- ❌ Quoting the 2.50× KV figure as a merging result. **Pruning supplies 2.0× of it; the merge
+  step alone is 1.25×** — so even on the one axis where merging works, it is the smaller half.
+- ❌ Describing the architecture diagram's merger as buying compression "for free". T3 scored
+  the matched-budget accuracy claim **`UNDERPOWERED` in both runs** (+1.66 and +0.02, zero Holm
+  survivors, required n ≳ 307).
+
+⚠ **So ToMe's entire remaining justification in this project is one narrow claim that is not
+yet resolvable at n=50.** That is an honest statement of its status, and it is the reason T6/T7
+stay queued rather than promoted: they test a claim whose benefit surface is the smaller half
+of a memory axis, at a resolution the corpus cannot currently deliver. **That is a scheduling
+judgement, not part of the placement decision** — the placement decision above rests only on
+the FLOPs budget and the comparability argument, both of which are independent of any deadline.
+
+### 5. Recorded so it is not lost: what the inside-Swin phase would need
+
+Not a to-do. A specification, so a future phase does not re-derive it:
+
+- Insertion **before stage 2**, not before stage 3 — anything later is ≤4.9% and not worth the
+  redesign (§2).
+- A merge that is **window-partition preserving**, or a replacement partitioning scheme for
+  merged tokens, plus a defined cyclic shift and a relative-position-bias rule for merged
+  tokens (§3).
+- **Encoder retraining or fine-tuning**, since the frozen weights were pretrained on an intact
+  grid, and a fresh unpruned ceiling to replace 77.74.
+- A new comparability baseline. Runs 2–14 do not transfer.
+
+### 6. Scope limits of the evidence
+
+⚠ **The table in §1–2 is an analytic proxy, not a measurement.** It counts window attention and
+projections/MLP and ignores patch merging, normalisation, biases and all memory traffic. It is
+corroborated rather than contradicted by the one real measurement available — D11's 1.04× at a
+5× visual-token cut — and the agreement of an analytic count with an observed one is the
+pattern M1 used (rel gap 0.0000). But do not quote the percentages as measured FLOPs. ⚠ The
+proxy also says nothing about **decoder** cost, which is where this project's one true
+efficiency claim lives and where generation is bound (243–280 autoregressive steps).
+
 ## Conventions
 
 **The repo is under git as of 2026-10-02 — use it, and know what it does not cover.** Initial
@@ -2146,6 +2280,27 @@ encoder tail **1e-5**.
   not by running the scripts you can name. `scripts/_final_check.py` (scratch) does this by
   walking every string constant in every script through `ast` and `os.path.exists`-ing the ones
   that look like run paths; a curated list of paths to check reproduces the original blind spot.
+
+- **Splitting a document breaks the checkers that READ it, and the break hides behind the old
+  green count.** Found 2026-10-02. The 2026-09-24 restructure moved AGENTS.md's historical bulk
+  verbatim into three archives. `check_writeup_numbers.py`'s transcription section opened
+  `AGENTS.md` and nothing else, so **7 of its 142 checks began failing on figures that had
+  merely moved** — `0.896`, `0.910`, `73.09`, `18%`, `49.2%`, `−3.22`, `−3.10`, every one of them
+  still correct and still on disk, in an archive. The script exited **1** for 8 days while this
+  file recorded it as **142/142**, in two places (one of which also said `134/134`, so the two
+  copies of the count disagreed with each other *and* with reality).
+  ⚠ **The restructure entry predicted the wrong failure.** It warned that *the archives* would
+  be unaudited — "`check_writeup_numbers.py` does not read them" — and treated that as a gap in
+  coverage. The actual consequence was the inverse: not that the archives went unchecked, but
+  that **the auditor itself broke**, and reported a document as defective when the document was
+  fine. A correct prediction about which files a tool reads, with the wrong conclusion about
+  what that causes.
+  **The general form:** when you move text between files, enumerate every tool that *reads* the
+  old location — not just every tool that reads the moved text. And make a shrunken source
+  **raise**: the fix here asserts all four tracker files exist, because silently falling back to
+  a smaller source is exactly the behaviour that made this invisible. Same family as "a green
+  count is scoped to whatever the sweep globbed", one level up: here the *source set* was
+  scoped, not the file set.
 
 - **A verifier log that predates its own input is not evidence, and it is the one stale-green
   shape with no red anywhere.** Found 2026-10-02 on resume. `verify_pooled_corpus_port.py`

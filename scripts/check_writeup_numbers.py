@@ -392,7 +392,25 @@ print("  These figures live in prose, not in a JSON this script can re-derive. C
 print("  them against AGENTS.md proves the writeup copied them correctly and nothing more;")
 print("  it does NOT re-establish them. Listed separately so the distinction stays visible.")
 print()
-agents = open(os.path.join(ROOT, "AGENTS.md"), encoding="utf-8").read()
+# 2026-10-02: READ THE ARCHIVES TOO. On 2026-09-24 AGENTS.md's historical bulk moved verbatim
+# into three archives, and this section kept reading only AGENTS.md -- so 7 of its 142 checks
+# began failing on figures that had merely MOVED and were never wrong (0.896, 0.910, 73.09,
+# 18%, 49.2%, -3.22, -3.10). AGENTS.md went on recording this script as "142/142" the whole
+# time. The restructure entry predicted the archives would be *unaudited*; the actual
+# consequence was the inverse -- it broke the auditor. "The tracker" is now four files, so the
+# transcription source has to be all four. Missing archives RAISE rather than silently
+# shrinking the source back to AGENTS.md alone, which is precisely how this went unnoticed.
+_TRACKER = ["AGENTS.md", "AGENTS-ARCHIVE-DIAGNOSTICS.md", "AGENTS-ARCHIVE-RUNS.md",
+            "AGENTS-ARCHIVE-CHANGELOG.md"]
+_parts = []
+for _f in _TRACKER:
+    _p = os.path.join(ROOT, _f)
+    assert os.path.exists(_p), (
+        f"transcription source {_f} is missing -- if the tracker was re-split, update "
+        f"_TRACKER. Do NOT drop the file: a smaller source makes this section fail on "
+        f"figures that are merely elsewhere.")
+    _parts.append(open(_p, encoding="utf-8").read())
+agents = "\n".join(_parts)
 # 2026-09-18: normalise AGENTS.md the same way the writeup is normalised. `norm` folds U+2212
 # MINUS SIGN to ASCII hyphen but `agents` was raw, so any figure carrying a sign was
 # structurally unable to match -- it would be ASCII in `norm` and U+2212 in `agents` and the
