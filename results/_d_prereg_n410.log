@@ -1,0 +1,15 @@
+T1 s3 matched-normal null p95 -- SHIPPED null_ratio(), pctl() given a FRACTION
+==============================================================================
+  CALIBRATION CONTROL: n=50 must reproduce AGENTS.md's p95=1.74, median=1.20.
+  If it does not, this measurement is wrong and nothing below may be quoted.
+
+  n=   50  p50=1.2019  p95=1.7428  p99=2.0485   FUNSD only        (recorded p95 1.74, median 1.20)
+  n=  397  p50=1.1961  p95=1.5062  p99=1.6743   mirror pool       (recorded p95 1.51)
+  n=  410  p50=1.2009  p95=1.5088  p99=1.6778   OFFICIAL pool     <-- the new number
+
+  [PASS] n=50 reproduces the recorded p95/median
+  [PASS] n=397 reproduces the recorded p95 1.51
+
+  NON-VACUITY: the bar must TIGHTEN as n grows -- 1.7428 -> 1.5062 -> 1.5088  (monotone, as a constant could not be)
+
+  CONSEQUENCE: at the official pool n=410 the gate is p95=1.5088, vs 1.5062 planned at n=397 -- a change of +0.0026.

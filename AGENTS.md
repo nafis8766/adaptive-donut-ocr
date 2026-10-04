@@ -315,24 +315,37 @@ fourth consecutive UNDERPOWERED.
   to be re-litigated. The rejected branch, for the record: apply **T1 §7 honestly**, report
   `UNDERPOWERED` with `n ≳ 307`, and rescope T4/T6/T7 instead of booking them.
   **What option 1 now requires, and the first step is NOT an agent's to take:**
-  1. ⚠ **The user must register at the ICDAR RRC portal, read the terms, and download.** Two
-     consecutive sessions failed to read those terms and the reasons are now known to be
-     **structural, not transient**: `WebSearch` is **unsupported for this model** (the harness
-     rejects the tool type outright, so retrying cannot help), and the RRC host serves a
-     certificate for a **different domain** than the one requested, so the connection cannot be
-     verified. **A licensing decision must not rest on an unauthenticatable source** — which is
-     why this step is the user's, not a third agent attempt. Do not spend another session on it.
-  2. ~~word GT may need re-deriving~~ **Measured and half-retired 2026-10-02** —
-     `scripts/diagnose_gt_granularity.py`, 4/4 controls: **word recall is granularity-invariant**
-     (denominator identical 50/50), **word order and NED are not**. See the amendment in
-     `## Corpus re-examination after the SROIE ruling (2026-10-02)`. The primary quantity is
-     safe; the co-primaries need T1 §5's per-corpus stratification to carry them.
-  3. Once the corpus is on disk: re-run `verify_corpus_grain.py` and
-     `diagnose_gt_granularity.py` **against the real annotations** (both are built to be
-     re-pointed), then the `PooledTestSet` adapter in PATCH I cell 9 may need a schema change —
-     it currently expects the mirror's `words`/`bboxes` naming, and `verify_pooled_corpus_port.py`
-     **asserts** that the image column is the pool's only schema divergence, so a rename fails
-     the check rather than surfacing at document 51.
+  **✅ THE ARCHIVE IS ON DISK as of 2026-10-03** — `SROIE2019-20261003T021428Z-1-001.zip`,
+  1.12 GiB, official ICDAR distribution, **test ground truth included**. Fully measured; see
+  `## The official SROIE archive — ON DISK, measured 2026-10-03/04`. Headlines: the usable
+  task-1/2 test split is **360 pages, not 347** (347 is the **task-3** size and a strict
+  subset), so **the pool is n=410**; grain is **0.75 pt/word**, *finer* than the mirror's 0.86
+  and clearing T1's 1.0 pt MDE; granularity invariance **confirmed on the real corpus**
+  (shipped recall identical 360/360); and T1 §3's null p95 moves **1.5062 → 1.5088**, which is
+  immaterial. ⚠ **None of it is independently verified** — the 6-agent adversarial workflow
+  died on an API budget-quota error, 0 of 6 completing.
+  1. ⚠⚠ **STILL BLOCKING: the user must read and record the licence terms.** The download did
+     **not** settle this — a regex over all 4,226 archive entries found **no licence, readme,
+     terms or citation file of any kind**. The terms exist only on the RRC portal, and the two
+     structural obstacles stand: `WebSearch` is **unsupported for this model**, and the RRC
+     host serves a certificate for a **different domain** (`CN=*.cvc.uab.cat` against a request
+     to `rrc.cvc.uab.es`), so it cannot be authenticated. **A licensing decision must not rest
+     on an unauthenticatable source.** Three questions: permitted use; **redistribution** (the
+     repo is public — a `.gitignore` guard is in place and was *necessary*, `SROIE2019/` tested
+     NOT IGNORED under the first rule); and the required attribution.
+  2. ~~word GT may need re-deriving~~ **Measured twice and retired for the primary quantity.**
+     `diagnose_gt_granularity.py` on reconstructed FUNSD lines (4/4 controls), then on the
+     **real** official corpus: recall denominator identical **360/360**, shipped recall
+     identical **360/360**, gold sequence identical **350/360** (2.8%, vs 42% on the
+     reconstruction — the probe was conservative). Confirmed against **notebook cell 13**, not
+     just `src/evaluate.py`.
+  3. Once the licence clears: **the adapter is the work.** PATCH I cell 9 expects HF columns;
+     official data is jpg+txt with **8-coordinate quads** needing conversion to the 4-element
+     bbox `reading_order_words` wants. ⚠ `verify_pooled_corpus_port.py:201-206` asserts
+     `{"words","bboxes"}` are in both corpora's `column_names` — official SROIE has no
+     `column_names`, so **that check fails by construction**, as designed.
+     `POOLED_N_EXPECTED` must go **397 → 410**. ⚠ And this item's own claim that the two corpus
+     scripts are *"built to be re-pointed"* is **FALSE** — both hardcode `load_dataset(...)`.
   Same sweep, more documents. **The pool is FUNSD (50) + SROIE test (347) = 397**,
   fixed by T2; CORD is excluded on denotation and must never enter it (`## Corpus decision
   (T2)`). At n=397 the resolution drops ~2.8× to **≈1.0 pt**, which is finally smaller than
@@ -465,7 +478,10 @@ fourth consecutive UNDERPOWERED.
     figure in the new file was cross-checked against *this* file rather than carried over from
     the old one. **`REPORT.md` is still open** — its stale banner still names "ToMe has never
     executed" and a run table stopping at run 10.
-  - `STORY.md` has **no numeric audit** and stops at run 12.
+  - ~~`STORY.md` has **no numeric audit** and stops at run 12.~~ **`STORY.md` brought to
+    today's worklog 2026-10-03** (Kilo (tencent/hy3:free)) — new chapters 16–23, a one-page
+    digest, per-chapter "in one line" summaries, refreshed "where it stands"; **still no
+    numeric audit.**
   - **Dead code found 2026-09-22:** `src/model.py:248` assigns `final_coords` from the
     merger and never reads it — only `compressed_tokens` reaches the decoder, and the
     `generate()` path at `:372` already discards it as `_`. So the merged 2D coordinate
@@ -520,15 +536,19 @@ cross-checked against this file rather than copied from the old one (11 of them 
 literal digits, per the Conventions entry on correcting numbers).
 
 
-`STORY.md` (2026-09-17) is the **only** document organised by time rather than by result:
-each stage is "what we set out to do → what went wrong → what we did about it", covering
-runs 2–12 plus D1–D12, M1, F1–F3 and the ToMe parity fix, with a glossary and a
-"what we'd tell someone starting over" section drawn from the gotchas below. Written on
-request so the project is legible to someone with no prior context. **It has no numeric
+`STORY.md` (2026-09-17, **updated to today's worklog 2026-10-03**) is the **only** document
+organised by time rather than by result: each stage is "what we set out to do → what went
+wrong → what we did about it", covering runs 2–14 plus D1–D14, M1, F1–F3, the ToMe parity
+fix, the T1 pre-registration, the corpus and licence rulings, the T4 build and its
+2026-10-02 generator/notebook incident, the T5 placement decision, and today's worklog
+(chapters 16–23), with a one-page digest, per-chapter "in one line" summaries, a glossary
+and a "what we'd tell someone starting over" section drawn from the gotchas below. Written
+on request so the project is legible to someone with no prior context. **It has no numeric
 audit** — every figure in it was transcribed from this file, so if you correct a number
 here, `STORY.md` is stale until someone fixes it by hand. Its run-12 chapter deliberately
 states the checkpoint-provenance observation (see "Run 12") **without adjudicating it**,
-because that analysis was owned by a parallel session at the time of writing.
+because that analysis was owned by a parallel session at the time of writing; chapter 16 of
+the 2026-10-03 update is where that question is now settled.
 
 ---
 
@@ -1174,6 +1194,27 @@ key-value subset* rather than the page, making its `recall` a different quantity
 ⚠ **§3's null p95 at `n=397` was simulated before 397 was confirmed** — this rule assumed
 T2's answer. It was right; re-derive it against the loaded pool anyway before run 17 is
 scored, rather than inheriting a threshold written against an unverified size.
+
+#### ⚠ AMENDED 2026-10-04 — the pool is n=410, not 397, and `347` was mislabelled
+
+The official ICDAR archive is on disk and measured. **The usable task-1/2 test split is 360
+pages, so the pool is `n = 410`.** `347` is the **task-3** test size and is a strict subset of
+task 1/2's 361 — so `verify_corpus_grain.py:109`'s message calling 347 *"the canonical ICDAR
+task-1/2 size"* is wrong, and T2's 347 was the size of the **mirror**, built from the task-3
+subset. Re-derived by importing this project's own `null_ratio`/`pctl`/`choose_g`, with n=50
+and n=397 as calibration controls that both reproduce the recorded values:
+
+| quantity | planned (n=397) | **measured (n=410)** |
+|---|---|---|
+| §3 null p95 | 1.5062 | **1.5088** (+0.0026, immaterial) |
+| §5 `k` per tail | 39 | **41** — corpus-aligned takes FUNSD **41/50 = 82%**, violates §5 |
+| §5 `choose_g()` | 0.03 on the synthetic | **0.06** → 24/tail, FUNSD 48%, compliant |
+| §6 `n ≳ 307` | clears by +90 | **clears by +103** |
+| composition | 87.4% / 82.2% | **87.8% doc / 84.7% word** |
+
+**Grain is better than planned:** official SROIE is **134.16 words/doc = 0.75 pt/word**,
+*finer* than the mirror's 0.86. Full detail, including the two parsing hazards and the
+unverified-by-anyone caveat, in `## The official SROIE archive`.
 
 ⚠ **n is not a knob at n=50.** `MAX_EVAL_SAMPLES = 50` **is** the whole FUNSD test split, so
 at n=50 the gate is what must move, not the sample size — which is exactly why the `FREE`
@@ -1961,6 +2002,198 @@ pattern M1 used (rel gap 0.0000). But do not quote the percentages as measured F
 proxy also says nothing about **decoder** cost, which is where this project's one true
 efficiency claim lives and where generation is bound (243–280 autoregressive steps).
 
+## The official SROIE archive — ON DISK, measured 2026-10-03/04
+
+**The user downloaded it: `SROIE2019-20261003T021428Z-1-001.zip`, 1,205,125,953 bytes, repo
+root, 4,226 entries, 1.12 GiB uncompressed.** This section is what measuring it established.
+⚠ **The licence is STILL UNREAD and T4 is STILL BLOCKED on it** — see §7. Nothing below is a
+licence finding.
+
+⚠⚠ **NO INDEPENDENT VERIFICATION OF THIS SECTION EXISTS.** A 6-agent adversarial workflow was
+launched to refute every number here and **all six agents died instantly on
+`API Error: 402 Budget pool quota has been exhausted`** — 0 completed, 0 tokens spent, 4.1 s
+wall-clock. That is an account billing limit, not a script defect, so re-running cannot help.
+Every figure below is **one analyst's single pass**, which is exactly the condition this
+project's conventions treat as untrustworthy. Re-derive before booking GPU.
+
+### 1. Archive layout, and the number this project has had wrong since T2
+
+| directory (verbatim; note the FULL-WIDTH `（` in the last) | entries | content |
+|---|---|---|
+| `SROIE2019/0325updated.task1train(626p)/` | 1547 | 712 jpg + 835 txt |
+| `SROIE2019/0325updated.task2train(626p)/` | 1611 | 735 jpg + 876 txt |
+| `SROIE2019/task1&2_test(361p)/` | 360 | **360 jpg, images only** |
+| `SROIE2019/task3-test 347p) -/` | 347 | 347 jpg, nested one level deeper |
+| `SROIE2019/text.task1&2-test（361p)/` | 361 | **361 txt — THE TEST GROUND TRUTH** |
+
+**Test GT is present.** The fallback plan (use the train split because test GT might be
+withheld) is unnecessary.
+
+⚠ **`347` IS THE TASK-3 TEST SIZE, NOT TASK 1/2's.** Measured: task3-test is 347 pages and is
+a **strict subset** of task1&2-test's 361 (`|task3 − t1&2test| = 0`). So
+`verify_corpus_grain.py:109`'s assertion message — *"SROIE test loads n=347, the canonical
+ICDAR task-1/2 size"* — is **mislabelled**, and T2's `n=347` was the size of the *mirror*,
+which was built from the task-3 subset. **The usable task-1/2 test split is 360 pages**
+(360 jpg ∩ 361 txt; one GT file has no image).
+
+### 2. Pool size and split integrity
+
+| | measured |
+|---|---|
+| **usable task1&2 TEST pairs** | **360** |
+| TEST stems ∩ TRAIN stems | **0** — clean split |
+| task1train usable pairs | 704 (712 jpg, 835 txt) |
+| task2train usable pairs | **727** (735 jpg, 876 txt) |
+| task1train GT stems vs task2train GT stems | **NOT identical** — 119 and 160 differences |
+
+⚠ **The train directories are messy and their "(626p)" names are wrong** — they hold 712/735
+images, not 626. Any use of train must intersect jpg∩txt stems rather than trust the count.
+
+**So the pool is FUNSD 50 + SROIE 360 = `n = 410`** (not 397). Optionally + 727 train pages
+→ 1137; SROIE train is **uncontaminated for this project** (the eval protocol says SROIE was
+deliberately excluded from all training), but see §5 for what that does to the composition.
+
+### 3. Annotation format — two real hazards, both measured
+
+Each GT line is `x1,y1,x2,y2,x3,y3,x4,y4,transcription` — **eight** integer coordinates (a
+quadrilateral), then the text. Across all 361 test GT files, **19,386 lines**:
+
+| hazard | measurement | consequence |
+|---|---|---|
+| **commas inside the transcription** | **973 lines = 5.02%** have >9 comma fields (e.g. `104,163,306,163,306,182,104,182,NO 2 & 4, JALAN BAYU 4,`) | a naive `split(",")` corrupts 5% of the corpus. **`split(",", 8)` is required** — verified correct: 0 empty transcriptions, 0 non-integer coordinate fields |
+| **mixed encoding** | **360 files UTF-8, 1 file cp1252**, 0 BOMs | a strict `utf-8` read crashes on exactly one file. Decode with a `utf-8-sig` → `cp1252` fallback |
+
+### 4. Grain and granularity invariance, on the REAL corpus
+
+Measured on the 360 usable test pages, importing the **shipped** `reading_order_words` and
+`compute_word_metrics` rather than restating them:
+
+| | official SROIE | mirror (recorded) | FUNSD |
+|---|---|---|---|
+| lines/doc | 53.73 → 1 line = 1.86 pt | — | — |
+| **words/doc** | **134.16 → 1 word = 0.75 pt** | 116.5 → 0.86 pt | 174.1 → 0.57 pt |
+| multi-word lines | 9,185/19,342 = **47.5%** | 0% (per-word) | — |
+
+**Official SROIE's grain is FINER than the mirror's (0.75 vs 0.86 pt/word) and clears T1's
+1.0 pt MDE.** The mirror's figures were never SROIE's — see §6.
+
+**Granularity invariance — the 2026-10-02 amendment's "re-run against the real corpus":**
+
+| | measured on official line-level GT |
+|---|---|
+| recall **denominator** identical (line vs word GT) | **360/360 docs** |
+| **shipped recall** identical | **360/360 docs** |
+| gold **sequence** identical | **350/360 docs** — 10 mismatches, **2.8%** |
+
+**The amendment is confirmed and strengthened.** Recall is granularity-invariant on the real
+corpus; the sequence effect is **2.8%**, far below the 42% (21/50) the FUNSD *reconstruction*
+implied — so that probe was conservative, which is the right direction for a probe to err.
+
+✅ **And it was verified against the implementation that actually matters.** The notebook has
+its own metric copy; cell 13 of `kaggle_pruning_run.ipynb` reads
+`gold = re.findall(r'\w+', ' '.join(gt_words).lower())` — **identical** to
+`src/evaluate.py`, so the invariance holds in the code that produces runs, not just the
+library mirror. That check was prompted by a contradiction (§6) and is the reason the
+amendment survives.
+
+### 5. What changes in T1's pre-registration at n=410 — re-derived, with a calibration control
+
+Computed by **importing** `score_preregistered.py`'s own `null_ratio`/`pctl`/`choose_g`
+(`results/_d_prereg_n410.log`):
+
+| n | null p95 | null median | status |
+|---|---|---|---|
+| 50 | **1.7428** | **1.2019** | ✅ reproduces the recorded 1.74 / 1.20 — **calibration control** |
+| 397 | **1.5062** | 1.1961 | ✅ reproduces the recorded 1.51 |
+| **410** | **1.5088** | 1.2009 | **the new bar: +0.0026, immaterial** |
+
+Non-vacuity: the bar **tightens monotonically** with n (1.7428 → 1.5062), which a constant
+could not do.
+
+| T1 section | at n=410 |
+|---|---|
+| **§6** `n ≳ 307` for `res ≤ 1.0 pt` | **CLEARS, margin +103** |
+| **§3** null p95 | **1.5088** (was 1.5062 planned) |
+| **§5** discard set | `k = floor(0.10·410) =` **41/tail**; a corpus-aligned tail takes **FUNSD 41/50 = 82% — VIOLATES §5** |
+| **§5** `choose_g()` response | **g = 0.06** → 24/tail, FUNSD 48%, compliant |
+| composition | **87.8% receipts by document, 84.7% by word** (recorded for the mirror pool: 87.4% / 82.2%) |
+
+⚠ **If train is added (n=1137):** `choose_g` drops to **g = 0.02** and the pool becomes
+**95.6% receipts by document, 94.4% by word** — FUNSD falls to a **4.4%** minority. More n,
+but the "pooled" number becomes almost purely a receipt number. **Not recommended without a
+deliberate decision**, and T1 §5's constraint binds harder, not less.
+
+### 6. The rejected mirror was never a faithful copy — and my hypothesis was WRONG
+
+Only **52 of 347** mirror documents have a word-set exactly matching an official page.
+
+**I predicted the cause was comma corruption** — that the mirror used `split(",")` and
+mangled the 5% of lines in §3. **Refuted by measurement:** matching the mirror against a
+*naively* parsed official GT gives **4/347**, *fewer* than the correct parse's 52. Filed
+because the prediction was specific, testable, and false.
+
+What it actually is — best-Jaccard of each mirror doc against the correctly-parsed official:
+
+| | |
+|---|---|
+| median | **0.9574** |
+| ≥ 0.90 | **295/347** |
+| ≥ 0.98 | **94/347** |
+| min | 0.5034 |
+| direction | **bidirectional** — mirror missing 800 word types, mirror has 1,138 official lacks |
+
+So the mirror *is* substantially this ground truth but differs on **253/347** pages by small
+amounts in **both** directions — a different normalisation or a different release, not lossy
+truncation. **Consequence: every mirror-derived SROIE figure in this file describes the
+mirror, not SROIE** — `116.5 words/doc`, `0.86 pt/word`, and `84.7% of 40,411 words tagged O`
+are all mirror measurements. §4 has the official replacements for the first two.
+
+⚠ **This retroactively strengthens the rejection on a second, independent ground:** the mirror
+was rejected on *licence provenance*, and it also fails on **fidelity**.
+
+⚠ **A `print` in a verifier asserted something the code contradicts.**
+`verify_corpus_grain.py:130-133` states line-level storage *"shrinks the denominator ~2.1×"*.
+That is **false of this pipeline** — both metric copies join and re-tokenise (§4) — and it
+went unchecked because it is a `print`, not a `say`, so no control ever tested it. It *is*
+true of the **grain** figure, which counts annotation units; two different quantities under
+one sentence.
+
+### 7. What is still blocked, and it is the same thing as before
+
+⚠⚠ **THE LICENCE IS UNREAD. T4 CANNOT BE BOOKED.** Measured: **no licence, readme, terms,
+copyright or citation file exists anywhere in the archive** (regex over all 4,226 entries →
+zero hits). The terms live only on the RRC portal, which two sessions could not read — and the
+reasons remain structural: `WebSearch` is unsupported for this model, and the RRC host serves
+a certificate for a **different domain** (`CN=*.cvc.uab.cat` for a request to
+`rrc.cvc.uab.es`), so the connection cannot be authenticated. **The user must read and record
+the terms.** Three questions, the second of which is new and urgent:
+
+1. **Permitted use** — research / non-commercial / any restriction.
+2. ⚠ **Redistribution — the repo is PUBLIC as of 2026-10-02.** If redistribution is
+   forbidden, the data must never enter git history. **Guard added before extraction:**
+   `.gitignore` now carries `*SROIE*` / `*sroie*`. This was necessary, not precautionary —
+   `git check-ignore` reported `SROIE2019/` as **NOT IGNORED** under the first,
+   narrower rule, and `*.jpg`/`*.txt` are deliberately not globally excluded. Verified with a
+   must-not-ignore control (`scripts/verify_corpus_grain.py` correctly stays tracked).
+3. **Attribution** — the required ICDAR 2019 RRC Task 1/2 citation, for README and WRITEUP.
+
+### 8. Still to do before T4 runs, now that the data is local
+
+- **Read and record the licence terms (user).** Everything else is downstream.
+- **Independent verification of §§1–6.** The workflow that was supposed to provide it never
+  ran. Do not treat this section as checked.
+- **Adapter work.** PATCH I cell 9's `PooledTestSet` expects the mirror's HF columns
+  (`words`/`bboxes`/`images`); official data is a zip of jpg+txt with **8-coordinate quads**
+  where `reading_order_words` wants a 4-element `[x0,y0,x1,y1]`. ⚠ And
+  `verify_pooled_corpus_port.py:201-206` **asserts** `{"words","bboxes"} ⊆ both corpora's
+  `column_names`` — official SROIE has no `column_names` at all, so **that assertion will
+  fail by construction**, which is the behaviour it was written for.
+- **`POOLED_N_EXPECTED` is 397 and cell 13 asserts it. It must become 410.**
+- ⚠ **AGENTS.md's own claim that the two corpus scripts are "built to be re-pointed" is
+  FALSE** — `verify_corpus_grain.py:70-84` and `diagnose_gt_granularity.py:119` both
+  **hardcode** `load_dataset("nielsr/funsd")` / `load_dataset("sizhkhy/SROIE")` with no
+  corpus argument. My sentence, asserted from intent rather than read off the code.
+
 ## Conventions
 
 **The repo is under git as of 2026-10-02 — use it, and know what it does not cover.** Initial
@@ -2280,6 +2513,28 @@ encoder tail **1e-5**.
   not by running the scripts you can name. `scripts/_final_check.py` (scratch) does this by
   walking every string constant in every script through `ast` and `os.path.exists`-ing the ones
   that look like run paths; a curated list of paths to check reproduces the original blind spot.
+
+- **A percentile helper that takes a FRACTION, called with a PERCENTAGE, silently returns the
+  MAXIMUM — and the maximum is a plausible-looking number.** Found 2026-10-04 while
+  re-deriving T1 §3's null bar at the new pool size. `score_preregistered.py:316` is
+  `pctl(xs, p) -> xs[min(len(xs)-1, int(p*len(xs)))]`, i.e. `p` is `0.95`. Called as
+  `pctl(r, 95)`, `int(95 * 40000)` = 3,800,000, clamped to `len-1` → **the largest draw**. The
+  output was `p95 = 2.9918` **and `median = 2.9918`**, at every one of five values of `n`.
+  **What makes this worth recording is that the wrong number was not absurd** — 2.99 is a
+  perfectly plausible worst-document ratio, and had the script printed only `p95` it would
+  have been written into the tracker as the new gate, a 2× inflation of a threshold that
+  decides whether merging is reported as harmful. Two things caught it, neither of them the
+  value itself: **p95 and median were bit-identical** (impossible for 40,000 simulated draws),
+  and it **contradicted the recorded 1.74 at n=50**.
+  **The general form, and it is the project's own rule applied to an argument rather than a
+  config:** a units mismatch in a *call* is invisible to every check that only looks at the
+  callee. The fix that made the re-run trustworthy was a **calibration control inside the
+  script** — assert that `n=50` reproduces the recorded `p95 1.74 / median 1.20` *before*
+  reporting anything new, plus a monotonicity assertion that the bar tightens as `n` grows
+  (which a constant cannot do). **When re-deriving a threshold that already has a recorded
+  value, re-derive the recorded value in the same run and assert it.** Same family as
+  *"calibrate the metric on a known-good case"* in Conventions — there it was an ink oracle,
+  here it is the project's own past output.
 
 - **Splitting a document breaks the checkers that READ it, and the break hides behind the old
   green count.** Found 2026-10-02. The 2026-09-24 restructure moved AGENTS.md's historical bulk

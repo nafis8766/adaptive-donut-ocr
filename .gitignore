@@ -38,6 +38,72 @@ __pycache__/
 *.bak-*
 
 # ---------------------------------------------------------------------------
+# LICENSED CORPUS DATA -- added 2026-10-03, before the official SROIE download.
+#
+# This repository is PUBLIC. ICDAR RRC data is obtained under the competition's
+# own terms, which this project has not yet read and which may forbid
+# redistribution. Republishing it from here would be an irreversible disclosure,
+# so the guard goes in BEFORE the data arrives rather than after.
+#
+# Note *.jpg/*.png are NOT globally excluded (visualizations/ and
+# sample_document.png are deliberately versioned), so a `git add -A` over a
+# downloaded corpus directory WOULD have committed it. These rules are
+# directory-scoped for that reason.
+#
+# If the terms turn out to permit redistribution, remove these lines
+# deliberately and say so in AGENTS.md -- do not let data arrive in history as
+# a side effect of a bulk add.
+# ---------------------------------------------------------------------------
+data/
+corpora/
+# Any path containing SROIE, at any depth, file or directory. Verified 2026-10-03
+# that `git ls-files | grep -i sroie` is EMPTY, so this broad rule shadows no
+# tracked file. It is deliberately broad: the narrower list below missed
+# `SROIE2019/` -- the actual extraction directory of the real download -- which
+# `git check-ignore` reported as NOT IGNORED. A guard that misses the real case
+# is the only kind that matters.
+*SROIE*
+*sroie*
+sroie_official/
+ICDAR2019*/
+# ---------------------------------------------------------------------------
+# NEGATIONS added 2026-10-04 -- the rules above were swallowing the project's OWN
+# analysis code and its evidence. Measured in Project-kilo: `*sroie*` IGNORED
+# `scripts/verify_official_sroie.py` (PATCH J's companion verifier, 26/26) AND
+# `results/_v_official_sroie.log` (the only evidence that it ran), and
+# `git ls-files --error-unmatch` confirmed BOTH untracked. Committing that stream
+# as-is would have silently dropped a verifier and its log out of the repo --
+# which is what claim 4 (the methodological layer) rests on.
+#
+# Why the original check missed it, and both halves are this project's own
+# documented patterns:
+#   * `git ls-files | grep -i sroie` was EMPTY on 2026-10-03 and that was TRUE --
+#     the verifier was written on 2026-10-04. A guard validated against the tree
+#     as it stood is invalidated by the next file anyone adds.
+#   * the "must-not-ignore control" used `scripts/verify_corpus_grain.py`, whose
+#     name contains no "sroie" -- i.e. a control drawn from OUTSIDE the rule's
+#     domain, which could not have failed. Decorative by construction.
+#
+# These two lines re-include CODE and LOGS only, never data. Verified in a scratch
+# repo: verifier + log TRACKABLE, while `sroie_official/sub/X1.jpg` and
+# `SROIE2019-*.zip` stay IGNORED. Note a negation cannot rescue anything under an
+# excluded DIRECTORY, so `sroie_official/` above is unaffected by these.
+# ⚠ `_v_official_sroie.log` quotes a handful of GT transcription fragments as
+# evidence (e.g. one cp1252 line). That is quotation, not redistribution -- but it
+# is a deliberate choice, recorded here so it can be overruled.
+# ---------------------------------------------------------------------------
+!scripts/*sroie*.py
+!results/*sroie*.log
+*task1train*/
+*task2train*/
+*task3train*/
+*task1_2-test*/
+*/0325updated*
+# Belt and braces: HF datasets cache, if anyone points HF_HOME into the repo.
+.cache/
+huggingface/
+
+# ---------------------------------------------------------------------------
 # Debris. `=4.38.0` is a 0-byte file from a shell-quoting slip in a
 # `pip install transformers>=4.38.0`.
 # ---------------------------------------------------------------------------

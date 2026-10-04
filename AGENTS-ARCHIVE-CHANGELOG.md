@@ -20,6 +20,28 @@ separately on purpose so those changes stay distinguishable.
 
 ## Changelog
 
+- **2026-10-03 — STORY.md brought to today's worklog and simplified (T8, partial; Kilo (tencent/hy3:free)).**
+  On user request ("update it till today's worklog and see if you can simplify it" — the file is
+  the sharing artifact, and its length/density drew reader complaints). STORY.md is now current
+  through 2026-10-03: **new chapters 16–23** (run 12's provenance question settled + runs 13/14;
+  D13/D14; the T1 pre-registration; T2's corpus decision and T3's re-scoring; the T4 build and
+  the 2026-10-02 generator/notebook incident; the corpus re-examination after the SROIE ruling;
+  the T5 ToMe placement decision; today's two unlogged artifacts), **a one-page digest** near
+  the top ("the version to send to a colleague"), a per-chapter **"in one line"** summary on all
+  23 chapters, an updated "where the project actually stands" (claim 3 restated with the T3/T5
+  scope; six new rows in the dead-directions table; open items replaced with the live queue
+  state), four new lessons (#9–12: write the grading rule before the data; measure the
+  instrument before booking; a licensing decision must not rest on an unauthenticatable source;
+  an edited generator is an unverified generator), and 11 new glossary entries. **No new
+  measurement** — every figure is transcribed from this file, and the file still has **no
+  numeric audit**. T8's STORY.md line is struck and superseded in this file, and the
+  derived-docs paragraph is refreshed. The two artifacts of today recorded in its chapter 23 —
+  the uncommitted `.gitignore` licence guard and untracked `results/_d_prereg_n410.log` (null
+  p95 **1.5088** at n=410 "OFFICIAL pool" vs 1.5062 at n=397, +0.0026; the log implies the
+  official SROIE test split is **360** documents, pool **410** not 397; generating script not
+  on disk; its n=50/n=397 controls reproduce the recorded 1.74/1.51) — remain to be formally
+  logged in this file when the ICDAR download lands.
+
 - **2026-09-30 — T4 BUILT, NOT RUN: PATCH I ports the sweep to the pooled corpus (FUNSD 50 +
   SROIE 347 = 397), the sweep grows to 29 rows, and T1 §§3/5 stop being prose.** Full record
   in `AGENTS.md`'s `## The pooled-corpus port (T4)`; this is the index entry.
@@ -2425,6 +2447,63 @@ separately on purpose so those changes stay distinguishable.
   establishes a property of the pipeline's reading-order step, not of SROIE's real annotations,
   and must be re-run against the downloaded corpus before any pooled number is quoted.
 
+- **2026-10-03/04 — the official SROIE archive is ON DISK and fully measured; the licence is
+  still unread.** The user downloaded `SROIE2019-20261003T021428Z-1-001.zip` (1.12 GiB, 4,226
+  entries) from the ICDAR RRC portal. Full findings in `AGENTS.md` →
+  `## The official SROIE archive`. The six that change something:
+  **(a) `347` has been the wrong number since T2.** It is the **task-3** test size and is a
+  **strict subset** of task-1/2's 361; the usable task-1/2 test split is **360** pages (360
+  jpg ∩ 361 txt). So the pool is **n=410**, not 397, and `verify_corpus_grain.py:109`'s
+  message calling 347 *"the canonical ICDAR task-1/2 size"* is mislabelled. Test GT **is**
+  distributed, so the contemplated fallback (use train because test GT might be withheld) was
+  unnecessary. TEST ∩ TRAIN = **0**.
+  **(b) Grain is better than planned: 134.16 words/doc = 0.75 pt/word**, *finer* than the
+  mirror's 0.86, comfortably expressing T1's 1.0 pt MDE.
+  **(c) The granularity amendment is confirmed on the real corpus and the sequence effect is
+  far smaller than feared** — shipped recall identical **360/360**, denominator identical
+  **360/360**, gold sequence identical **350/360** (2.8%, against 42% on the FUNSD
+  reconstruction). ✅ And verified against **notebook cell 13**, not only `src/evaluate.py` —
+  prompted by a contradiction, see (e).
+  **(d) T1's rule barely moves.** Null p95 **1.5062 → 1.5088**; `n ≳ 307` clears by +103;
+  §5's `k` goes 39 → 41 and a corpus-aligned tail takes **FUNSD 82%**, so `choose_g` returns
+  **0.06**. Re-derived by importing the project's own functions with n=50 and n=397 as
+  calibration controls, both reproducing their recorded values.
+  **(e) The rejected mirror was never a faithful copy — and my stated hypothesis for why was
+  wrong.** Only **52/347** mirror docs exactly match an official page. I predicted comma
+  corruption (a `split(",")` parser mangling the 5.02% of lines that contain commas inside the
+  transcription); **refuted** — the naive parse matches **4/347**, *fewer*. It is actually a
+  bidirectional small divergence (median Jaccard 0.9574, 295/347 ≥ 0.90, only 94/347 ≥ 0.98;
+  800 word types missing, 1,138 extra). So every mirror-derived SROIE figure in the tracker
+  describes the mirror: `116.5 words/doc`, `0.86 pt/word`, `84.7% tagged O`. This strengthens
+  the rejection on a second ground — **fidelity**, independent of licence. It also exposed
+  that `verify_corpus_grain.py:130-133`'s *"shrinks the denominator ~2.1×"* is **false of this
+  pipeline** and went unchecked because it is a `print`, not a `say`.
+  **(f) Two parsing hazards, both measured, both needing code:** **5.02%** of 19,386 GT lines
+  carry commas inside the transcription, so `split(",", 8)` is mandatory (verified: 0 empty, 0
+  non-integer coords); and **1 of 361 files is cp1252** while the other 360 are UTF-8, so a
+  strict `utf-8` read crashes on exactly one page.
+  ⚠⚠ **NONE OF THIS IS INDEPENDENTLY VERIFIED.** A 6-agent adversarial workflow built to
+  refute every number **died instantly** — all six on
+  `API Error: 402 Budget pool quota has been exhausted`, 0 completed, 0 subagent tokens, 4.1 s.
+  An account billing limit, so re-running cannot help. Every figure is one analyst's single
+  pass, which is the condition this project's conventions treat as untrustworthy.
+  ⚠ **The licence remains the blocker and the download did not touch it** — a regex over all
+  4,226 entries found **no licence, readme, terms or citation file of any kind**. The terms are
+  portal-only and the two obstacles are structural: `WebSearch` is unsupported for this model,
+  and the RRC host serves a cert for `CN=*.cvc.uab.cat` against a request to
+  `rrc.cvc.uab.es`, so it cannot be authenticated.
+  ⚠ **A `.gitignore` guard went in BEFORE extraction and it was necessary, not precautionary:**
+  the repo went public 2026-10-02, `*.jpg`/`*.txt` are deliberately not globally excluded, and
+  `git check-ignore` reported `SROIE2019/` as **NOT IGNORED** under the first, narrower rule.
+  Broadened to `*SROIE*`/`*sroie*` and verified with a must-not-ignore control.
+  ⚠ **One self-inflicted error, filed because the wrong number looked right.** `pctl()` takes a
+  **fraction**; called with `95` it clamps to the last element and returns the **maximum**. The
+  first run reported `p95 = median = 2.9918` at all five values of `n` — a plausible ratio, and
+  a 2× inflation of the gate that decides whether merging is called harmful. Caught by p95
+  equalling the median and by contradicting the recorded 1.74, not by the value looking odd.
+  New Gotcha filed; the re-run carries a calibration control that asserts the recorded n=50
+  figures before reporting anything new.
+
 ---
 
 ## Kilo (tencent/hy3:free) — contributions (2026-08-29)
@@ -2508,3 +2587,11 @@ the runnable notebook is the artifact that turns the two planned GPU steps into 
 Kaggle Run-All. I did **not** modify `src/tome.py` or the original notebook — the
 diagnostic and tests are additive, and the runnable notebook is a new file, so the
 existing Kaggle workflow is untouched.
+
+- **STORY.md brought to today's worklog (2026-10-03, on user request).** Chapters 16–23
+  added (run 12's provenance question settled; runs 13/14; D13/D14; the T1 pre-registration;
+  T2/T3; the T4 build and the 2026-10-02 generator/notebook incident; the licence
+  re-examination; T5; today's two unlogged artifacts), a one-page digest, per-chapter "in one
+  line" summaries, refreshed "where it stands" / lessons / glossary. No new measurements —
+  every figure transcribed from `AGENTS.md`; the file has no numeric audit. See the 2026-10-03
+  changelog entry at the top of this file.

@@ -1,9 +1,10 @@
 # The story of AdaptiveDonutOCR
 
 *How this project actually went: what we set out to do at each stage, what went wrong, and what
-we did about it. Written 2026-09-17.*
+we did about it. Written 2026-09-17, updated 2026-10-03 to cover today's worklog
+(chapters 16–23, the one-page digest, and per-chapter summaries).*
 
-*This is the narrative companion to the other three documents in this repo.
+*This is the narrative companion to the other documents in this repo.
 [AGENTS.md](AGENTS.md) is the single source of truth — every number here comes from it, and where
 the two disagree, AGENTS.md is right and this file is stale. [WRITEUP.md](WRITEUP.md) presents
 the findings results-first, for a reader who wants the conclusions. [REPORT.md](REPORT.md) is a
@@ -14,6 +15,12 @@ is the one to read if you want to understand *why* the project looks the way it 
 
 ## How to read this
 
+If you have one minute, read [**The whole story in one page**](#the-whole-story-in-one-page) and
+stop. That is the version to send to a colleague.
+
+If you have an hour, read the chapters in order. Each chapter now starts with an
+**"in one line"** summary, so you can skim the shape of the story before committing to the detail.
+
 Each stage below has the same three parts:
 
 > **What we set out to do.** The plan going in, and the belief behind it.
@@ -22,6 +29,63 @@ Each stage below has the same three parts:
 
 You do not need a machine-learning background. The next section gives you everything you need.
 Terms in **bold** on first use are defined in the glossary at the end.
+
+---
+
+## The whole story in one page
+
+*The digest. The chapters below are the full version; this is the short one.*
+
+1. **The question (Ch 0).** Donut reads a page by looking at 4800 small square-summaries, and
+   most of the squares are blank. How few can you keep?
+2. **The floor, and two wrong theories (Ch 1–3).** A 54% recall baseline. "Not enough data" —
+   two runs, one of which said no. "The encoder is bad" — unfreeze it, and notice the model was
+   stopping 29% early.
+3. **The free lunch (Ch 4).** A decoding setting was capping output length. +27.18 points on
+   *unchanged weights* — the largest single effect in the project. The run table restarts here.
+4. **The router, backwards, then fixed (Ch 5–9).** It had learned to love blank paper because it
+   was only ever trained when nothing was discarded. Ink supervision flipped the sign; the loss
+   that trained it had a double-sigmoid bug; the safe fix grew the whole layer of verification
+   the project is now famous for — and the ink proxy turned out to be the wrong objective.
+5. **Better targets, no gain (Ch 10–11).** The decoder's own attention fits better and still
+   moves nothing, because at that budget pruning already beat not-pruning. The latency claim
+   dies (1.04× at 5× fewer tokens); the router's +17.7 to +34.0 points over random becomes a
+   headline claim.
+6. **The honest efficiency claim (Ch 12).** −65% of the decoder's cross-attention memory for
+   −0.26 points. Cross-attention only; not total memory, not latency.
+7. **"Why does pruning help?" (Ch 13–14).** Only because the model was trained for it. Five
+   extra epochs buy +0.52 points. "If you train for it" is load-bearing.
+8. **The half of the architecture that never ran (Ch 15).** The merger had `merge_ratio=0.0`
+   everywhere, and its split was broken (100% of vertical redundancy missed). The checkerboard
+   fix.
+9. **The merge question, answered and re-scored (Ch 16–19).** Run 12 lands on the wrong
+   checkpoint; run 13 on the right weights reads "20% merge is free, 40% costs ~4 points"; run 14
+   trains with merging. Then we measure the instrument: 50 documents cannot resolve a 1–2 point
+   question, and the scoring rule itself was unpinned — so the rule is written *before* the next
+   data (the pre-registration), the past is re-scored under it, and "free" becomes
+   **UNDERPOWERED**.
+10. **The second corpus and its licence (Ch 19–21).** 397 documents (FUNSD + the SROIE mirror)
+    are prepared and everything verified — then the mirror is rejected on licence; every
+    alternative measures dead; the fix is the official ICDAR download, which is a human step, not
+    an agent step.
+11. **Where the merger lives (Ch 22).** It stays after the frozen encoder: its encoder saving is
+    0% by construction, and the version that would pay is a new project, not a fix.
+12. **Today (Ch 23).** A licence guard in `.gitignore` written *before* the data arrives, and the
+    pre-registered thresholds re-derived at the official pool size (410 documents, not 397 — the
+    plan survives). One step left: the ICDAR registration + download.
+
+**The four claims we can defend (one line each):**
+
+1. Pruning to a third of the visual tokens costs nothing — *if you train for it*.
+2. The learned router beats random selection by +17.7 to +34.0 points at matched budgets.
+3. −65% of decoder cross-attention memory for −0.26 points; of the 2.50× KV saving at
+   prune-to-0.50-then-merge-0.20, **2.0× is pruning's and 1.25× is the merge step's**; and
+   "merging is free" is not licensed yet (UNDERPOWERED at n=50, needs ≳307 documents).
+4. The methodological layer — diagnostics that execute, verifiers that run the real code, a
+   grading rule written before the data — is a first-class result in its own right.
+
+**Where it is stuck:** one ingredient, a licensed second corpus. Everything else for the pooled
+sweep is built, verified, and ≈5.9 hours from booking.
 
 ---
 
@@ -98,6 +162,9 @@ These were not all obvious at the start. Several cost us runs to learn.
 
 ## Chapter 1 — Establish a floor (run 2)
 
+**In one line:** Establish the floor — 54% recall, a locked evaluation protocol, and nothing goes
+wrong. The only chapter where nothing goes wrong.
+
 > **What we set out to do.** Before optimising anything, prove the pipeline runs end to end and
 > get a number to beat. Train Donut on FUNSD with pruning switched off entirely.
 >
@@ -113,6 +180,9 @@ Nothing went wrong in this chapter. It is the only one.
 ---
 
 ## Chapter 2 — "It must be the data" (runs 3 and 4)
+
+**In one line:** Two runs try to prove "not enough data"; run 4's negative result kills the theory
+and the expansion plan.
 
 > **What we set out to do.** 54% is low. The obvious explanation for a model underperforming on
 > 149 training images is that 149 training images is not enough. So: train harder (40 epochs,
@@ -143,6 +213,9 @@ long as you actually update.
 
 ## Chapter 3 — "Then it must be the encoder" (run 5)
 
+**In one line:** Unfreezing the encoder buys fidelity but loses recall — and exposes that the
+model stops 29% early, which becomes the turning point.
+
 > **What we set out to do.** Act on run 4's diagnosis. Unfreeze the top stage of the encoder at a
 > very low learning rate (1e-5) so it could adapt to FUNSD's scan quality, and rebalance the data
 > mix back down to 500 synthetic pages.
@@ -167,6 +240,9 @@ That observation opens the next chapter, which is the turning point of the whole
 ---
 
 ## Chapter 4 — The best result in the project cost zero GPU hours (run 6)
+
+**In one line:** A decoding setting, not the weights, was capping output length: +27.18 points on
+unchanged weights, the largest single effect in the project.
 
 > **What we set out to do.** Find out why generation was stopping short. The suspected culprit
 > was `no_repeat_ngram_size=3` — a setting that forbids the model from ever repeating any
@@ -208,6 +284,9 @@ This chapter produced three durable consequences:
 ---
 
 ## Chapter 5 — Turning the router on, and discovering it was backwards (D1, run 7)
+
+**In one line:** The router had learned to love blank paper, because it was only ever trained in a
+mode where nothing is ever discarded; the signal is real, it was just pointing the wrong way.
 
 > **What we set out to do.** With a working baseline at last, actually do the research: train
 > with pruning switched on, at `keep_ratio=0.50`.
@@ -251,6 +330,9 @@ measuring is what turned an unreadable failure into a precise diagnosis.
 
 ## Chapter 6 — Choosing what to teach it (D2, D3)
 
+**In one line:** Ink is chosen as the training target with the reservation written down first, and
+the ink-oracle and random rows that every later sweep depends on are built.
+
 > **What we set out to do.** If the gradient will not teach the router which tokens matter, we
 > have to tell it directly. But tell it *what*? We needed a target: some signal, computable for
 > free on any page, that says "this square is important".
@@ -276,6 +358,9 @@ measuring is what turned an unreadable failure into a precise diagnosis.
 ---
 
 ## Chapter 7 — The sign fix works, and we change two things at once (run 8)
+
+**In one line:** Ink supervision flips the sign decisively (the negated row collapses from 73.09
+to 2.70); two procedural flaws are noted for the cost they later cost.
 
 > **What we set out to do.** Add a supervised loss term — **ink-BCE** — that pushes the router's
 > score toward 1 on high-ink squares and 0 on low-ink squares. Give it the answer directly.
@@ -306,6 +391,10 @@ measuring is what turned an unreadable failure into a precise diagnosis.
 ---
 
 ## Chapter 8 — The loss bug, and the layer we built because of it (D4, D5, F1–F3)
+
+**In one line:** The loss had a double-sigmoid bug; the safe fix required three repairs (F1 the
+loss, F2 the harness control, F3 telemetry) and the execute-the-real-code verification layer that
+has defined the project's second half.
 
 > **What we set out to do.** Fix the double sigmoid.
 >
@@ -353,6 +442,9 @@ the checking.
 
 ## Chapter 9 — The fix works, the accuracy falls (run 9, D6)
 
+**In one line:** The fixed mechanism works exactly as designed (retained ink 0.790 → 0.922) and
+accuracy falls: ink is a proxy, not the objective.
+
 > **What we set out to do.** Run 9: F1 + F2 together. A correctly-shaped ink loss and a verified
 > harness. Expect the router to get better at ink, and accuracy to follow.
 >
@@ -380,6 +472,10 @@ logged retained ink, we would have declared victory.
 ---
 
 ## Chapter 10 — A better target, which also did not work (D7–D10, run 10)
+
+**In one line:** A better-motivated target (the decoder's own attention) fits better and still
+moves nothing — the null was structurally guaranteed by the budget, because pruning already beat
+not-pruning there.
 
 > **What we set out to do.** Ink is the wrong target. Find a better one — and there is an obvious
 > candidate. The decoder already tells us which tokens it uses: its **cross-attention** weights,
@@ -422,6 +518,10 @@ already, and in our case they had.
 ---
 
 ## Chapter 11 — Re-asking the question where the answer can exist (D11)
+
+**In one line:** At budgets that bind: the attention target loses (−5.63, −12.81), the latency
+claim dies (1.04× at 5× fewer tokens), and the router's +17.7 to +34.0 points over random becomes
+a headline claim.
 
 > **What we set out to do.** Repeat run 10's comparison at budgets that bind: keep=0.25 and
 > keep=0.20, where tokens are genuinely scarce. Paired on the same 50 images, locally, no
@@ -472,6 +572,9 @@ the Kaggle numbers to three decimals on six separate gates.
 
 ## Chapter 12 — One honest efficiency claim (M1)
 
+**In one line:** The one honest efficiency claim survives: −65% of decoder cross-attention memory
+for −0.26 points, scoped to exactly what it is.
+
 > **What we set out to do.** D11 had just deleted the project's only efficiency claim. But
 > pruning must save *something* — it shrinks the decoder's cross-attention **KV cache**, the
 > memory holding the visual tokens during generation. So: measure it. Two independent ways —
@@ -496,6 +599,9 @@ the Kaggle numbers to three decimals on six separate gates.
 ---
 
 ## Chapter 13 — "Why does pruning help?" — and the word that turned out to be load-bearing (D12)
+
+**In one line:** Pruning helps only because the model was trained with it — run 5 declines where
+"denoising" predicted improvement, so "if you train for it" becomes load-bearing.
 
 > **What we set out to do.** An uncomfortable fact had been sitting unexplained since D11:
 > **throwing away half the page makes the model better.** Every document in the repo had carried
@@ -551,6 +657,9 @@ the limitations. **The four controls the difference-in-differences actually rest
 
 ## Chapter 14 — Closing the last hole in the main claim (run 11)
 
+**In one line:** Five extra epochs without pruning buy +0.52 points (t 0.24): the gain is the
+pruning-aware training itself, and the main claim gets its isolation.
+
 > **What we set out to do.** D12 had been explicit that it did **not** prove H1, only that it
 > supported it. The hole: run 9 differs from run 5 by pruning-aware training **and by five more
 > epochs of it**. Maybe it was just the extra epochs.
@@ -599,6 +708,10 @@ supplying it is word *order*, not recall — recall drifted 0.51, and the paired
 ---
 
 ## Chapter 15 — The half of the architecture that had never run (ToMe, run 12)
+
+**In one line:** The merger had never executed and its split was broken (100% of vertical
+redundancy missed); the checkerboard fix lands, and run 12's sweep runs with the
+checkpoint-provenance question left open.
 
 > **What we set out to do.** Face an embarrassing fact. `BipartiteTokenMerger` — merging
 > near-duplicate tokens instead of deleting them, half the described architecture — had
@@ -656,7 +769,366 @@ not quietly inherit a number it cannot vouch for.
 
 ---
 
+## Chapter 16 — The sweep finally runs on the right weights (runs 12, 13, 14)
+
+**In one line:** The merge question gets its real answer — run 12's provenance doubt is
+confirmed, run 13 re-runs the sweep on the intended weights and reads "20% merge is a null, 40%
+costs ~4 points", and run 14 shows that quoting one column of four is how you mislead.
+
+> **What we set out to do.** Settle run 12's open question, then actually answer *is merging
+> better than pruning at a fixed token count?* on the intended weights, and finally train *with*
+> merging so the checkpoint's own operating point is a merged one.
+>
+> **What happened with run 12.** The provenance question from the previous chapter is settled:
+> yes, it was run 5's checkpoint (the stamp names it, and its router arm reproduces the D1
+> inversion to the digit — router 24.97 against random 59.06 and ink oracle 73.69). So run 12's
+> router pairs are not a measurement of the merge stage at all; only the two ink-oracle pairs —
+> weight-independent — are interpretable. The sweep machinery itself (28 rows, six token-matched
+> pairs, the sabotage arm) worked exactly as designed.
+>
+> **Run 13** re-ran the identical 28-row sweep on the intended weights (run 9's). The control
+> drift was 1.09 points, so the ground had not moved. The headline, at face value:
+>
+> - **20% merge is a null at all four budgets** — five m=0.20 rows, all inside their own
+>   uncertainty.
+> - **40% merge at keep=0.50 costs −3.86 points [−7.54, −0.35]** — the first merge row that
+>   actually costs something.
+>
+> That is the merge result of record. It is also, as the next chapters show, a number that had
+> not yet survived its own measurement instrument.
+>
+> **Run 14** is the arm that was missing: not just *evaluating* merge but **training with merge
+> on** (`TRAIN_MERGE_RATIO=0.40`), so the checkpoint is merge-aware and its trained operating
+> point is a merged one — keep=0.50 → 2400 tokens, merge 40% of those → **M=1440**:
+>
+> | | run 9 (no merge, M=2400) | run 14 (merge-trained, M=1440) |
+> |---|---|---|
+> | word recall | 79.63 | 78.87 |
+> | char accuracy | 64.81 | 61.76 |
+> | word order | 54.08 | 50.13 |
+> | NED | 0.352 | 0.382 |
+>
+> "Run 14 matches run 9 with 40% fewer tokens" is quoting **one column of four**. Recall barely
+> moved; the other three metrics clearly did not.
+
+---
+
+## Chapter 17 — The instrument is coarser than the question (D13, D14)
+
+**In one line:** Before scoring any more merge numbers, we measured the instrument: 50 documents
+cannot resolve a 1–2 point question, and it turned out we could pick the scoring rule to make
+any answer come out we wanted.
+
+> **What we set out to do.** Run 13 read "20% merge is free". Before buying more runs on that,
+> measure the instrument itself: how variable are the per-document differences, and can 50
+> documents resolve effects of the size we are looking for?
+>
+> **What we found. Two diagnostics, both aimed at our own analysis.**
+>
+> **D13 — the power problem is structural.** The merge question is a 1–3 point question. The
+> per-document differences have a standard deviation of 11–13 points. With 50 documents, a
+> confidence interval is 2–5 points wide. **UNDERPOWERED is not what run 13's result happened to
+> be; it is what the instrument delivers at n=50, full stop.** Worse: 5 of the 50 documents carry
+> **75.6%** of the total variability — the difference distribution is heavy-tailed, and a single
+> page can lose 72 points while the average barely notices. Measured: both natural location
+> estimators (the plain mean, and the trimmed mean we were considering) hide that −72 point page.
+> A rule with only an average is therefore not a rule; it must carry a **tail** statistic in the
+> same breath.
+>
+> **D14 — the estimator was the smallest choice.** The pre-registration item had been scoped as
+> "pick an estimator". D14 found the estimator is the smallest of **seven** unpinned choices:
+> which two rows *are* "the" contrast ("run 14, m=0.40" names two contrasts that differ by
+> **5.08 points**), direction per quantity, which location statistic and in what order, which
+> tail statistic and what its ties mean, what the discard set may contain, and what counts as
+> confirmatory. And over the families the historical runs actually support, **Holm correction
+> leaves zero survivors in either run** — both published "MERGING WINS" verdicts sat on *disjoint*
+> rows.
+>
+> **What we did about it.** Nothing in the data can be fixed; the response is procedural:
+> **the entire grading rule gets written down, in full, before the next merge number exists.**
+
+---
+
+## Chapter 18 — The grading rule written before the data (T1, the run-17 pre-registration)
+
+**In one line:** One question named, one estimator pinned, a tail check beside the average, three
+quantities corrected together, four verdicts of equal arity — and the number of documents
+(≳307) that "free" will require.
+
+> **What we set out to do.** Write the rule D14 said was missing, with every choice blind to the
+> sign of any effect.
+>
+> **The rule, in plain words.**
+>
+> 1. **Name the question first.** *At an equal budget of 1920 tokens, does merging preserve more
+>    word recall than pruning alone?* The arms: `keep=0.50 m=0.20 ink` against `keep=0.40 ink
+>    TWIN` — the ink arm, because the sweep's own table says that is the arm that isolates the
+>    mechanism from the router's weakness. This pair had **never been declared a winner**, which
+>    is evidence the choice was not effect-shopping.
+> 2. **The average.** Take each document's difference (the document is the unit of analysis; the
+>    pairing is the design), then **trim the most extreme 10% before averaging** — the trimmed
+>    mean. Uncertainty is the **Tukey–McLaughlin** standard error (the naive version is ~33% too
+>    small, which is exactly how it looks on paper). No bootstrap: a bootstrap endpoint is one
+>    draw, not a value, and we had just watched verdicts turn on that kind of noise.
+> 3. **The tail, in the same breath.** Two checks on the worst documents, each normalised against
+>    the row's own *matched-normal null* — a simulation of "what the worst document looks like
+>    when everything is noise, at this n and this variability", run at scoring time so the bar
+>    tightens as n grows instead of being a constant: a worst-document ratio, and a count of
+>    documents that lost more than 10 points. On the data we already had, run 14's primary reads
+>    +0.02 points — the cleanest "no measured cost" imaginable — and **fails both**: its worst
+>    document lost 40.00 points (ratio 3.22, above even the null's p99) and 5 documents were
+>    harmed against a null p95 of 4. A rule without a tail would report that row as a perfect
+>    null.
+> 4. **Three quantities, corrected together.** Word recall (primary), NED ≡ character accuracy
+>    (co-primary; they are one quantity, so we count it once), and word order (co-primary — not
+>    stored in runs 13/14, so the three-way family is *written* now and *exercised* from run 17
+>    onward, not quietly dropped to two). **Holm** step-down at 5%, so testing three quantities
+>    does not inflate the false-alarm rate.
+> 5. **Four verdicts of equal arity.** DEGRADED (a confidence interval excluding 0, negative, on
+>    any of the three), IMPROVED (positive on the primary), FREE (all three include 0, **and**
+>    the resolution is ≤ 1.0 point, **and** both tail gates pass), and UNDERPOWERED (any
+>    confirmatory quantity flat with resolution > 1.0 point). The one deliberate asymmetry: harm
+>    on any quantity fires DEGRADED, but a gain on a secondary does not fire IMPROVED — a harm
+>    signal is still harm, while a gain signal on a secondary is metric-shopping.
+>
+> **The number the whole thing turns on:** at n=50 the resolution is 2.48 points (run 13) / 1.92
+> (run 14). The FREE verdict needs resolution ≤ 1.0 point, which at run 13's variability requires
+> **≳307 documents**. Fifty is a sixth of that. **The FREE verdict is unreachable on FUNSD
+> alone. That is the finding, not a footnote.**
+
+---
+
+## Chapter 19 — Re-scoring the past, and finding the corpus was not the whole problem (T2, T3)
+
+**In one line:** A second corpus is needed (397 documents, chosen on what it measures, not its
+size), and when the new rule re-scores the old runs, "free" becomes UNDERPOWERED and two more of
+our own headlines die.
+
+> **What we set out to do.** T1 said n ≳ 307, so find the second corpus; then re-score runs 13/14
+> under the new rule before anyone quotes them again.
+>
+> **T2 — the corpus decision, and why size was not what decided it.** Two candidates, both
+> verified *by loading them* rather than trusting memory: CORD's test split is exactly 100
+> documents, SROIE's mirror is exactly 347. CORD has the cleaner licence (first-party, CC-BY-4.0,
+> published by the same organisation that publishes the base model we use) — and the wrong
+> **denotation**: its ground truth annotates the receipt's key-value lines (menu, total, address)
+> but not the whole page, so its recall measures a different quantity from FUNSD's, and its grain
+> (1 word = 4.24 points) is four times coarser than the 1.0 point we want to resolve. Pooling
+> them would average two different metrics under one name. **SROIE has the right denotation — a
+> whole-page transcription — and the wrong licence story**: a bare "MIT" asserted by the uploader,
+> with zero attribution to the ICDAR competition the scans actually come from. The ruling on that
+> came later (Chapter 21); at this point the pool was **FUNSD + SROIE = 397**, which clears the
+> 307 requirement with margin.
+>
+> **T3 — the re-scoring, done by an executable scorer, not by prose.** `score_preregistered.py`
+> (45 controls, all passing) re-derives everything under the pinned rule:
+>
+> - **The pre-registered primary is UNDERPOWERED in both runs**: +1.66 [−0.81, +4.14] in run 13,
+>   +0.02 [−1.90, +1.94] in run 14. Zero Holm survivors. And run 14 does not score "free" despite
+>   +0.02, because both tail gates fail — the one behaviour the rule was written to produce.
+> - **Caveat (i): "free" is not sign-robust.** Claim 3's +0.54 was a plain mean; under the pinned
+>   estimator the same row reads **−0.65** in run 13 — and **+0.16** in run 14. All of them are
+>   nulls, so "no measured cost" survives; the sign does not.
+> - **Caveat (ii): the tail.** Run 14's m=0.40 row at M=1440 contains a page that lost
+>   **72.34 points**. The trimmed mean is blind to it *to the last bit*: pushing that page 25
+>   points further moves the trimmed estimate by exactly 0.0e+00, while the plain mean moves by
+>   181% of the row's own effect.
+> - **Finding 1: "resolved and negative" does not replicate.** The M=1440 price: run 13 gives
+>   −3.23 [−5.70, −0.76] (excludes zero); run 14 gives −0.17 [−2.40, +2.06] (includes zero). A
+>   sentence stated as *resolved* is denied by one of its two runs.
+> - **Finding 2: one sentence paired two baselines.** The 2.50× KV figure is measured against
+>   keep=1.00; the +0.54's control row is M=2400. The merge step alone is **1.25×**; the other
+>   2.0× belongs to pruning.
+> - **Finding 3: the tail gate is not specific to merging.** In the direction the design forces,
+>   **13 of 21 contrasts containing no merging at all** fire the gate, and the sweep's worst
+>   per-document loss (−80.85 points, ratio 5.43) belongs to `keep=0.75 ink ORACLE` — a row where
+>   *nothing is merged*. So a firing gate cannot be attributed to merging until an active
+>   comparator exists: **a random arm at a matched token budget. Neither run has one** — the merge
+>   budgets are [1344, 1440, 1920, 3840], the random budgets [1680, 2400, 3600], and the two
+>   lists do not overlap. Any past "merging beats random" statement was comparing across budgets.
+>
+> **What we did about it.** Rewrote claim 3 (its merge sentence now carries the rule's interval
+> and both caveats), promoted the missing random arm to a **build requirement** of the next sweep
+> (it becomes the 29th row), and recorded that the gate's bar must come from that active
+> comparator, not from the normal null alone.
+
+---
+
+## Chapter 20 — The pooled sweep is built, and the notebook on disk was a cancelled run's config (T4)
+
+**In one line:** Everything for the 397-document sweep is built and verified — and the day we
+checked, the notebook on disk was set to *train* an unauthorised run, through a generator that
+no longer ran.
+
+> **What we set out to do.** Port the 28-row sweep to the pooled corpus: eval-only, no training,
+> roughly six hours on Kaggle.
+>
+> **What shipped (PATCH I).** A `PooledTestSet` that loads both corpora behind one interface
+> (397 documents), a per-document `corpus` label so every row reports **per-corpus strata** (the
+> pool is 87% receipts by document — a pooled number is substantially a *receipt* number, and
+> FUNSD, where every result from runs 2–14 was measured, is a 12.6% minority of its own
+> successor), `word_order` now stored per document (so the three-quantity rule becomes
+> executable from run 17 on), and the **29th row: `keep=0.40 random TWIN` at M=1920** — the
+> token-matched random arm T3 promoted from a check to a blocker.
+>
+> The cost was measured by actually generating, not by arithmetic: SROIE documents generate
+> 0.66× the tokens of FUNSD's, so the sweep is **5.92 hours** against the 9-hour Kaggle cap, not
+> the naive 8.06.
+>
+> **What went wrong — found 2026-10-02 by *running* the generator instead of reading it.** The
+> notebook on disk shipped `DO_TRAIN = True` and `TRAIN_SELECT_MODE = 'ink'`: **run 18's
+> config** — a training run staged by a parallel session whose chat was lost to context
+> compaction, authorised by nothing in the repo, and off the serial queue. The user's ruling:
+> **cancelled, not deferred** — and the SROIE mirror **rejected on licence** (Chapter 21).
+>
+> Worse: the generator itself had stopped running (a stale patch anchor), so **none of the
+> "green" verifiers had ever executed against a T4 notebook** — they all certified the armed
+> run-18 config. A ~4-hour training run was one Run-All away from executing on the pooled corpus.
+>
+> **What we did about it.** Re-keyed the anchor so config flips cannot rot it again, reverted the
+> select mode to `router`, **wrote the guard the code comment claimed already existed** (an
+> eval-only run must load a pruning-era checkpoint; attaching run 5's weights now *raises*
+> instead of sweeping 29 rows through an anti-selective router — run 12, one assert away),
+> regenerated the notebook (cell 2 only, every other cell diffed byte-identical; the armed
+> notebook is archived as evidence, not deleted), and re-ran **five** verifiers *after* the
+> regeneration, checking each log is newer than the notebook it reads: **14/14** (the new guard,
+> sabotage-tested — deleting it takes the verifier to 8/14, exit 1), **96/96, 35/35, 62/62,
+> 64/64**.
+>
+> **The generalised lesson:** an edited generator is an unverified generator. Regenerating is not
+> a deployment step to do when convenient; it *is* the test. And a verifier log that predates the
+> input it reads is not evidence, however green it is.
+
+---
+
+## Chapter 21 — Why every alternative corpus measured dead, and the step that remains (the licence ruling)
+
+**In one line:** "Just switch datasets" has no target — the one clean-licence corpus measures the
+wrong thing — so the ruling is against the *mirror*, not the corpus, and the remaining step is a
+human one.
+
+> **What we set out to do.** The ruling "I would rather switch datasets than get into copyright
+> issues" looked like it would collapse the pool to FUNSD-only and make UNDERPOWERED permanent.
+> So: measure every alternative on disk before accepting that.
+>
+> **What we found — two defects, on opposite corpora, neither fixable by swapping.**
+>
+> | corpus | test n | 1 word = | denotation | licence as it reads locally |
+> |---|---|---|---|---|
+> | FUNSD | 50 | 0.57 pt | whole page (the reference) | — |
+> | SROIE mirror | 347 | 0.86 pt | whole page ✅ | `mit`, **uploader-asserted** ❌ |
+> | CORD | 100 | 4.24 pt | **key-value lines only** ❌ | `cc-by-4.0`, first-party ✅ |
+> | SynthDoG | — | — | whole page | *empty* ❌, and contaminated |
+>
+> CORD is first-party and clean — and unusable: across its entire test split the `dontcare` field
+> yields **zero recoverable words**, so it cannot be converted into a whole-page target, and at
+> 4.24 points per word a single word moves recall by more than four times the effect being
+> resolved. SynthDoG's licence field is empty in both its README and its metadata, and runs 4/5
+> trained on it. FUNSD's own 149-document train split is contaminated (training on it would bias
+> the paired differences *toward null* — precisely the verdict we are trying to separate from
+> UNDERPOWERED) and 199 < 307 anyway.
+>
+> **What that leaves: option 1, re-sourcing SROIE from the official ICDAR 2019 competition.** It
+> keeps every number in the pre-registration intact (the pool, the thresholds, the 29-row sweep,
+> the 5.9-hour cost, all the green verifiers) at zero code churn — the only reason it is worth
+> checking at all.
+>
+> **And why the first step is the user's, not an agent's.** Two consecutive sessions failed to
+> read the competition's terms for *structural* reasons: web search is unsupported for this
+> model, and the RRC host serves a certificate for a different domain than the one requested, so
+> the connection cannot be verified. **A licensing decision must not rest on a source that cannot
+> be authenticated.** So: register at the portal, read the terms, download.
+>
+> **The one cost that was anticipated, then tested.** Official SROIE ships *line-level*
+> transcriptions where the mirror had *per-word* boxes, so word-level ground truth might need
+> re-deriving. A local probe (`diagnose_gt_granularity.py`, 4/4 controls) re-scored FUNSD through
+> reconstructed lines with the *shipped* pipeline: **word recall is granularity-invariant** — the
+> denominator is identical on 50/50 documents, and recall moved on 0 of 35 mismatches. The primary
+> quantity is safe. **Word order and NED are not** (the gold *sequence* differs on 21/50
+> documents), so those two co-primaries must be reported per-corpus-stratum, and the probe must be
+> re-run against the official annotations when they arrive.
+
+---
+
+## Chapter 22 — Where the merger lives, decided (T5)
+
+**In one line:** ToMe stays where it is — after the frozen encoder, before the decoder — because
+its encoder saving at its current spot is 0% by construction, and the version that would pay is a
+new project, not a fix.
+
+> **What we set out to do.** Decide in writing, before the next merge run, whether ToMe stays
+> post-encoder or moves *inside* Swin. The decision gates the two queued training runs: if the
+> answer is "move it inside", they are moot as designed.
+>
+> **What we measured.** An analytic FLOPs proxy per Swin stage, computed from donut-base's own
+> config (5/5 controls, tied to the repo's token grid):
+>
+> | stage | tokens | blocks | share of encoder |
+> |---|---|---|---|
+> | 0 | 307,200 | 2 | 10.8% |
+> | 1 | 76,800 | 2 | 10.2% |
+> | 2 | 19,200 | 14 | **69.2%** |
+> | 3 | 4,800 | 2 | 9.7% |
+>
+> The merger sits after stage 3's 4,800-token output — downstream of **all 20 encoder blocks**, so
+> its encoder saving is not small, it is **zero, by construction**. Moving it one stage earlier
+> caps at **4.9%** even at a 50% merge (only 9.7% of the encoder is downstream of that point). The
+> version that would pay must precede stage 2: a 19,200-token grid inside a frozen pretrained
+> encoder, where window partitioning, shifted-window cyclic shifts and relative position bias all
+> assume an intact spatial grid — plus re-establishing every comparability baseline in the
+> project (the 77.74 ceiling, run 9's checkpoint, D11, D12, M1). That is a new project with the
+> same title.
+>
+> **The decision: keep it.** Consequences, both directions:
+>
+> - **Forbidden:** any encoder-FLOPs / speedup / latency framing for the merger (0.0% is measured
+>   and structural); quoting the 2.50× as a merging result (pruning supplies 2.0× of it; the
+>   merge step alone is **1.25×**); calling the compression "free" (UNDERPOWERED in both runs,
+>   required n ≳ 307).
+> - **Not mooted:** the two queued training runs. ToMe's entire remaining justification is one
+>   narrow claim — *at a matched token budget, merging preserves more accuracy than pruning* —
+>   evaluated on the decoder's cross-attention KV, which is where the project's one true
+>   efficiency claim lives.
+
+---
+
+## Chapter 23 — Today: guarding the door before the data arrives (2026-10-03)
+
+**In one line:** Two unrecorded artifacts landed today — a licence guard written *before* the
+data, and the pre-registered thresholds re-derived at the official pool size — and the only step
+left is a human one.
+
+> **What arrived, and why it is recorded here instead of left to the filesystem.**
+>
+> 1. **A licence guard in `.gitignore`, added before the download rather than after.** This repo
+>    is public, and the ICDAR terms may forbid redistribution — republishing the corpus from a
+>    public clone would be an irreversible disclosure. So `data/`, `corpora/`, and any SROIE path
+>    are git-ignored *now*: a bulk `git add -A` over a downloaded corpus directory cannot leak it
+>    into version history. If the terms turn out to permit redistribution, those lines come out
+>    deliberately, with a note in AGENTS.md — the data must not arrive in history as a side
+>    effect.
+> 2. **The pre-registered tail-gate threshold, re-derived at the official pool size.** The mirror's
+>    SROIE test split was 347 documents; the official one is evidently **360** — the pool would
+>    be **410, not 397**. Running the shipped null simulator (its n=50 and n=397 controls both
+>    reproduce the recorded values to 3 dp, so the measurement is trustworthy) gives the
+>    matched-normal p95 **1.5088 at n=410**, against 1.5062 at n=397: a +0.0026 change. The plan
+>    survives; the number is now off the right pool.
+>
+> **Status.** Everything agent-side is built and verified: the pooled loader, the 29-row sweep
+> with its token-matched random arm, the executable three-quantity rule, five green verifiers with
+> provenance-checked logs, and ≈5.9 hours of measured cost. **The blocker is the ICDAR
+> registration + download, and it is the user's step by design.** After it lands: verify the
+> terms, re-run the two granularity probes against the official annotations, adapt the loader if
+> the schema differs (it currently expects the mirror's field names, and the port check *asserts*
+> that), re-run the five verifiers against the regenerated notebook with mtime checks — and book
+> the sweep.
+
+---
+
 ## Where the project actually stands
+
+*Current as of today's worklog, 2026-10-03. The queue itself lives in AGENTS.md; this is the
+narrative version.*
 
 ### The four claims we can defend
 
@@ -670,9 +1142,19 @@ not quietly inherit a number it cannot vouch for.
    against 78.22, while retaining 0.072 **less** of the page's ink — so it is not merely
    rediscovering ink — but at t +1.62 on 50 images that is directional, not significant. The
    defensible comparison is against random.)*
-3. **One measured efficiency claim, with its price.** Cross-attention KV: 150.00 → 52.50 MiB
-   (−65.0%) for −0.26 points. Cross-KV only. Not total, not peak, not encoder, **not latency**.
-4. **The methodology is a first-class result.** See below.
+3. **One measured efficiency claim, with its price attached.** The memory half is unchanged and
+   still measured: cross-attention KV 150.00 → 52.50 MiB (−65.0%) at keep=0.35 for −0.26 points,
+   and extended to the merge rows — prune to 0.50 then merge 0.20 → M=1920, cross-KV 150.00 →
+   60.00 MiB (2.50×), of which **2.0× is pruning's and 1.25× is the merge step's**. The accuracy
+   half, re-scored under the pre-registered rule, is **UNDERPOWERED in both merge runs at n=50**
+   (needs ≳307 documents), and the 2.50× row contains a single page that lost 72.34 points.
+   Cross-KV only — not total, not peak, not encoder, **not latency**. The merger sits after the
+   frozen encoder, so it saves no encoder compute either (T5).
+4. **The methodology is a first-class result.** Diagnostics that re-derive their numbers from
+   cached artifacts, verifiers that *execute* the real notebook cells, an executable scorer for
+   the pre-registration, and the 2026-10-02 generator/notebook incident caught by running things
+   instead of reading them. Three correctness defects were found this way rather than by a run
+   failing; the count has only gone up.
 
 ### What died, and what killed it
 
@@ -685,18 +1167,32 @@ not quietly inherit a number it cannot vouch for.
 | Any latency or throughput claim | D11 (1.04× at 5× fewer tokens) |
 | H2, inference-time denoising | D12 (run 5 declines where H2 predicted improvement) |
 | "It was just the extra epochs" | Run 11 (+0.52 pts, t 0.24) |
+| "20% merge is free, 40% costs −3.86" (the run 13/14 headline) | T3 under the T1 rule: the pre-registered primary is UNDERPOWERED in both runs; "free" is not sign-robust; the M=1440 price is not replicated (−0.17 [−2.40, +2.06] in run 14) |
+| "Merging beats random at matched M" | Not computable from runs 13/14 — their merge and random budgets do not intersect. Now a required 29th row of the sweep, not a statement |
+| Any encoder-FLOPs / speedup framing for the merger | T5: 0% encoder saving by construction; the merge step is 1.25× of the 2.50× KV figure |
+| The SROIE HF mirror as the second corpus | Licence rejected 2026-10-02 (uploader-asserted MIT, zero attribution to ICDAR RRC) |
+| CORD as the second corpus | Denotation (annotates the key-value subset, not the page) and grain (4.24 pts/word), both measured |
+| Run 18 (the ink select-mode training arm) | Cancelled 2026-10-02: staged by a lost session, authorised by nothing, off the serial queue |
 
 ### Still open
 
-- Run 12's merge sweep — the analysis, and the checkpoint-provenance question above.
-- A re-measurement of the decoding settings on run-11 weights.
-- An optional co-adaptation study.
-- The ~18% of outputs that are still not valid JSON, which nobody has characterised.
-- Local-vs-Kaggle generation drift, which needs writing up as a limitation: run 5 reads 74.72
-  locally against 77.74 on Kaggle on identical weights and images, and the gap widens as the
-  budget tightens. Token *selection* reproduces bit-exactly; *generation* does not. **This is why
-  nothing in the analysis compares a local number to a Kaggle one — within-checkpoint deltas are
-  the comparable quantity.**
+- **A licensed second corpus — the only remaining blocker.** Everything else in T4 is built and
+  verified (five verifiers green with provenance-checked logs; ≈5.9 h measured cost). The step
+  that remains is the user's: register at the ICDAR RRC portal, read the terms, download the
+  official SROIE (decided 2026-10-02, option 1).
+- **Then, in queue:** T6 (train the symmetric checkpoint `keep=0.30, merge=0.0`, ≈4–4.5 h) and T7
+  (the redesigned merge run on the pooled corpus, ≈2–3 h; the pre-registered primary becomes
+  scorable at n=410).
+- **Housekeeping (T8):** REPORT.md is stale — its banner still says "ToMe has never executed" and
+  its run table stops at run 10. This file now covers today's worklog but **has no numeric
+  audit** (every figure here is transcribed from AGENTS.md; if a number is corrected there, this
+  file goes stale). Dead code at `src/model.py:248`: `final_coords` is computed and thrown away.
+- **Older open items, still standing:** the ~18% of outputs that are not valid JSON, which nobody
+  has characterised; local-vs-Kaggle generation drift, written up as a limitation — run 5 reads
+  74.72 locally against 77.74 on Kaggle on identical weights and images, and the gap widens as
+  the budget tightens. Token *selection* reproduces bit-exactly; *generation* does not. **This is
+  why nothing in the analysis compares a local number to a Kaggle one — within-checkpoint deltas
+  are the comparable quantity.**
 
 ---
 
@@ -743,6 +1239,34 @@ correctness bugs — the decoding cap, the keep=1.0 STE trap, and the double-sig
 found by *diagnostics*, not by anything failing. All three had been silently producing plausible
 numbers for multiple runs.
 
+**9. Write the grading rule before the data.** D14 found seven unpinned choices, any one of which
+could move the verdict by several points; runs 13/14 had both declared "MERGING WINS" on *disjoint*
+rows. So the rule — which rows, which estimator, which tail check, thresholds in points, Holm over
+which family, what each verdict licenses, how many documents "free" costs — was written **before
+run 17 existed**, and re-scoring the past under it killed two of the repo's own headlines. A rule
+written after the data is not a rule; it is a story.
+
+**10. Measure the instrument before booking the experiment.** D13: 50 documents against 11–13
+points of per-document variability cannot resolve a 1–2 point question — UNDERPOWERED was not run
+13's result, it was the instrument's design. And the instrument's blind spot is asymmetric: the
+average is provably blind to a single −72-point page, so any accuracy-*preservation* rule needs a
+tail statistic in the same breath as the location one.
+
+**11. A licensing decision must not rest on a source you cannot authenticate.** Two agent attempts
+to read the ICDAR terms failed for structural reasons (web search unsupported for this model; the
+competition host's certificate mismatch), and the mirror's "MIT" was an uploader's assertion with
+zero attribution. So the download is a human step — register, read, download — and the repo got a
+git-ignored data guard *before* the data arrived, so a bulk add cannot leak a possibly
+non-redistributable corpus into a public history.
+
+**12. An edited generator is an unverified generator.** The shipped notebook carried a cancelled
+run's config (`DO_TRAIN=True`, an unauthorised select mode) because the last regeneration that had
+ever *run* was of the wrong thing — and the generator behind it had been silently crashing on a
+stale anchor for two days. All four "green" verifiers were certifying the armed config.
+Regenerating is not a deployment step to do when convenient; it *is* the test. Corollary: a
+verifier log older than the input it reads is not evidence, however green it is — check the
+mtime.
+
 ---
 
 ## Glossary
@@ -758,13 +1282,25 @@ numbers for multiple runs.
 | **STE** (straight-through estimator) | The trick that lets a hard keep/discard decision still produce a training gradient. Chapter 5 is about how it misfired. |
 | **ToMe / merger** | Merging near-identical tokens instead of deleting them. |
 | **FUNSD** | The dataset: 149 training and 50 test images of scanned business forms. |
+| **SROIE** | The receipt-OCR dataset from the ICDAR 2019 Robust Reading Competition. The intended second test corpus; the HF mirror is licence-rejected, the official download is the remaining step. |
+| **CORD** | A Korean receipt dataset with a clean first-party licence; excluded because it annotates only the key-value lines of a receipt, not the whole page. |
 | **Word recall** | Our main metric: percentage of the correct words that appeared in the output. |
 | **pts** | Percentage points. |
 | **t** (t-statistic) | Roughly, effect size divided by its uncertainty. Above ~2 in absolute value is conventionally "probably real"; near 0 means indistinguishable from nothing. |
 | **SE** (standard error) | How much the measured number would wobble if we re-ran on different images. |
 | **Paired** | The two things being compared were measured on the *same* 50 images, which cancels out per-image difficulty and makes small differences detectable. |
 | **Underpowered** | We could not have detected an effect this size even if it existed — importantly **not** the same as "there is no effect". |
+| **UNDERPOWERED** | The pre-registered verdict (capitalised) for "too few documents to resolve this question". It licenses nothing and must be quoted with the required n. |
 | **Ink oracle** | A selector that picks the highest-contrast squares directly from pixels. Weight-independent, so it gives identical token sets across checkpoints — which makes it the fair way to compare two models. |
 | **Ablation** | Re-running with one thing changed, to see what that thing was doing. |
 | **Checkpoint** | A saved copy of a trained model's weights. |
 | **KV cache** | Memory the decoder holds during generation. Pruning shrinks the part of it that stores visual tokens. |
+| **Pre-registration** | Writing the exact grading rule — which rows to compare, which estimator, which tail check, thresholds in points, what each verdict licenses, how many documents "free" requires — before the data exists, so the rule cannot bend to fit the result. |
+| **Trimmed mean** | An average computed after discarding the most extreme 10% of values in each tail; resistant to a single disaster page without giving up the rest. |
+| **Tail gate** | A check on the worst individual documents, reported beside the average, because the average is provably blind to a single −72-point page. |
+| **Matched-normal null** | A simulation of "what the worst document looks like when everything is noise, at this row's own n and variability" — the tail gate's bar tightens as n grows instead of being a constant. |
+| **Token-matched** | Two sweep rows that hand the decoder the same number of tokens, so the only difference between them is how the tokens got there (merged vs pruned harder). |
+| **Denotation** | What the ground truth actually measures. Two corpora can both be "receipts" and still score recall against different denominators. |
+| **Holm correction** | A step-down way of testing several quantities at once that keeps the overall false-alarm rate at 5%. |
+| **Checkpoint provenance** | Which weights a result was actually measured on, recorded in the result's own file so it can be checked later (the field that caught run 12). |
+| **mtime** | A file's modification time. Used to prove a check ran *after* the thing it checked. |
