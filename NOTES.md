@@ -13,8 +13,11 @@ frozen Swin-B encoder → PatchSaliencyRouter → BipartiteTokenMerger → mBART
 ```
 
 **`AGENTS.md` is the single source of truth for project state** — run history, findings,
-diagnostics, rejected approaches, and gotchas. Read it before changing anything. `REPORT.md` is
-a standing summary of what the project is and what each run established.
+diagnostics, rejected approaches, and gotchas. Read it before changing anything; its
+`## Project closed 2026-10-05` section is the final accounting. ~~`REPORT.md` is
+a standing summary of what the project is and what each run established.~~ **`REPORT.md` was
+retired 2026-10-05** — its claims half is `WRITEUP.md` (audited) and its run-table half is in
+`AGENTS.md`, and it had become the repo's worst staleness surface. Git history holds it.
 
 ---
 
@@ -103,7 +106,9 @@ deliberately excluded** — its KIE schema would pollute the single `{"text": ..
 
 ```
 AGENTS.md                          # source of truth: runs, findings, diagnostics, gotchas
-REPORT.md                          # standing summary of the project and each run
+README.md                          # visitor-facing: results in 30 seconds
+WRITEUP.md                         # results-first, claim by claim (numerically audited)
+STORY.md                           # chronological, for a reader with no ML background
 kaggle_token_pruning_ocr.ipynb     # canonical notebook (17 cells) — produced runs 2–6
 kaggle_pruning_run.ipynb           # GENERATED from the above — produced runs 7–10
 src/                               # library mirror: router, tome, loss, model, dataset,
@@ -173,15 +178,24 @@ ranked blank paper above text for five runs (diagnostic D1); the fix was an expl
 supervision term, added in run 8.
 
 **Bipartite token merging (ToMe).** Partitions surviving tokens into two sets, computes cosine
-similarity, and soft-merges the most similar into weighted centroids while tracking 2D
-coordinate centroids. Measured on runs 12–14 (2026-09-16/17/18); ~~merging 20% of the router's
+similarity, and soft-merges the most similar into weighted centroids. ~~while tracking 2D
+coordinate centroids.~~ ⚠ **It does compute merged 2D coordinate centroids and return them, but
+nothing reads them** — `src/model.py:248` binds `final_coords` and never uses it, `:372`
+discards it as `_`, and both notebook call sites discard it too. Nothing downstream of the
+merger consumes coordinates; the decoder sees tokens only. The phrase was removed from the
+architecture diagrams on 2026-10-05 rather than the code, because the return value is what makes
+the merger testable in isolation (`verify_tome_merge_port.py` compares it).
+Measured on runs 12–14 (2026-09-16/17/18); ~~merging 20% of the router's
 kept set is free, 40% costs −3.86 pts on merge-naive weights.~~ **restated 2026-09-24 under the
 run-17 pre-registration: the primary contrast is `UNDERPOWERED` in both runs (+1.66 and +0.02
 pts, neither surviving Holm), the required n is 307 against FUNSD's 50, and the 40% cost does
 not replicate (−3.23 in run 13, −0.17 in run 14).** Training with merging on
 (run 14) left that contrast flat but **underpowered**, and the A/B partition fix
 (`checkerboard_color`) is **null on all three checkpoints** — correct about the partition,
-unproven about recall. See `AGENTS.md`.
+unproven about recall. **The axis was closed unresolved on 2026-10-05** at `UNDERPOWERED`; see
+`AGENTS.md` → `## Project closed 2026-10-05`. ⚠ And per T5, the merger sits *after* the frozen
+Swin, so its encoder saving is **0% by construction** — of the 2.50× cross-KV figure at M=1920,
+pruning supplies 2.0× and the merge step alone **1.25×**.
 
 **Joint loss.** Cross-entropy + a target-sparsity MSE term + an entropy term, with an optional
 saliency BCE term (notebook only). Note the entropy term is negative-definite and pushes scores
@@ -204,29 +218,51 @@ toward 0.5; `lambda_entropy` was never deliberately chosen and is set to 0 in th
 
 ## What's open
 
-Two experiments, in priority order. `AGENTS.md` → "OPEN ITEMS AS OF 2026-09-09" is the live list.
+**Nothing. The project closed 2026-10-05** — see `AGENTS.md` → `## Project closed 2026-10-05`
+for the final accounting. This section is kept as the record of what was open at the end and
+how each item resolved, because two of the three resolved *against* what this file predicted.
 
-1. **Pending 14 — isolate H1** (~4 h Kaggle T4). Train a run-5-length checkpoint *without*
+1. ~~**Pending 14 — isolate H1** (~4 h Kaggle T4). Train a run-5-length checkpoint *without*
    pruning. The headline claim rests on attributing run 9's advantage to pruning-aware training,
-   and D12 explicitly did not isolate that from the five extra epochs. Highest value remaining.
+   and D12 explicitly did not isolate that from the five extra epochs. Highest value
+   remaining.~~ **✅ CLOSED 2026-09-14 by run 11** — and it was the highest-value item, correctly
+   ranked. Run 11 is run 9 with `TRAIN_KEEP_RATIO` 0.50 → 1.00 and nothing else changed:
+   **`ISO(0.35) = −10.49` (t −3.74)**, run 11's curve peaks unpruned and declines monotonically,
+   and five unpruned epochs moved the ceiling by **+0.52 pts (t 0.24)**. So the attribution
+   holds and claim 1 may say *"because it was trained for it."* ⚠ Isolated at
+   keep=0.35/0.25/0.20 only; the loose budgets are **underpowered, not null**. Write "H1
+   isolated at keep=0.35/0.25/0.20", never "H1 proven".
 2. ~~**Pending 15 — ToMe.** Either run the merger once and settle the merge-after-prune
    ordering, or scope it out of the architecture description. It has never executed.~~
    **Closed 2026-09-17 by run 13** — the ordering is settled (`checkerboard_color`) and the
    merger is measured. ~~**What replaces it: run 14 — train with merging on.**~~ **Run 14 ran
    on 2026-09-18 and came back UNDERPOWERED** (−0.28 [−4.46, +3.44], res 3.95 vs a 3.6 bar),
    so 3.33× at M=1440 is not licensed and **2.5× at M=1920 stays the limit**. Three findings
-   from it shape whatever comes next: the merge-row gain was **not distinguishable from a
-   general robustness lift** (+3.11 merged vs +3.43 on a *random, unmerged* selection,
-   difference −0.32 p=0.60); **NED degraded significantly** (p=0.029) where recall did not, so
-   "free" held on one metric of four; and the **router's margin over random fell** +17.07 →
-   +13.16. **What replaces it: a redesigned merge-training run, not a rerun.** `n` is not a
-   knob — 50 *is* FUNSD test — so the design has to change: both checkpoints contrasted in one
-   session, a primary pre-registered across metrics, per-image `char_acc`/`word_order` stored
-   so they can be tested at all, and a "did this checkpoint just improve at everything"
-   control. Also still missing, and symmetric to Pending 14: a checkpoint trained at
-   `keep=0.30, merge=0.0`, without which every token-matched M=1440 comparison has exactly one
-   trained arm.
+   from it shape ~~whatever comes next~~ *how the axis was finally closed*: the merge-row gain was
+   **not distinguishable from a general robustness lift** (+3.11 merged vs +3.43 on a *random,
+   unmerged* selection, difference −0.32 p=0.60); **NED degraded significantly** (p=0.029) where
+   recall did not, so "free" held on one metric of four; and the **router's margin over random
+   fell** +17.07 → +13.16. ~~**What replaces it: a redesigned merge-training run, not a
+   rerun.**~~ **✅ CLOSED UNRESOLVED 2026-10-05 under the pre-registration's own §7.** The
+   redesigned run was specified in full and its eval-only predecessor was **built and verified
+   green** (29 rows, the matched `random` arm at M=1920 that runs 13/14 structurally lacked,
+   five verifiers, 5.92 h costed against a 9 h cap) — and **never ran, for want of a corpus with
+   a readable licence.** Terminal verdict: **`UNDERPOWERED`, requiring `n ≳ 307`**, against
+   FUNSD's 50. `n` was never a knob — 50 *is* FUNSD test.
+3. ~~Still missing, symmetric to Pending 14: a checkpoint trained at `keep=0.30, merge=0.0`,
+   without which every token-matched M=1440 comparison has exactly one trained arm.~~
+   **Closed unrun 2026-10-05.** The design was never faulted and the confound is real — it is
+   recorded in `AGENTS.md` as T6 so a restart does not re-derive it. At n=50 it was predicted
+   to buy a *correctly designed* fourth `UNDERPOWERED` for 4–4.5 GPU-hours.
+
+⚠ **What this list got wrong, kept because it is the useful part.** It ranked H1 isolation
+first and that was right. It then framed the merge question as needing a better *design*, when
+T3 showed the binding constraint was the **instrument**: at n=50 against a per-document sd of
+11–13 points, `UNDERPOWERED` was structural, and no redesign at that sample size could have
+escaped it. The lesson is in `AGENTS.md`'s conventions — compute the required *n* from the
+observed sd *before* blaming the treatment, and ask whether *n* is a knob at all.
 
 Closed and not to be reopened: ink as a training objective, the attention target, the latency
-framing, stratified selection, `repetition_penalty > 1.0`, and run 11 as it was originally
-sketched.
+framing, stratified selection, `repetition_penalty > 1.0`, run 11 as it was originally
+sketched, the `tome_split` sabotage row (three nulls), and run 18 (`TRAIN_SELECT_MODE='ink'`,
+cancelled unrun — authorised by nothing in the tracker).

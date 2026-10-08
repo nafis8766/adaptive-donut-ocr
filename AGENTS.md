@@ -49,6 +49,25 @@ will act on it.
 
 ## ▶ TODO — THE SERIAL WORK QUEUE (read this first, every session)
 
+> **⛔ PROJECT CLOSED 2026-10-05 — THE QUEUE IS NOT LIVE**
+>
+> **User ruling, 2026-10-05: the project is wrapped up for submission with a CV / SOP for
+> masters applications in CSE / NLP. T4, T6 and T7 are CLOSED under T1 §7 — not blocked, not
+> deferred, not waiting on a corpus licence.** The merge axis's terminal result is
+> `UNDERPOWERED` with the required `n ≳ 307`, which is exactly the outcome T1 §7 was written
+> in advance to license. See `## Project closed 2026-10-05` for the final state.
+>
+> **This reverses the 2026-10-02 ruling** (re-source SROIE from official ICDAR rather than
+> apply §7), and the reversal is legitimate rather than a re-litigation: the ground given for
+> the §7 recommendation at the time was the ~10–12 week CV deadline, and **that deadline has
+> now arrived.** The science did not change. Nothing about the corpus assessment is withdrawn
+> — the official archive is on disk and measured (`n=410`), and its licence was never read.
+>
+> **Do not resume from this section.** There is no first unchecked item to start on. If work
+> on this project ever restarts, the queue below is a record of where it stopped and why, and
+> a new queue should be written rather than this one resumed — T4's build is two days of
+> context ahead of its own prose, and T6/T7 were designed against a corpus that never cleared.
+
 **Resume protocol.** When the user says *"resume"*, *"what's next"*, *"continue"*, or
 starts a session without naming a task: **read this section, report the first unchecked
 item, and start there.** One at a time, in order. Do not re-plan from scratch, do not
@@ -75,11 +94,11 @@ fourth consecutive UNDERPOWERED.
 | T1 | Write Pending 18's estimator rule | free | — |
 | T2 | ~~Confirm the second eval corpus exists and is usable~~ **DONE — SROIE n=347** | free | — |
 | T3 | ~~Re-score runs 13/14 under T1's rule~~ **DONE — UNDERPOWERED both runs; claim 3 restated; T1 §3 amended** | free, local | T1 |
-| T4 | Port the 28-row sweep to the pooled corpus (FUNSD+SROIE = 397) | local or Kaggle, eval-only | ~~T1, T2~~ **free** |
+| T4 | ~~Port the 28-row sweep to the pooled corpus (FUNSD+SROIE = 397)~~ **CLOSED 2026-10-05 under T1 §7 — BUILT AND VERIFIED, NEVER RUN** | — | ~~T1, T2~~ — |
 | T5 | ~~Decide where ToMe lives in the architecture~~ **DONE — STAYS post-encoder; 0% encoder saving is structural, no cheap fix (4.9% cap one stage earlier); T6/T7 NOT moot** | free | ~~D13 read~~ — |
-| T6 | Pending 16 — train `keep=0.30, merge=0.0` | Kaggle T4, ≈4–4.5 h | T4, T5 |
-| T7 | Pending 17 — the redesigned merge run | Kaggle T4, ≈2–3 h | T6 |
-| T8 | Housekeeping: reconcile the prose docs; dead `final_coords` | local, ~40 min | — (fill gaps) |
+| T6 | ~~Pending 16 — train `keep=0.30, merge=0.0`~~ **CLOSED 2026-10-05 under T1 §7 — never run** | — | ~~T4, T5~~ — |
+| T7 | ~~Pending 17 — the redesigned merge run~~ **CLOSED 2026-10-05 under T1 §7 — never run** | — | ~~T6~~ — |
+| T8 | ~~Housekeeping: reconcile the prose docs; dead `final_coords`~~ **DONE 2026-10-05 except `STORY.md`'s numeric audit, which stays open** | local | — |
 
 ---
 
@@ -270,7 +289,29 @@ fourth consecutive UNDERPOWERED.
   This is the same shape as the `n`-is-not-a-knob mistake: a quantity blocked on a
   *stored field*, not on an experiment.
 
-- [ ] **T4 — Port the 28-row sweep to the pooled corpus.**
+- [x] **T4 — Port the 28-row sweep to the pooled corpus. CLOSED 2026-10-05 UNDER T1 §7 —
+  BUILT AND VERIFIED, NEVER RUN.**
+  **The box is ticked on the CLOSURE, not on the sweep.** This is the one place in this file
+  where a tick does not mean "the DONE-WHEN was satisfied by something executed" — the
+  DONE-WHEN required the sweep to run end-to-end on the pooled set and **it never did.** The
+  item is closed because the *question* was terminated by ruling, not because the work was
+  finished. It is marked `[x]` rather than `[ ]` so the queue does not read as live; every
+  word of the original item is preserved below, unstruck, because the build is real and the
+  reasoning is the deliverable.
+  **What exists and is green:** PATCH I (cells 2/9/13/15), the 29-row sweep including the
+  blocker arm `keep=0.40 random TWIN` at M=1920, `word_order` and a per-document `corpus`
+  label in `per_image`, T1 §5's per-corpus discard constraint and §3's direction pin
+  executable in the scorer, and **five verifiers green against the 2026-10-02 18:57 notebook
+  with mtimes confirmed newer** (14/14 · 96/96 · 35/35 · 62/62 · 64/64, exit 0 each).
+  **What never happened:** the eval. Cost was measured at **5.92 h** against a 9 h cap, so it
+  was affordable; it was never affordable *licensed*. The official ICDAR SROIE archive is on
+  disk and fully measured (**n=410**, grain 0.75 pt/word, granularity invariance confirmed
+  360/360), and **its licence was never read** — `WebSearch` is unsupported for this model and
+  the RRC host serves a certificate for a different domain, so no agent could authenticate the
+  terms, and a licensing decision must not rest on an unauthenticatable source. That is where
+  it stopped. See `## The official SROIE archive` §7.
+  *Everything below this block is the item as it stood on 2026-10-04, preserved verbatim.*
+
   *Eval-only, no training. ~~Blocked by T1, T2~~ **UNBLOCKED 2026-09-24 — both are done.**
   **This is the actual unblock.***
   **BUILT 2026-09-29/30, NOT RUN — see `## The pooled-corpus port (T4)`.** PATCH I ships
@@ -455,7 +496,14 @@ fourth consecutive UNDERPOWERED.
   encoder", T6 and T7 as currently designed are moot** — which is exactly why this sits
   above them. ✅ satisfied; the answer was "keep", so they are not moot.
 
-- [ ] **T6 — Pending 16: train the symmetric checkpoint `keep=0.30, merge=0.0`.**
+- [x] **T6 — Pending 16: train the symmetric checkpoint `keep=0.30, merge=0.0`.
+  CLOSED 2026-10-05 UNDER T1 §7 — NEVER RUN.**
+  Closed by ruling, not by evidence. **The design was never faulted and is not withdrawn:**
+  the confound it targets is real — every M=1440 comparison on disk has exactly one trained
+  arm — and T5 confirmed it was not made moot by the placement decision. What closed it is
+  that its blocker (T4) is closed, and that at n=50 it was predicted to produce a
+  **correctly-designed fourth UNDERPOWERED** for 4–4.5 GPU-hours. Anyone restarting this
+  should build it *after* a corpus that clears `n ≳ 307`, never before.
   *Kaggle T4, ≈4–4.5 h. Blocked by T4 and T5.*
   Full rationale in the Pending table. The design is right and the confound is real —
   every M=1440 comparison currently has exactly one trained arm.
@@ -464,30 +512,52 @@ fourth consecutive UNDERPOWERED.
   the *confound* and leaves the *power* untouched, so at n=50 the predicted outcome is
   a correctly-designed fourth UNDERPOWERED. That is 4–4.5 GPU-hours for nothing.
 
-- [ ] **T7 — Pending 17: the redesigned merge run.**
+- [x] **T7 — Pending 17: the redesigned merge run. CLOSED 2026-10-05 UNDER T1 §7 — NEVER RUN.**
+  Closed by ruling. **T1's pre-registration is not wasted by this** — it was exercised against
+  runs 13/14 by T3 (`scripts/score_preregistered.py`, 64/64), where it changed the project's
+  headline claim and found a defect in itself (§3's tail gate is not specific to merging).
+  A rule written before a run, then used to retire the run that preceded it, is the result;
+  run 17 was the planned *application* of it, not its justification.
   *Kaggle T4, ≈2–3 h. Blocked by T6.* Four requirements unchanged — see the Pending
   table. Both checkpoints in one session; primary pre-registered over three quantities;
   the `random`-at-trained-budget control; DiD checkpoints already on disk.
   Do **not** re-run the sabotage row — three nulls closed it. See the standing
   constraints below and the Conventions entry *"A question closed by three nulls is closed."*
 
-- [ ] **T8 — Housekeeping (no dependencies; fill gaps with this).**
+- [x] **T8 — Housekeeping. DONE 2026-10-05, except `STORY.md`'s numeric audit.**
   - ~~Reconcile `REPORT.md` and `README.md` against runs 11–14.~~ **`README.md` DONE
     2026-10-02** — rewritten visitor-first and reconciled against runs 2–14; the old
     caveat-first text is preserved verbatim as `NOTES.md` (`git mv`, history intact). Every
     figure in the new file was cross-checked against *this* file rather than carried over from
-    the old one. **`REPORT.md` is still open** — its stale banner still names "ToMe has never
-    executed" and a run table stopping at run 10.
+    the old one. ~~**`REPORT.md` is still open** — its stale banner still names "ToMe has never
+    executed" and a run table stopping at run 10.~~ **`REPORT.md` RETIRED 2026-10-05
+    (`git rm`), by user ruling.** Its job overlapped `WRITEUP.md` (claims) and `STORY.md`
+    (chronology) almost entirely, it was the most stale document in the repo, and it carried
+    **no unique reason** — so archive-never-delete is satisfied by git history rather than by a
+    fourth archive file nobody reads. ⚠ It was worse than this item recorded: beyond the stale
+    banner, its own *corrections* asserted the figures T3 retired on 2026-09-24 (*"20% merge is
+    free"*, *"−3.86 [−7.45, −0.30]"*) and its M1 row stated *"+0.54 pts … no measured cost"* —
+    i.e. it read as reconciled while stating withdrawn claims. Five derived docs are now four.
   - ~~`STORY.md` has **no numeric audit** and stops at run 12.~~ **`STORY.md` brought to
     today's worklog 2026-10-03** (Kilo (tencent/hy3:free)) — new chapters 16–23, a one-page
     digest, per-chapter "in one line" summaries, refreshed "where it stands"; **still no
-    numeric audit.**
-  - **Dead code found 2026-09-22:** `src/model.py:248` assigns `final_coords` from the
-    merger and never reads it — only `compressed_tokens` reaches the decoder, and the
-    `generate()` path at `:372` already discards it as `_`. So the merged 2D coordinate
-    centroids are computed and thrown away, and *"w/ 2D coord centroids"* in the
-    architecture diagram overstates what is wired. Either consume them or drop them
-    from the diagram; do not leave the diagram claiming a path that does not exist.
+    numeric audit.** ⚠ **THIS IS THE ONE T8 ITEM LEFT OPEN AT CLOSURE, deliberately.** Every
+    figure in its 1,306 lines was transcribed by hand from this file, so correcting a number
+    here still leaves it stale. It was not audited because extending the auditor to a
+    chronology is real work with a weak payoff: a narrative's figures are *historical in
+    context* — "run 13 read '20% merge is free'" is **correct** as a statement about what was
+    believed in September, and an auditor keyed on current values would flag it wrongly. Read
+    `STORY.md` for the shape of the project, never for a number.
+  - ~~**Dead code found 2026-09-22:** … Either consume them or drop them from the diagram~~
+    **RESOLVED 2026-10-05 by dropping the claim, not the code.** `src/model.py:248` assigns
+    `final_coords` from the merger and never reads it — only `compressed_tokens` reaches the
+    decoder, and the `generate()` path at `:372` already discards it as `_`. **The diagram's
+    *"w/ 2D coord centroids"* is removed** from this file and from every derived doc that
+    carried it. **The code is deliberately unchanged:** the Gotchas entry is explicit that the
+    second return value is what makes the merger testable in isolation and that
+    `verify_tome_merge_port.py` compares it, so deleting it would trade a live check for a
+    cosmetic tidy. The defect was never the dead binding — it was a **diagram claiming a path
+    that does not exist**, and that is what was fixed.
 
 ### Standing constraints — not tasks, but they apply to every item above
 
@@ -506,24 +576,161 @@ gets read on resume, and each of these has already cost a run once.
   its justification on record is D13's variance structure, never the sign of a contrast.
 - **Do not tick an item on something written rather than executed.** See the resume
   protocol at the top of this section.
+  ⚠ **T4 is ticked at closure without having executed, and it is the only such tick in this
+  file.** It is marked `[x]` so the queue does not read as live; its own block says in its
+  first sentence that the box is on the *closure*, not on the sweep. If that distinction ever
+  blurs, read T4's DONE-WHEN — it was never satisfied and is not claimed to be.
 
 ---
 
-`README.md` was **reconciled against this file on 2026-09-04** and no longer documents
-the abandoned SROIE CLI plan. It is a summary, not a second source of truth — this file
-still wins on any disagreement. `REPORT.md` (same date) is a standing prose summary of
-the project and of what each run established; it carries the same subordination notice.
+## Project closed 2026-10-05
 
-**Five derived documents, none of them a source of truth.** All five are subordinate to
-this file and all five go stale the moment a run lands:
+**Read this before anything else in this file.** The project is wrapped up for submission
+alongside a CV and SOP for masters applications in CSE / NLP. No further runs are planned.
+`AGENTS.md` remains the source of truth for what was done and why; what follows is the final
+accounting, so a reader does not have to reconstruct it from a 3,200-line queue.
+
+### What this project claims
+
+Three results, each already stated with its scope in `## What this project is` and unchanged
+by the closure:
+
+1. **Pruning to a third of the visual tokens costs nothing — if you train for it.** keep=0.35
+   discards 65% of visual tokens for **−0.26 recall points** (t −0.18, n=50 paired). The
+   conditional is load-bearing and measured: run 5, never trained under pruning, loses
+   monotonically on **bit-identical** token sets (D12). Attribution isolated by run 11 —
+   `ISO(0.35) = −10.49` (t −3.74) — so the gain is pruning-aware training, not the five extra
+   epochs it came with. Limit: isolated at keep=0.35/0.25/0.20; the loose budgets are
+   **underpowered, not null.**
+2. **The router's selection value is real and large.** +17.7 / +27.4 / +34.0 / +29.3 points
+   over a random mask at matched budgets (D11). Not ink coverage, and **no claim that it beats
+   the ink oracle** — t +1.62, under the pre-registered 2.0.
+3. **One measured efficiency claim, with its price attached.** Decoder cross-attention KV
+   **150.00 → 52.50 MiB (−65.0%)** at keep=0.35 for that −0.26 points; analytic and
+   hook-observed agree to a relative gap of 0.0000. Cross-KV only — **not** total, not peak,
+   not encoder, **not latency.**
+
+And a fourth that is the reason the other three are worth reading: **the methodological layer
+is a first-class result.** 14 diagnostics that re-derive from cached artifacts, `verify_*.py`
+checks that `exec` real notebook cells rather than linting them, sabotage controls on the
+verifiers themselves, and a pre-registration written before the run it was for and then used
+to **retire the project's own headline**.
+
+### What this project does not claim, and never resolved
+
+- **The merge axis is `UNDERPOWERED`, terminally.** T1's pre-registered primary — `keep=0.50
+  m=0.20 ink` vs `keep=0.40 ink TWIN`, token-matched at M=1920 — scores **+1.66 [−0.81,
+  +4.14]** in run 13 and **+0.02 [−1.90, +1.94]** in run 14, with **zero Holm survivors in
+  either.** `UNDERPOWERED` licenses nothing: not "merging is free", not "no measured cost",
+  not even "merging changes nothing" (T1 §7). The required resolution needs **n ≳ 307
+  documents**; FUNSD test is **50, and that is the whole split**, so `n` was never a knob.
+- **"Merging 20% is free" and "40% costs −3.86 [−7.45, −0.30]" are RETIRED**, and not for an
+  arithmetic reason — both figures still reproduce exactly from run 13. T3 retired the
+  **verdicts**: the m=0.20 sign flips with the estimator (+0.54 plain → −0.65 trimmed) *and*
+  with the replicate (−0.65 run 13 → +0.16 run 14), and the M=1440 price is **unreplicated**
+  (−3.23 [−5.70, −0.76] in run 13 vs −0.17 [−2.40, +2.06] in run 14).
+- **The corpus-average null is not a sentence about an arbitrary document.** Run 14's merge
+  null contains a page that lost **72.34 points**, and both location estimators hide it — the
+  plain mean because 72/50 is inside the resolution, the trimmed mean because the page is
+  discarded outright, **to the last bit** (a 25 pt mutation moves it by `0.0e+00`).
+- **No latency or throughput claim from this work is true.** 4800 → 960 visual tokens (5×)
+  buys **1.04×**, max 1.05× over ten rows. Structural, not disappointing: the router and the
+  merger both sit *after* the frozen Swin, so all 4,800 tokens are computed at every budget,
+  and T5 measured the merger's encoder saving at **0% by construction** — it is downstream of
+  all 20 encoder blocks.
+- **ToMe's placement is a decision, not an oversight** (T5). Moving it one stage earlier caps
+  at **4.9%** of encoder FLOPs even at a 50% merge; the version that pays must precede stage
+  2, which holds **69.2%** of the encoder in 14 of its 20 blocks, inside a frozen pretrained
+  encoder whose window partitioning, cyclic shift and relative position bias all assume an
+  intact grid — and it would break comparability with every run from 2 to 14.
+
+### What was built and never run
+
+**T4's pooled-corpus port, complete and verified.** PATCH I (cells 2/9/13/15), a 29-row sweep
+including the `keep=0.40 random TWIN` blocker arm at M=1920 that runs 13/14 structurally could
+not supply, `word_order` and per-document `corpus` labels in `per_image`, T1 §5's per-corpus
+discard constraint and §3's direction pin executable in the scorer, cost measured at **5.92 h**
+against a 9 h cap, and **five verifiers green against the final notebook with mtimes
+confirmed** (14/14 · 96/96 · 35/35 · 62/62 · 64/64).
+
+It never ran for one reason: **no corpus with a readable licence.** The official ICDAR SROIE
+archive is on disk and measured (**n=410** pooled, grain 0.75 pt/word, granularity invariance
+confirmed 360/360 on the real corpus) — and **the archive contains no licence, readme, terms
+or citation file anywhere in its 4,226 entries.** The terms exist only on the RRC portal,
+which no agent in this project could authenticate: `WebSearch` is unsupported for this model,
+and the host serves a certificate for a **different domain** (`CN=*.cvc.uab.cat` against a
+request to `rrc.cvc.uab.es`). The alternatives were measured and each fails on a ground
+licensing cannot fix: **CORD** has the clean first-party `cc-by-4.0` and the wrong denotation
+(23.6 words/doc, KIE-categorised, `dontcare` yields 0 recoverable words, grain 4.24 pt/word);
+the **`sizhkhy/SROIE` mirror** has the right denotation and a bare uploader-asserted
+`license: mit` with zero attribution to the competition that produced the scans — and was
+later found **unfaithful** as well (only 52 of 347 documents match the official GT exactly);
+**SynthDoG-en** states no licence at all and is contaminated; **FUNSD train** is contaminated
+and 199 < 307 regardless.
+
+So the project stopped at a licence it could not read, rather than using data it could not
+account for. That is the honest outcome and T1 §7 was written in advance to license it.
+
+### Abandoned, recorded so it is not mistaken for missing
+
+- **`Project-kilo` / PATCH J / `scripts/verify_official_sroie.py` (26/26) /
+  `results/_v_official_sroie.log`** — a parallel stream that built an official-SROIE loader.
+  It is **not in this repository** and was not reachable from the workspace at closure. Its
+  loader is moot under §7. Its measurement contribution survives here: the `n=410` vs `n=397`
+  reconciliation in `## The official SROIE archive` §1 is the merge of both streams' counts,
+  and both were exact — the disagreement was a **scope choice** (task-3's 347 images vs task
+  1/2's 360), not an arithmetic error.
+- **Run 18** (`TRAIN_SELECT_MODE='ink'`) — cancelled 2026-10-02, never run, authorised by
+  nothing in this file. Not a finding about ink-mode training; nothing was measured.
+- **`STORY.md`'s numeric audit** — the one T8 item left open. See T8.
+
+### The three things worth taking from this project
+
+1. **A green check deserves the same suspicion as a red one.** `router_score_probe.py` printed
+   "no concerns" across five sections; a sixth that compared the router to the *actual
+   objective* reversed the verdict. Before trusting a pass, ask what a *failing* system would
+   score on the same check — if the answer is "about the same", the check is decorative.
+2. **A verifier that crashes reads exactly like one nobody ran** — and that failure has three
+   forms, each cheaper to miss than the last. One crashed silently for 13 days; one exited 1
+   at 19 PASS / 0 FAIL; one **passed with the right number from the wrong artifact**, detected
+   only because its log was older than its own input. Hence: executed, and executed *against
+   the thing you are claiming*.
+3. **An estimator chosen after seeing the effect is not a measurement.** T1's rule was pinned
+   before run 17 existed, on D13's variance structure rather than on any contrast's sign — and
+   when T3 applied it to runs 13/14 it **retired the project's headline claim** and found a
+   defect in the rule itself (§3's tail gate fires on 13 of 21 contrasts where nothing is
+   merged). A pre-registration that only ever confirms is not doing anything.
+
+---
+
+`README.md` was **reconciled against this file on 2026-09-04**, rewritten visitor-first on
+2026-10-02, and no longer documents the abandoned SROIE CLI plan. It is a summary, not a second
+source of truth — this file still wins on any disagreement. ~~`REPORT.md` (same date) is a
+standing prose summary of the project and of what each run established; it carries the same
+subordination notice.~~ **`REPORT.md` was RETIRED 2026-10-05 (`git rm`) — see T8.**
+
+**~~Five~~ FOUR derived documents, none of them a source of truth.** All four are subordinate
+to this file and all four go stale the moment a run lands:
 
 | File | Organised by | Audience | Audit |
 |---|---|---|---|
 | `README.md` | results first, then scope limits | **someone arriving from a link, with 30 seconds** | — |
 | **`NOTES.md`** | **caveat first — "read this before quoting a number"** | **a maintainer about to cite a figure** | — |
-| `REPORT.md` | claims + per-run table | someone who knows the project | — |
-| `WRITEUP.md` | results-first, claim by claim | a reviewer checking the claims | `scripts/check_writeup_numbers.py`, 142/142 |
+| `WRITEUP.md` | results-first, claim by claim | a reviewer checking the claims | `scripts/check_writeup_numbers.py` |
 | **`STORY.md`** | **chronology — stage by stage** | **a general reader, no ML background** | **none — see below** |
+
+⚠ **`REPORT.md` was the fifth and is gone.** Retired 2026-10-05 because its two jobs — claims
+and a per-run table — were already done better by `WRITEUP.md` (audited) and by this file's own
+run table, and because it had become the repo's worst staleness surface: a *stale-as-of* banner
+whose own corrections asserted the figures T3 retired. Git history holds it; nothing unique was
+lost, because it carried no **reason** that is not in this file or an archive.
+
+⚠ **And the audit column is narrower than it looks** — `WRITEUP.md`'s auditor re-derives
+figures from `results/*.json`, so it checks **arithmetic, not whether a sentence is still the
+project's position.** That gap is why `WRITEUP.md` sat green while asserting a withdrawn
+verdict for 11 days: T3 changed the verdict, not the number, and −3.86 still reproduces
+exactly. Closed 2026-10-05 by adding a §7 ban on the retired phrasing — but the general
+limitation stands, and it is the reason this file wins on any disagreement.
 
 ⚠ **`NOTES.md` IS the old `README.md`, renamed 2026-10-02, not a new document** — moved with
 `git mv` so its history follows it. The split exists because one file was being asked to do two
@@ -559,9 +766,18 @@ Token-pruning research on Donut for document OCR. Architecture:
 ```
 frozen Swin-B encoder  ->  PatchSaliencyRouter  ->  BipartiteTokenMerger  ->  mBART decoder
 (naver-clova-ix/donut-base)   MLP score +            ToMe cosine soft-merge      seq2seq
-                              straight-through        w/ 2D coord centroids
+                              straight-through        (checkerboard split)
                               top-k prune
 ```
+
+> ⚠ **The third column read *"w/ 2D coord centroids"* until 2026-10-05, and that overstated
+> what is wired.** The merger does compute merged coordinate centroids and returns them, but
+> **no caller reads them** — `src/model.py:248` binds `final_coords` and never uses it,
+> `:372` discards it as `_`, and both notebook call sites discard it too. Nothing downstream
+> of the merger consumes coordinates; the decoder sees tokens only. The phrase was removed
+> rather than the code, because the return value is what makes the merger testable in
+> isolation (`verify_tome_merge_port.py` compares it) — see T8 and the Gotchas entry
+> *"Merged `final_coords` are dead code on both paths."*
 
 **THE FOUR CLAIMS THIS PROJECT CAN MAKE (current as of 2026-09-09; everything below
 this block is history and several parts of it are superseded).** Each one names the
@@ -626,6 +842,16 @@ evidence that earns it and the scope limit that comes with it:
    beside it.** No confirmatory quantity survives Holm in either run. The corpus-average null
    is **true**; it is not a sentence about an arbitrary document. The two rows above are
    **different estimands and must never be pooled** — that is D14 §1b's 5.08 pt hazard.
+
+   ⚠ **TERMINAL AS OF 2026-10-05 — this is the project's final position on the merge axis, not
+   an interim one.** T4/T6/T7 are closed under T1 §7 (see `## Project closed 2026-10-05`), so
+   the `n ≳ 307` that would upgrade `UNDERPOWERED` to `FREE` or `IMPROVED` will not be
+   collected. **Do not write a future tense here.** The accuracy half of claim 3 is
+   *unresolved and was left unresolved deliberately*, with the resolution requirement stated
+   in advance and the corpus that could have met it blocked on an unreadable licence. The
+   memory half — cross-KV `150.00 → 60.00 MiB (2.50×)` at M=1920 — is **unaffected, measured,
+   and stands**; note only that **pruning supplies 2.0× of it and the merge step alone is
+   1.25×** (T5), so the headline ratio is not a merging result.
 
    **Scope of the restatement:** **2 of T1's 3 confirmatory quantities.** Recall and
    NED≡charAcc are scored above; **`word_order` is not on disk for runs 13/14 and is not
@@ -772,7 +998,8 @@ one, because in several cases the caveat is the finding.
 | — | `scripts/verify_eval_only_ckpt_gate.py` | **The eval-only checkpoint gate (2026-10-02).** Execs the shipped `if RESUME_CKPT:` statement under **four scenarios, two of which must raise** — the verdicts **invert** on both `DO_TRAIN` and checkpoint era, which is what proves the train-side and eval-side guards oppose each other. Closes a gap PATCH A's comment claimed was closed. **14/14**; **8/14 exit 1 under sabotage**. |
 | — | `scripts/verify_train_select_mode.py` | PATCH H's `src`-level check (2026-09-25). **Undocumented until 2026-09-27**; log `results/verify_train_select_mode.log`. |
 | — | `scripts/verify_notebook_train_select_mode.py` | PATCH H's **notebook-level** check — execs cells 2/4/7/11 and the shipped saliency block. **Undocumented until 2026-09-27, and it had no log at all.** Run 2026-09-27: **37 passed, 0 failed through section 3, then exit 1 in section 4** (`NameError: epoch_sal`). Three of its own defects were found by running it — see `## Patch H, run 18's staged config, and two select-mode verifiers`. **Do not cite it as green.** |
-| — | `scripts/check_writeup_numbers.py` | Re-derives every figure in `WRITEUP.md` from `results/*.json` — deliberately **not** from this file for the derivable figures, because prose checked against prose proves nothing. **142/142, exit 0 (re-run 2026-10-02).** Found six real errors incl. a double sign inversion. ⚠ **It was silently FAILING 135/7 for 8 days** — its §6 transcription check read only `AGENTS.md`, and the 2026-09-24 split moved 7 figures into the archives, so it failed on figures that had merely *moved* and were never wrong. Fixed by reading all four tracker files, with a raising assert if one is missing. Sabotage-tested (bogus figure → 1 failure, exit 1). |
+| — | `scripts/check_writeup_numbers.py` | Re-derives every figure in `WRITEUP.md` from `results/*.json` — deliberately **not** from this file for the derivable figures, because prose checked against prose proves nothing. **144/144, exit 0 (re-run 2026-10-05).** ~~142/142 (2026-10-02)~~ — **the count rose because two §7 disclaimer needles were ADDED, not because figures were dropped**: `n ≳ 307` and `0 of 3` now have to be present, and `not isolated` was replaced by `underpowered, not null`. Found six real errors incl. a double sign inversion. ⚠ **It was silently FAILING 135/7 for 8 days** — its §6 transcription check read only `AGENTS.md`, and the 2026-09-24 split moved 7 figures into the archives, so it failed on figures that had merely *moved* and were never wrong. Fixed by reading all four tracker files, with a raising assert if one is missing. Sabotage-tested (bogus figure → 1 failure, exit 1). ⚠⚠ **It checks ARITHMETIC, not whether a claim is still the project's position** — and that gap let a *withdrawn verdict* sit under a green check for 11 days (T3 retired "20% merge is free" on 2026-09-24; `−3.86` still reproduces exactly from run 13, so nothing here could fire). Closed 2026-10-05 by the two new needles, which a re-assertion of "free" would have to delete. |
+| — | `scripts/check_agents_md_format.py` | Structural lint for the tracker files: fences balance, no ragged table rows, no edit debris. **AGENTS.md exit 0 (0 debris, 0 ragged, 10 fences balanced), and all 7 other `.md` files exit 0, 2026-10-05.** ⚠ **It had the cp1252 crash this file's own Gotchas entry documents, and nobody had applied the known fix** — it printed `UnicodeEncodeError` on `⛔` and died **after** reporting `1 PROBLEM(S)` but **before naming it**, so the crash masked its own finding. Fixed with `sys.stdout.reconfigure` (the docstring previously just *documented* a `PYTHONIOENCODING` prefix, which the Gotchas entry says is not a fix). The finding underneath was real: a markdown heading inside a blockquote (`> # …`) trips the botched-paste rule, correctly. |
 | — | `scripts/probe_generation_determinism.py` | Tests by execution the assumption that greedy generation is bit-identical across runs — the sole justification for bootstrapping over documents only. **6/6** within-process, **6/6** across two processes. |
 | — | `scripts/diagnose_tome_parity.py` | Quantifies the ToMe score-order/parity gotcha (~49% missed redundancy). Imports the **shipped** `checkerboard_color`; a local restatement scored 10/10 under sabotage. |
 | — | `scripts/diagnose_decoder.py` | LEGACY (copy-vs-next-token, settled before run 6). Re-run on run 8: no copy failure (COPY 0.0% / NEXT 74.5%), and the first legible sample of generated text recorded anywhere. |
@@ -781,7 +1008,7 @@ one, because in several cases the caveat is the finding.
 
 | Path | Role |
 | --- | --- |
-| [README.md](README.md), [NOTES.md](NOTES.md), [REPORT.md](REPORT.md), [WRITEUP.md](WRITEUP.md), [STORY.md](STORY.md) | **Derived prose, none of them a source of truth** — see the subordination table at the top of this file. `WRITEUP.md` is the only one with a numeric audit (`scripts/check_writeup_numbers.py`, 142/142); `STORY.md` (2026-09-17) is the only one organised chronologically (stage → problem → fix, for a reader with no ML background). **`NOTES.md` is the old `README.md`, renamed 2026-10-02** when the visitor-facing and maintainer-facing jobs were split — it holds the caveat-first detail, the new `README.md` leads with results. Correcting a number in this file leaves all five stale until someone propagates it. |
+| [README.md](README.md), [NOTES.md](NOTES.md), [WRITEUP.md](WRITEUP.md), [STORY.md](STORY.md) | **Derived prose, none of them a source of truth** — see the subordination table at the top of this file. `WRITEUP.md` is the only one with a numeric audit (`scripts/check_writeup_numbers.py`) — and that audit checks **arithmetic, not whether a claim is still current**, which is how it sat green over a withdrawn verdict for 11 days; `STORY.md` (2026-09-17, updated 2026-10-03) is the only one organised chronologically (stage → problem → fix, for a reader with no ML background) and has **no audit at all**. **`NOTES.md` is the old `README.md`, renamed 2026-10-02** when the visitor-facing and maintainer-facing jobs were split — it holds the caveat-first detail, the new `README.md` leads with results. **`REPORT.md` was the fifth and was retired 2026-10-05 (`git rm`, T8)** — superseded by `WRITEUP.md` plus this file's run table, and the repo's worst staleness surface. Correcting a number in this file leaves all four stale until someone propagates it. |
 | [kaggle_token_pruning_ocr.ipynb](kaggle_token_pruning_ocr.ipynb) | The **canonical** notebook, 17 cells, edited only via asserted patchers (below). Produced runs 2–6. **It did NOT produce runs 7–8.** |
 | [kaggle_pruning_run.ipynb](kaggle_pruning_run.ipynb) | **The notebook that actually produced runs 7–11.** Generated by `scripts/make_kaggle_pruning_notebook.py`, which copies the canonical notebook and adds the `DO_TRAIN` pruning-ON retrain + `SUPERVISE_SALIENCY` ink-BCE loss, and since 2026-09-16 the **real checkerboard `BipartiteTokenMerger` spliced from `src/tome.py`** plus the 13 token-matched merge rows (PATCH E/F/G), and since 2026-09-26 **PATCH H** — `_selection_signal` spliced from `src/model.py` (59 lines) with `select_mode` threaded into `forward()` so `forward()` and `generate()` share one selection path — and since 2026-09-29 **PATCH I**, the pooled-corpus port (cells 2/9/13/15: FUNSD+SROIE = 397 behind a `PooledTestSet`, a per-document `corpus` label, `word_order` in `per_image`, per-corpus strata on every row, and a 29th sweep row `keep=0.40 random TWIN` at M=1920). ⚠ **This list read "E/F/G" until 2026-09-27, 11 days after H shipped** — see `## Patch H, run 18's staged config, and two select-mode verifiers`. **The mechanism behind the project's headline result lives only here and in its generator — not in `src/`, not in the canonical notebook.** That is a third copy of the model; see the duplication gotcha. Regenerate, never hand-edit. **The merge fix exists ONLY here** — the canonical notebook still carries the broken parity split (gotcha). |
 | [src/](src/) | Library mirror: `model.py`, `router.py`, `tome.py`, `dataset.py`, `train.py`, `evaluate.py`, `loss.py` |
@@ -1198,10 +1425,15 @@ scored, rather than inheriting a threshold written against an unverified size.
 #### ⚠ AMENDED 2026-10-04 — the pool is n=410, not 397, and `347` was mislabelled
 
 The official ICDAR archive is on disk and measured. **The usable task-1/2 test split is 360
-pages, so the pool is `n = 410`.** `347` is the **task-3** test size and is a strict subset of
-task 1/2's 361 — so `verify_corpus_grain.py:109`'s message calling 347 *"the canonical ICDAR
+pages, so the pool is `n = 410`.** `347` is the **task-3** test size — so
+`verify_corpus_grain.py:109`'s message calling 347 *"the canonical ICDAR
 task-1/2 size"* is wrong, and T2's 347 was the size of the **mirror**, built from the task-3
-subset. Re-derived by importing this project's own `null_ratio`/`pctl`/`choose_g`, with n=50
+subset. ⚠ **This paragraph said task-3 is "a strict subset of task 1/2's 361" — corrected the
+same day: it is a subset of the 361 **GT** files but NOT of the 360-image directory it names.
+The orphan is one image, `X51006619570`, which lives in `task3-test/`. `410` stands as the
+recommendation, now on *denotation* rather than on that subset claim, and a third pool `411` is
+reachable. See the CORRECTED block in `## The official SROIE archive` §1.**
+Re-derived by importing this project's own `null_ratio`/`pctl`/`choose_g`, with n=50
 and n=397 as calibration controls that both reproduce the recorded values:
 
 | quantity | planned (n=397) | **measured (n=410)** |
@@ -2029,12 +2261,61 @@ project's conventions treat as untrustworthy. Re-derive before booking GPU.
 **Test GT is present.** The fallback plan (use the train split because test GT might be
 withheld) is unnecessary.
 
-⚠ **`347` IS THE TASK-3 TEST SIZE, NOT TASK 1/2's.** Measured: task3-test is 347 pages and is
-a **strict subset** of task1&2-test's 361 (`|task3 − t1&2test| = 0`). So
+⚠ **`347` IS THE TASK-3 TEST SIZE, NOT TASK 1/2's.** Measured: task3-test is 347 pages. So
 `verify_corpus_grain.py:109`'s assertion message — *"SROIE test loads n=347, the canonical
 ICDAR task-1/2 size"* — is **mislabelled**, and T2's `n=347` was the size of the *mirror*,
-which was built from the task-3 subset. **The usable task-1/2 test split is 360 pages**
-(360 jpg ∩ 361 txt; one GT file has no image).
+which was built from the task-3 subset. **The usable task-1/2 test split is 360 pages.**
+
+#### ⚠ CORRECTED 2026-10-04 (same day, by a second session) — the subset claim is off by one, and the off-by-one hid a better pool
+
+This section originally read *"task3-test … is a **strict subset** of task1&2-test's 361
+(`|task3 − t1&2test| = 0`)"* and *"one GT file has no image"*. **Both are wrong, and they are
+the same error:** the sentence compared the task-3 **image** directory against the **GT**
+directory while naming the **image** directory. Re-measured from the zip's namelist
+(`task3-test` 347 jpg · `task1&2_test(361p)` 360 jpg · `text.task1&2-test` 361 txt):
+
+| claim | as written | **measured** |
+|---|---|---|
+| `\|task3 − task1&2_test\|` (image dir, as named) | 0 | **1** |
+| `\|task3 − GT stems\|` (what the 0 was actually true of) | — | **0** ✅ |
+| "one GT file has no image" | no image anywhere | **its image EXISTS — in `task3-test/`** |
+
+**The orphan is `X51006619570`, and it is the same stem on both sides** (`GT − t1&2img` and
+`task3img − t1&2img` are each exactly `{X51006619570}`, asserted equal). So the 361st GT file
+is not unpaired — its image simply lives in the *other* test directory.
+
+**Consequence: three pool sizes are reachable, not two, and the two streams were each right
+about their own.**
+
+| SROIE part | pairable (image ∧ GT) | pool with FUNSD 50 | GT non-empty lines |
+|---|---|---|---|
+| task3-test only | **347** | **397** — `Project-kilo`'s PATCH J | 18,705 |
+| task1&2_test only | **360** | **410** — this section / commit `403ec0e` | 19,342 |
+| **both image dirs** | **361** | **411** — *measured, not previously noted* | 19,386 |
+
+⚠ **So `410` vs `397` was never an arithmetic disagreement — it is a SCOPE CHOICE**, and both
+counts are exact. The line counts confirm both streams read the **same GT source** (Kilo's log
+reports 18,705 and this section 19,386; both reproduce to the line), so only the *image-set
+enumeration* differs. That matters for the fix: PATCH J's loader reads the right ground truth
+and needs its **enumeration root** widened, not its parser changed.
+
+**RECOMMENDATION: take 410, and do NOT take 411 — on denotation, not on power.** T1 §6 clears
+`n ≳ 307` at every candidate (+90 / +103 / +104), so power is *not* the binding constraint and
+the +1 is worth 0.24%. `410` is exactly *"the official ICDAR task 1/2 test split"*, one
+sentence with one referent. `411` is *"that split plus one image borrowed from the task-3
+directory"* — a corpus whose denotation needs a footnote, which is the **same defect that
+killed CORD** (T2 excluded it for denoting a different quantity, not for being small). Spending
+a footnote on the denominator to buy 0.24% is the wrong trade. **`397` is superseded**: the
+task-3 subset was only ever the *mirror's* document set, and the mirror is rejected, so
+restricting to it now has no upside.
+
+⚠ **Scope of this correction:** measured by enumerating the zip's 4,226 entries and the GT line
+counts directly, so it is execution rather than prose — but it is still **one session's single
+pass**, and the 6-agent adversarial check this section asks for **still has not run** (my own
+3-agent attempt died on `403 pre-consume quota failed`, the same billing class as the `402`
+recorded above). Two independent failures of the same mechanism; treat multi-agent verification
+as unavailable, not as pending.
+
 
 ### 2. Pool size and split integrity
 
@@ -2171,10 +2452,58 @@ the terms.** Three questions, the second of which is new and urgent:
 1. **Permitted use** — research / non-commercial / any restriction.
 2. ⚠ **Redistribution — the repo is PUBLIC as of 2026-10-02.** If redistribution is
    forbidden, the data must never enter git history. **Guard added before extraction:**
-   `.gitignore` now carries `*SROIE*` / `*sroie*`. This was necessary, not precautionary —
+   `.gitignore` now carries `*SROIE*` / `*sroie*` **plus `!scripts/*sroie*.py` /
+   `!results/*sroie*.log`**. The broad rule was necessary, not precautionary —
    `git check-ignore` reported `SROIE2019/` as **NOT IGNORED** under the first,
-   narrower rule, and `*.jpg`/`*.txt` are deliberately not globally excluded. Verified with a
-   must-not-ignore control (`scripts/verify_corpus_grain.py` correctly stays tracked).
+   narrower rule, and `*.jpg`/`*.txt` are deliberately not globally excluded.
+   ~~Verified with a must-not-ignore control (`scripts/verify_corpus_grain.py` correctly stays
+   tracked).~~ ⚠ **That verification was decorative and the guard was defective** — it
+   swallowed `scripts/verify_official_sroie.py` and `results/_v_official_sroie.log`, and the
+   control named a filename the rule *cannot match*, so it could not have failed. Caught
+   same-day by a second session; the negations are the fix. See the Gotchas entry *"A
+   `.gitignore` rule broad enough to protect data…"*, and **enumerate the domain with
+   `git check-ignore` over the real `scripts/`/`results/` listings** rather than naming one
+   witness.
+   ⚠⚠ **AMENDED 2026-10-04 — the guard was OVER-broad and was swallowing this project's own
+   verifier and its evidence.** Measured in `Project-kilo`: `.gitignore:66 *sroie*` IGNORED
+   **`scripts/verify_official_sroie.py`** (PATCH J's companion check, the 26/26) **and
+   `results/_v_official_sroie.log`** (the only evidence it ever ran), with
+   `git ls-files --error-unmatch` confirming **both untracked**. Committing that stream as-is
+   would have dropped a verifier and its log out of the repo — and **claim 4, the
+   methodological layer, is precisely the claim that rests on verifiers being in the repo.**
+   **Fixed:** `!scripts/*sroie*.py` and `!results/*sroie*.log`, re-including **code and logs
+   only, never data** — verified in a scratch repo *and* in this one (verifier + log
+   TRACKABLE; `sroie_official/sub/X1.jpg`, `SROIE2019-*.zip`, `SROIE2019/task3-test/X1.jpg`
+   all still IGNORED). A negation cannot rescue anything under an excluded **directory**, so
+   `sroie_official/` is unaffected.
+   ✅ **The fix paid for itself inside the same hour, measurably.** Commit `403ec0e` (pushed to
+   the public remote) added **`results/_v_fmt_sroie.log`** and **`results/_v_writeup_sroie.log`
+   (182 lines of `check_writeup_numbers.py` output)**. Both match `*sroie*`; without the
+   negation that commit would have **silently omitted both**, and nothing would have reported
+   it. Checked for leakage: neither holds corpus text (first lines are
+   `code fences : 10 (balanced)` and a `=====` banner), so the public push disclosed nothing.
+   ⚠ **Both halves of the original verification were unsound, and each is one of this file's
+   own documented patterns:**
+   (a) *`git ls-files | grep -i sroie` was EMPTY on 2026-10-03 — and that was TRUE.* The
+   verifier was written on **2026-10-04**. A guard validated against the tree as it stood is
+   invalidated by the next file anyone adds; the check had no way to be wrong *and* no way to
+   stay right.
+   (b) *the must-not-ignore control was drawn from OUTSIDE the rule's domain.*
+   `verify_corpus_grain.py` contains no `sroie`, so `*sroie*` was never going to match it —
+   the control **could not have failed**. That is Conventions' *"ask what a failing system
+   would score on this same check"*, and the answer here was "identical".
+   **General form, worth keeping: a must-not-ignore control has to name a file the rule
+   actually matches.** The cheap correct version is `git check-ignore` over the real
+   `scripts/` and `results/` listings after every ignore-rule edit — enumerate the domain,
+   do not pick a witness from outside it.
+   ⚠ **One open decision for the user, not an agent's to take:** `_v_official_sroie.log`
+   (in `Project-kilo`, not here) quotes a handful of GT transcription fragments as evidence —
+   including the one cp1252 line with its pound sign. My negation makes it **trackable**, so
+   **merging and pushing that stream would publish those fragments** to a public repo while
+   the licence is still unread. A few quoted lines in a verification log is quotation rather
+   than redistribution on any ordinary reading, but it is corpus-derived text and the call is
+   the user's. Options: push as-is, scrub the quoted fragments out of the log, or narrow the
+   negation to exclude that one filename.
 3. **Attribution** — the required ICDAR 2019 RRC Task 1/2 citation, for README and WRITEUP.
 
 ### 8. Still to do before T4 runs, now that the data is local
@@ -2475,6 +2804,35 @@ encoder tail **1e-5**.
   mismatch produces — after ~50 of 134 checks. The remaining 84 never ran. A documented
   `PYTHONIOENCODING=utf-8` prefix is not a fix, because the failure mode is *forgetting* it.
   Scripts that print non-ASCII should call `sys.stdout.reconfigure(encoding="utf-8")` themselves.
+  ⚠ **RECURRED 2026-10-05 in `check_agents_md_format.py`, which had never had the fix applied —
+  and the second form is worse, because the crash MASKED THE CHECKER'S OWN ANSWER.** It printed
+  its summary (`edit debris: 1`), then `1 PROBLEM(S):`, then died on **U+26D4 `⛔`** while
+  printing *which* line was the problem. So the output said "there is exactly one problem" and
+  structurally could not say what it was. That is strictly more misleading than the 2026-09-06
+  truncation: a reader sees a real failure count, no diagnosis, and an exit code that looks like
+  the lint working. **Three standing consequences.**
+  **(a) The criterion is "not encodable in cp1252", NOT "non-ASCII" — and getting that wrong
+  sent me chasing a defect that does not exist.** The fix is not "remember the prefix": the
+  docstring *had* the prefix documented, which is precisely the state this entry already called
+  insufficient, and it survived that way for weeks. So the right move is to enumerate the
+  domain — but my first enumeration screened on **non-ASCII**, flagged six `diagnose_*` scripts,
+  and led me to "fix" `diagnose_analysis_dof.py` for printing `§`. **A sabotage control
+  refuted my own fix:** with the call removed and `PYTHONIOENCODING=cp1252` forced, D14 still
+  exits **0**, because **U+00A7 `§` IS in cp1252 at 0xA7**. The two characters that actually
+  crashed are *outside* cp1252 — U+2265 `≥` and U+26D4 `⛔`. Re-screened on cp1252-encodability
+  over all **39** checker-class scripts: **zero residual risk** — every script lacking
+  `reconfigure` prints only cp1252-safe text, and five of those six `diagnose_*` hits were
+  module **docstrings**, which are never printed. The `diagnose_analysis_dof.py` call stays as
+  *defensive* with a comment saying so; it fixed nothing. **General form: a screening criterion
+  one notch broader than the real failure condition manufactures work and, worse, manufactures
+  false entries in this file.** Screen on the condition, then sabotage the fix to confirm the
+  condition was real.
+  **(b) When a checker reports a count and no detail, suspect the printer, not the count.**
+  **(c) Do not weaken a lint to fit a stylistic choice that has an equivalent.** The finding
+  underneath was legitimate: a markdown heading inside a blockquote (`> # …`) matches the
+  botched-paste rule, and the resolution was to change the markdown to **bold** — which renders
+  as loud, keeps a banner out of the document outline where it is not a section, and leaves the
+  rule able to catch the real thing.
 
 - **PowerShell's `Set-Content -Encoding utf8` corrupts every non-ASCII character in a UTF-8
   file it did not create.** Reading with `Get-Content -Raw` and writing back with
@@ -2505,6 +2863,30 @@ encoder tail **1e-5**.
   is not a superset of parsing.** Strip with a byte-level rewrite asserting `raw[3:] == new`
   so nothing but the 3 leading bytes changes.
 
+- **A `.gitignore` rule broad enough to be safe is broad enough to swallow your own tooling —
+  and the obvious control for it cannot fail.** Found 2026-10-04. The licence guard
+  `*SROIE*`/`*sroie*` was added deliberately broad (the narrower list had missed `SROIE2019/`,
+  the real extraction directory). It then also IGNORED **`scripts/verify_official_sroie.py`**
+  and **`results/_v_official_sroie.log`** — a shipped verifier and the only evidence it ran —
+  with `git ls-files --error-unmatch` confirming both untracked. The repo would have lost a
+  verifier out of version control, which is the one asset claim 4 rests on.
+  **Both halves of the original verification were unsound, in two different ways already in
+  this file:** (a) `git ls-files | grep -i sroie` came back EMPTY and **that was true** — the
+  verifier was written the *next day*; a guard validated against the tree as it stood is
+  invalidated by the next file anyone adds. (b) the must-not-ignore control named
+  `scripts/verify_corpus_grain.py`, **whose name the rule cannot match**, so it had no way to
+  fail — Conventions' *"ask what a failing system would score on this same check"*, answer
+  "identical".
+  **The fix and the rule to carry:** re-include code and logs with `!scripts/*sroie*.py` /
+  `!results/*sroie*.log` (never data — and note a negation **cannot** rescue anything beneath
+  an excluded *directory*, so `sroie_official/` is untouched by it). Then **enumerate the
+  domain**: run `git check-ignore` over the actual `scripts/` and `results/` listings after
+  every ignore-rule edit, rather than picking one witness and hoping. A must-not-ignore control
+  must name a file the rule **actually matches**.
+  ⚠ The cost of getting this wrong is silent in the worst way: commit `403ec0e` added two
+  `*sroie*`-matching logs, and without the negation it would have **omitted both with no
+  warning** — `git commit` does not report files it skipped for being ignored.
+
 - **A green count is scoped to whatever the sweep globbed.** "8/8 verifiers exit 0" on
   2026-08-31 was true and still left five files holding a path that had not existed for days,
   because the sweep ran `verify_*.py` and `diagnose_*.py` and those five are named otherwise.
@@ -2513,6 +2895,25 @@ encoder tail **1e-5**.
   not by running the scripts you can name. `scripts/_final_check.py` (scratch) does this by
   walking every string constant in every script through `ast` and `os.path.exists`-ing the ones
   that look like run paths; a curated list of paths to check reproduces the original blind spot.
+
+- **`git status` is a snapshot, and `git add -A` is a second, later snapshot — in a repo with a
+  concurrent session those are different trees.** Found 2026-10-04. Commit `403ec0e` carries
+  **26 lines of another session's `.gitignore` analysis that I had never read**, under a message
+  that does not mention it, because `git add -A` staged whatever was on disk at staging time
+  rather than what `git status` had shown moments before. Nothing was lost and the edit was
+  correct — it is the negation fix in the entry below, and it is the only reason that commit's
+  two `*sroie*` logs were not silently dropped — but the commit misattributes authorship and
+  its message is incomplete about its own contents.
+  **This amends the Conventions entry *"Before assuming you know what state the tree is in, run
+  `git status`"*:** that is necessary and not sufficient. When another session may be writing,
+  either **stage explicit paths** (`git add AGENTS.md results/foo.log`) or **re-run
+  `git status` immediately before committing and read the staged diff**, because `git add -A`
+  is a claim about the tree *now*, not about the tree you inspected. Cheapest form:
+  `git diff --cached --stat` before `git commit`, and treat an unexpected path as a stop.
+  ⚠ **The symptom was visible and dismissed.** That `git status` listed **one** untracked log
+  where three had just been written — the two `*sroie*`-matching ones were already being
+  ignored. The discrepancy was noticed, judged uninteresting, and not investigated; it was the
+  live signature of the ignore defect below, one command from being found.
 
 - **A percentile helper that takes a FRACTION, called with a PERCENTAGE, silently returns the
   MAXIMUM — and the maximum is a plausible-looking number.** Found 2026-10-04 while

@@ -69,6 +69,20 @@ import statistics as st
 import sys
 from typing import Dict, List, Sequence, Tuple
 
+# 2026-10-05: DEFENSIVE, not a fix -- and the first version of this comment was wrong.
+# This script prints "§1b" at line ~365 (a non-ASCII char in an f-string that really does
+# reach stdout, confirmed: it appears in the log). I added this call claiming cp1252 would
+# crash on it. A sabotage control disproved that: with this line removed and
+# PYTHONIOENCODING=cp1252 forced, D14 still exits 0 -- because U+00A7 IS in cp1252 (0xA7).
+# The chars that actually crash are OUTSIDE cp1252: U+2265 "≥" (check_writeup_numbers) and
+# U+26D4 "⛔" (check_agents_md_format). So my screening criterion was "non-ASCII", which is
+# far too coarse; the correct one is "not cp1252-encodable", and under THAT criterion zero
+# of this repo's 39 checker-class scripts have a residual problem. The line stays because
+# it costs nothing and protects against a future non-cp1252 char being added to a printed
+# string here -- but it fixed no live defect. See AGENTS.md's Gotchas entry on the cp1252
+# crash, clause (a).
+sys.stdout.reconfigure(encoding="utf-8")
+
 HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RUN13 = os.path.join(HERE, "run 13", "ablation_selection.json")
 RUN14 = os.path.join(HERE, "run14", "ablation_selection.json")

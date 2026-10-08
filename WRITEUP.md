@@ -4,14 +4,34 @@
 `AGENTS.md` is the source of truth and carries the full run history, the diagnostics that
 produced these figures, and the approaches that failed.*
 
+> **⛔ READ FIRST — FINAL STATE, 2026-10-05**
+>
+> **The project is closed.** Two of its three results stand as written below. The **merging**
+> result does not: both *"20% merge is free"* and *"40% costs −3.86 [−7.45, −0.30]"* are
+> **RETIRED**, and the honest terminal verdict on the merge axis is **`UNDERPOWERED`**,
+> requiring **n ≳ 307** documents that were never collected.
+>
+> The retirement is **not** an arithmetic correction — both figures still reproduce exactly
+> from run 13's artifacts. A pre-registration written before the deciding run existed was
+> applied backwards to runs 13 and 14, and the **verdicts** did not survive it: the
+> token-matched primary at M=1920 is **+1.66 [−0.81, +4.14]** and **+0.02 [−1.90, +1.94]**,
+> with **0 of 3 confirmatory quantities surviving Holm in either run.**
+>
+> **Everything below is preserved as written, with corrections marked in place** — nothing is
+> deleted, because the reason a claim was wrong is the more useful half of the record. The
+> three dated correction blocks are the document's actual argument. **The full final
+> accounting is §5's third correction; `AGENTS.md` → `## Project closed 2026-10-05` is the
+> source of truth.**
+
 > **Correction, 2026-09-18 — the merging gap this writeup declares open has since been
 > closed.** Four statements below said `BipartiteTokenMerger` "has never executed" and that
 > the merge sweep was "blocked on an ordering fix". The ordering fix (`checkerboard_color`,
 > deriving A/B colour from the original raster index rather than from score rank) landed, and
 > the merger ran end to end on a Kaggle T4 as **run 13** (2026-09-17, 28-row token-matched
-> grid). The four sites are corrected in place and marked. Result: **merging away 20% of the
+> grid). The four sites are corrected in place and marked. Result: ~~**merging away 20% of the
 > router's kept set is free at four budgets under both the router and the ink oracle; 40%
-> costs −3.86 pts [−7.45, −0.30]**. Nothing else in this writeup changes — §2's scope limits
+> costs −3.86 pts [−7.45, −0.30]**~~ — **both verdicts retired 2026-09-24; see the banner
+> above and §5's third correction.** Nothing else in this writeup changes — §2's scope limits
 > apply to the merger unchanged, because it also runs *after* the frozen Swin.
 
 > **Second correction, 2026-09-21 — run 14 has now run, and it does not settle the question.**
@@ -235,9 +255,39 @@ nothing *if you train for it*. It is not a property of the pruner.
 **The one thing this does not settle, stated before the run produced any output:** run 9
 differs from run 5 by pruning-aware training **and by five more epochs of it**. The
 cross-checkpoint gaps (+5.07 / +8.67 / +7.42 / +10.23, all significant) establish that a
-difference exists, not that pruning-aware training caused it. **H1 is supported, not
+difference exists, not that pruning-aware training caused it. ~~**H1 is supported, not
 isolated.** The missing arm is a run-5-length checkpoint trained without pruning; it is the
-next experiment, and until it runs this claim is not upgraded.
+next experiment, and until it runs this claim is not upgraded.~~
+
+**✅ CLOSED by run 11 (2026-09-14) — this paragraph's "next experiment" ran, and the claim is
+upgraded.** *(Correction 2026-10-05: the struck text had been stale for three weeks, and so had
+the guard enforcing it — see the note below.)* Run 11 is run 9 with `TRAIN_KEEP_RATIO` 0.50 →
+1.00 and **nothing else changed**, verified by diffing the executed notebooks: the five epochs
+*without* the pruning. Measured paired on n=50:
+
+- **`ISO(0.35) = −10.49 pts` (t −3.74)** — removing the pruning while keeping the epochs costs
+  ten points.
+- Run 11's budget curve **peaks unpruned and declines monotonically**, where run 9's is flat.
+- Five unpruned epochs moved the ceiling by **+0.52 pts (t 0.24)** — i.e. the epochs alone buy
+  nothing.
+- Closed locally too: `ISO ≤ 0` at all four budgets, clearing the pre-registered `ISO ≤ −3.0`
+  with `|t| ≥ 2.0` at keep=0.35 (−8.15), 0.25 (−7.35) and 0.20 (−7.92).
+
+So the gain is attributable to **pruning-aware training**, not to the extra epochs, and §1 may
+say *"because it was trained for it."*
+
+⚠ **One limit stands, and it is the reason the wording is precise.** The loose budgets (Kaggle
+keep=0.75/0.50, local keep=0.50) are **underpowered, not null** — no isolation is claimed there.
+Write **"H1 isolated at keep=0.35/0.25/0.20"**, never "H1 proven".
+
+⚠ **Worth recording because it is this project's own documented failure mode.** The struck
+sentence survived three weeks past its refutation *and the numeric auditor was enforcing it*:
+`scripts/check_writeup_numbers.py` §7 banned the phrase "H1 is isolated" on the stated
+rationale *"the control has not run"* — while requiring the phrase "not isolated" to be
+present. The control had run. `README.md` already carried the corrected version, so the repo's
+two main documents contradicted each other and the check mandated the wrong side. A guard keyed
+on the state it was written in does not merely fail to notice its own fix; it can make the fix
+look like the defect. Both the ban and the needle were re-pointed on 2026-10-05.
 
 **A methodological note we are keeping.** The pre-registered acceptance criterion returned
 **UNDERPOWERED** and it still stands: it keyed on keep=0.50 alone — the flattest point on the
@@ -278,9 +328,11 @@ an ordering fix rather than on GPU time.~~
 
 *Corrected 2026-09-18.* The ordering fix landed and the merger ran as **run 13** (Kaggle T4,
 2026-09-17, run 9's pruning-aware weights, 28-row grid in which every merge row is paired with
-a prune-only row at the identical final token count M). **Merging away 20% of the router's kept
+a prune-only row at the identical final token count M). ~~**Merging away 20% of the router's kept
 set is free** to this harness's resolution, at four budgets and under both the router and the
-ink oracle; **merging away 40% costs −3.86 pts [−7.45, −0.30]**. What remains a limitation is
+ink oracle; **merging away 40% costs −3.86 pts [−7.45, −0.30]**.~~ *(Both sentences retired
+2026-09-24 — see the third correction below. The **figures** still reproduce exactly; the
+**verdicts** did not survive the pre-registered estimator.)* What remains a limitation is
 the *condition*, and it is the same word this writeup's title turns on: every checkpoint in the
 project was trained at `merge_ratio=0.0`, so run 13 measured merging **strictly off-distribution**.
 By §4's own logic the 40% cost is therefore the train/test-matching lesson a second time until
@@ -296,6 +348,78 @@ contrast **NED is significantly worse** (p=0.029) while charAcc and word order e
 moved to about *half* their previous cost rather than to zero, which is the signature of a
 **partial** recovery: exactly the case the pre-registration said this design could not
 distinguish from a full one. **2.5× at M=1920 therefore remains the measured limit.**
+
+### Third correction, 2026-10-05 — the merging claim is retired, and the axis is closed
+
+**This is the final position.** Both struck sentences above were retired on 2026-09-24, and
+**not for an arithmetic reason** — run 13's plain means reproduce **+0.54** and **−3.86**
+exactly. What was wrong was the *words*. A pre-registration written before any run-17 number
+existed (estimator, SE, interval, tail statistic, multiplicity, verdict table — fixed on the
+variance structure of the paired deltas, never on the sign of a contrast) was then applied
+*backwards* to runs 13 and 14, and it did not return what the headline said.
+
+The pre-registered primary is **token-matched**, because that is the only estimand the merger
+has a reason to exist for: at an equal budget of **M=1920**, does merging preserve more word
+recall than pruning harder? That is `keep=0.50 m=0.20 ink` against `keep=0.40 ink TWIN`, with
+token-matching asserted from disk in both runs.
+
+| | run 13 | run 14 |
+|---|---|---|
+| **pre-registered primary**, M=1920 matched | **+1.66 [−0.81, +4.14]** | **+0.02 [−1.90, +1.94]** |
+| resolution (CI half-width) | 2.48 pts | 1.92 pts |
+| verdict | **UNDERPOWERED** | **UNDERPOWERED** |
+| confirmatory quantities surviving Holm | **0 of 3** | **0 of 3** |
+
+**`UNDERPOWERED` licenses nothing** — not "merging is free", not "no measured cost", not even
+"merging changes nothing". The required resolution needs **n ≳ 307 documents**. FUNSD test is
+**50, and that is the entire split**, so `n` was never a knob to turn.
+
+Three findings make this stronger than a null, and each cuts against the claim being replaced:
+
+1. **"Free" is robust to neither the estimator nor the replicate.** Claim 3's own row
+   (`keep=0.50 m=0.20 router` vs `keep=0.50 router`, M=1920 vs M=2400) is **+0.54** as a plain
+   mean, **−0.65** under the pre-registered trimmed mean, and **+0.16** in run 14. Every one is
+   a null, so "no measured cost" survives — but the *sign* flips both ways, and only the
+   estimator direction was on record before.
+2. **The −3.86 price is unreplicated, which is a different defect from being wrong.** The
+   pre-registered estimator gives **−3.23 [−5.70, −0.76]** in run 13 (excludes zero) and
+   **−0.17 [−2.40, +2.06]** in run 14 (includes zero). The old sentence called *resolved*
+   something one of two runs denies.
+3. **The corpus-average null is not a statement about an arbitrary page, and both location
+   estimators hide that.** Run 14's M=1440 row contains a document that lost **72.34 points**.
+   The plain mean hides it because 72/50 ≈ 1.4 pts sits inside the resolution; the trimmed mean
+   is blind to it **to the last bit** — pushing that page 25 pts further moves the estimate by
+   exactly `0.0e+00`, while the plain mean moves −0.50, which is **181% of the row's own
+   effect**. A pre-registered *tail* gate surfaces it (worst-document ratio 5.01 against a
+   matched-null p95 of 1.74); the harmed-count gate does not (4 against p95 6). So **one** gate
+   catches it, not both — and surfacing is not attributing: the same gate fires on **13 of 21**
+   contrasts where **nothing is merged at all**, and the worst per-document loss in the whole
+   sweep (**−80.85 pts**) belongs to a row with `merge_ratio=0`.
+
+**Scope of this restatement: 2 of the 3 confirmatory quantities.** Recall and NED≡charAcc are
+scored; **`word_order` is not on disk for runs 13/14 and is not derivable** — `per_image` stores
+only the row-level aggregate, while the metric needs the raw predicted and gold word
+*sequences*, and neither recall (set-valued, order-blind) nor NED (character-level) determines
+it. Holm is still run over a family of **three**, so the thresholds are the conservative ones.
+This is a limit of the back-scoring, not of the rule.
+
+**The axis is now closed.** The experiment that would have reached n ≳ 307 was built and
+verified — a 29-row pooled sweep with the structure-matched `random` arm at M=1920 that runs
+13/14 could not supply, five verifiers green, cost measured at 5.92 h against a 9 h cap — and
+**never ran, for want of a corpus with a licence anyone could read.** The official ICDAR SROIE
+archive is on disk and measured (pooled **n=410**, grain 0.75 pt/word), and contains no licence,
+terms or citation file in any of its 4,226 entries; the terms exist only on a host that serves a
+certificate for a different domain. Of the alternatives, the one with clean first-party
+licensing annotates only a key-value subset of each page rather than the page (grain 4.24
+pt/word, 4.2× coarser than the effect being resolved), and the one with the right annotations
+carries a bare uploader-asserted licence with no attribution to the competition that produced
+the scans — and was later found to match the official ground truth exactly on only 52 of 347
+documents.
+
+So the honest terminal result is the one the pre-registration named in advance for this exact
+case: **`UNDERPOWERED`, with the required `n` quoted beside it.** The memory claim in §1 is
+unaffected and stands; note only that of the 2.50× at M=1920, **pruning supplies 2.0× and the
+merge step alone is 1.25×**, so the headline ratio is not a merging result.
 
 Two things this result is **not**. It is not a latency or encoder-side win: the merger runs
 *after* the frozen Swin, exactly like the router, so every scope limit in §2 applies to it
@@ -369,8 +493,8 @@ exists to prevent.
 
 | limitation | status | what would close it |
 |---|---|---|
-| H1 is supported but **not isolated** — five extra epochs are confounded with pruning-aware training | known before the run; stated in the script's docstring | a run-5-length checkpoint trained **without** pruning (~4 h on a T4). This is the next experiment |
-| ~~Token merging has never executed~~ **Token merging was measured off-distribution** *(row corrected 2026-09-18)*, **and the in-distribution re-measure came back underpowered** *(2026-09-21)* | ~~the parity diagnostic says it cannot work as documented under score-order~~ the ordering was fixed and the merger ran as **run 13**: 20% merge is free at four budgets, 40% costs **−3.86 pts [−7.45, −0.30]**. ~~But every checkpoint was trained at `merge_ratio=0.0`, so this is the off-distribution case~~ **Run 14 trained at `TRAIN_MERGE_RATIO=0.40` and took that contrast to −0.28 [−4.46, +3.44] — flat, but res 3.95 vs a 3.6 bar, so UNDERPOWERED, and the interval still contains −3.86. The same checkpoint gained as much on a random unmerged selection (+3.43 vs +3.11, diff −0.32 p=0.60), and NED degraded significantly (p=0.029) while recall did not** | **Not run 14 again at n=50 — `n` is not a knob (50 *is* FUNSD test).** The effect has to grow or the design has to change: contrast m=0.40 against m=0.00 across **two checkpoints in one session**, pre-register on **more than one metric**, and add a **"did this checkpoint just get better at everything" control** (the `random` row at the trained budget). **2.5× at M=1920 stays the measured limit** |
+| ~~H1 is supported but **not isolated** — five extra epochs are confounded with pruning-aware training~~ **H1 WAS ISOLATED by run 11** *(row corrected 2026-10-05; it had been stale since 2026-09-14)* | ~~known before the run; stated in the script's docstring~~ **Closed.** Run 11 is run 9 with `TRAIN_KEEP_RATIO` 0.50 → 1.00 and nothing else changed (verified by notebook diff) — i.e. the five epochs *without* the pruning. `ISO(0.35) = −10.49 pts` (t −3.74, n=50 paired): run 11's curve peaks unpruned and declines monotonically where run 9's is flat, and five unpruned epochs moved the ceiling by only **+0.52 pts** (t 0.24). So the gain is attributable to pruning-aware training, **not** to the extra epochs | **Nothing — it ran.** ⚠ One limit stands: isolated at keep=0.35/0.25/0.20 (−8.15 / −7.35 / −7.92, every t at or beyond −2.70 locally); the **loose** budgets are **underpowered, not null**. Write "H1 isolated at keep=0.35/0.25/0.20", never "H1 proven" |
+| ~~Token merging has never executed~~ **Token merging was measured off-distribution** *(row corrected 2026-09-18)*, ~~**and the in-distribution re-measure came back underpowered** *(2026-09-21)*~~ **and under the pre-registration it is UNDERPOWERED in both runs — axis CLOSED 2026-10-05** | ~~the parity diagnostic says it cannot work as documented under score-order~~ the ordering was fixed and the merger ran as **run 13**: ~~20% merge is free at four budgets, 40% costs **−3.86 pts [−7.45, −0.30]**~~ *(both verdicts retired 2026-09-24 — the figures reproduce, the words did not survive the estimator)*. ~~But every checkpoint was trained at `merge_ratio=0.0`, so this is the off-distribution case~~ **Run 14 trained at `TRAIN_MERGE_RATIO=0.40` and took that contrast to −0.28 [−4.46, +3.44] — flat, but res 3.95 vs a 3.6 bar, so UNDERPOWERED, and the interval still contains −3.86. The same checkpoint gained as much on a random unmerged selection (+3.43 vs +3.11, diff −0.32 p=0.60), and NED degraded significantly (p=0.029) while recall did not.** Re-scored under the pre-registered estimator the **token-matched** primary at M=1920 is **+1.66 [−0.81, +4.14]** (run 13) and **+0.02 [−1.90, +1.94]** (run 14), **0 of 3 quantities surviving Holm in either** — see §5's third correction | ~~Not run 14 again at n=50~~ **`n ≳ 307` documents, and it was never collected.** `n` is not a knob — 50 *is* FUNSD test. The pooled 29-row sweep that would have reached it (with the structure-matched `random` arm at M=1920 that runs 13/14 lack) was **built, verified green, and never run: no corpus with a licence anyone could read.** **2.5× at M=1920 stays the measured limit**, of which pruning supplies 2.0× and merging 1.25× |
 | Local and Kaggle generation diverge, widening with tightness | characterised, and the reason every claim here is a paired within-venue delta | not chased; recorded as a limitation |
 | ~18% of predictions are still not valid JSON | measured as a rate only, never characterised | error analysis. Predictions are deliberately never repaired before scoring |
 | The unpruned ceiling moves between retrains — 1.09 and 1.30 pts on two runs, **10.93** on a third — and on runs 7–8 that drift cannot be separated from a harness fault | why every comparison here is within-checkpoint; run 9 onward re-evaluates the unchanged run-5 weights through the same harness first, which makes the question decidable | more seeds; runs 7–8 stay ambiguous retroactively — no control can be added to a run that already happened |

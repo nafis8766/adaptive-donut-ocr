@@ -73,7 +73,6 @@ AGENTS.md                        # source of truth: runs, findings, dead ends, g
 NOTES.md                         # maintainer notes: every caveat, in detail
 WRITEUP.md                       # results-first, claim by claim (numerically audited)
 STORY.md                         # chronological, for a reader with no ML background
-REPORT.md                        # per-run summary
 
 kaggle_token_pruning_ocr.ipynb   # canonical notebook — produced runs 2-6
 kaggle_pruning_run.ipynb         # GENERATED from it — produced runs 7-14
@@ -88,6 +87,23 @@ Model weights (`*.pt`) and the per-run result archives (`*.zip`) are not version
 
 ## Status
 
-Runs 2–14 complete. The next experiment is an eval-only sweep on a pooled corpus, built and verified but **blocked on corpus licensing**: FUNSD's 50 test documents cannot resolve the merge question, and of the available alternatives one has the right licence but annotates only a key-value subset of each page rather than the page, one has the right annotations but an uploader-asserted licence with no attribution to the competition that produced the scans, and one states no licence at all. If no suitably licensed corpus is sourced, the honest outcome is to report `UNDERPOWERED` with the required `n` and stop — which the pre-registration specifies in advance.
+**Closed, October 2026.** Runs 2–14 complete; the three results above are the deliverable.
 
-**`AGENTS.md` is the source of truth.** Every other document here, including this one, is derived from it and goes stale the moment a run lands.
+The merge axis was closed **unresolved, deliberately.** Merging-vs-pruning at a matched budget
+is `UNDERPOWERED` in both available runs, and reaching a 1.0-point resolution needs **n ≳ 307
+documents** against FUNSD's 50 — which is the entire test split, so `n` was never a knob. The
+pooled 29-row sweep that would have reached it was built, verified green by five checks, and
+costed at 5.92 h against a 9 h budget. It never ran, because no corpus with a licence I could
+read was available: the official competition archive contains no licence, terms or citation file
+in any of its 4,226 entries and its terms live only on a host serving a certificate for a
+different domain; of the alternatives, the one with clean first-party licensing annotates only a
+key-value subset of each page rather than the page, and the one with the right annotations
+carries a bare uploader-asserted licence with no attribution to the competition that produced
+the scans.
+
+So the reported outcome is the one the pre-registration named in advance for exactly this case —
+`UNDERPOWERED`, with the required `n` quoted beside it — rather than a claim resting on data I
+could not account for. `AGENTS.md` → `## Project closed 2026-10-05` is the final accounting.
+
+**`AGENTS.md` is the source of truth.** Every other document here, including this one, is
+derived from it.

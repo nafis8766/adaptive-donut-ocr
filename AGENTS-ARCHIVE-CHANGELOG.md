@@ -2595,3 +2595,92 @@ existing Kaggle workflow is untouched.
   line" summaries, refreshed "where it stands" / lessons / glossary. No new measurements —
   every figure transcribed from `AGENTS.md`; the file has no numeric audit. See the 2026-10-03
   changelog entry at the top of this file.
+
+- **2026-10-05/08 — PROJECT CLOSED. T4/T6/T7 closed under T1 §7; `REPORT.md` retired; the
+  withdrawn merging claim scrubbed from the prose; two stale guards re-pointed.** User ruling:
+  the project is wrapped up for submission with a CV / SOP for masters applications in CSE /
+  NLP. No further runs. The full final accounting is `AGENTS.md` → `## Project closed
+  2026-10-05`; this entry is what changed and what it cost.
+
+  **The ruling and its one reversal.** T4, T6 and T7 are **closed, not deferred** — the merge
+  axis's terminal verdict is `UNDERPOWERED` with the required `n ≳ 307`, which is exactly the
+  outcome T1 §7 was written in advance to license. This **reverses the 2026-10-02 ruling**
+  (re-source SROIE from official ICDAR rather than apply §7). The reversal is legitimate rather
+  than a re-litigation of a decision this file says not to re-litigate: the ground given for
+  the §7 recommendation at the time was the ~10–12 week CV deadline, and that deadline arrived.
+  Nothing about the corpus assessment is withdrawn — the official archive is on disk, measured
+  at `n=410`, and **its licence was never read** (no licence/terms/citation file in any of its
+  4,226 entries; the RRC portal serves a cert for a different domain, so no agent could
+  authenticate it).
+
+  **What the wrap-up actually found, and it was not on the T8 checklist.** `WRITEUP.md` and
+  `REPORT.md` were both still asserting *"20% merge is free"* and *"40% costs −3.86
+  [−7.45, −0.30]"* **as results**, inside correction banners that made them read as reconciled.
+  T3 retired both on 2026-09-24. **`check_writeup_numbers.py` was genuinely 142/142 and could
+  not catch it:** it re-derives figures from `results/*.json`, and −3.86 still reproduces
+  *exactly* from run 13 — T3 changed the **verdict**, not the arithmetic. So the repo's one
+  audited document was the one stating withdrawn claims, under a green check, for 11 days.
+  Closed by adding two §7 disclaimer **needles** (`n ≳ 307`, `0 of 3`) that a re-assertion of
+  "free" would have to delete; count **142 → 144**, and the +2 is entirely those needles plus
+  `not isolated` → `underpowered, not null`, not a change in figures audited.
+
+  **A guard was enforcing a claim that had been false for three weeks.** `check_writeup_numbers.py`
+  §7 banned `H1 is (proven|established|isolated)` on the stated rationale *"the control has not
+  run"* and **required** the phrase `"not isolated"`. Run 11 ran on **2026-09-14** and isolated
+  H1 (`ISO(0.35) = −10.49`, t −3.74); `README.md` already carried the corrected version, so the
+  two main documents contradicted each other and the auditor enforced the wrong side. This is
+  the D4 staleness shape one turn worse: the guard did not merely fail to notice its own fix, it
+  **mandated the superseded wording**, so applying the fix would have turned the check red.
+  Ban narrowed to `proven|established` (AGENTS.md claim 1 is explicit that "H1 proven" is the
+  thing to never write); needle re-pointed to the *live* scope limit.
+
+  **`REPORT.md` retired (`git rm`).** 256 lines whose two jobs — claims and a per-run table —
+  were already done better by `WRITEUP.md` (audited) and by AGENTS.md's own run table, and which
+  carried **no unique reason**, so archive-never-delete is satisfied by git history rather than
+  by a fourth archive nobody reads. De-referenced in `README.md`, `NOTES.md`, `STORY.md` and
+  AGENTS.md's two doc tables. Five derived docs → four.
+
+  **Other prose corrections:** `NOTES.md`'s "What's open" still ranked H1 isolation as "highest
+  value remaining" after run 11 had done it, and still framed the merge question as needing a
+  better *design* when T3 had shown the binding constraint was the **instrument** (at n=50
+  against a per-document sd of 11–13 pts, `UNDERPOWERED` is structural and no redesign escapes
+  it). `STORY.md` gained a read-for-the-shape-not-the-number banner, since its figures are
+  deliberately historical-in-context. The architecture diagram's **"w/ 2D coord centroids"** is
+  removed from AGENTS.md and NOTES.md — `final_coords` is bound and never read on both paths —
+  but **the code is unchanged**, because the return value is what `verify_tome_merge_port.py`
+  compares; the defect was a diagram claiming a path that does not exist.
+
+  **Two findings about the tooling, one of which is my own error.**
+  (i) `check_agents_md_format.py` had the cp1252 crash **this file's own Gotchas entry
+  documents**, with the known fix never applied — its docstring merely *documented* a
+  `PYTHONIOENCODING` prefix, the exact state that entry already calls insufficient. It printed
+  `edit debris: 1`, then `1 PROBLEM(S):`, then died on U+26D4 while naming the line. **The crash
+  masked the checker's own answer** — a real failure count with no diagnosis, which is strictly
+  worse than the 2026-09-06 truncation. Fixed with `sys.stdout.reconfigure`.
+  (ii) ⚠ **I then over-corrected, and a sabotage control caught me.** I screened `scripts/` on
+  **non-ASCII**, flagged six `diagnose_*` files, and "fixed" `diagnose_analysis_dof.py` for
+  printing `§`. Forcing `PYTHONIOENCODING=cp1252` with the call removed: **D14 still exits 0**,
+  because **U+00A7 is in cp1252 at 0xA7**. The criterion is *not encodable in cp1252*, not
+  *non-ASCII*. Re-screened correctly over all **39** checker-class scripts: **zero residual
+  risk**, and five of the six original hits were module **docstrings**, never printed. The call
+  stays as explicitly defensive. **The lesson is new and goes in Gotchas: a screening criterion
+  one notch broader than the real failure condition manufactures work and manufactures false
+  entries in this file.** Screen on the condition, then sabotage the fix to confirm the
+  condition was real.
+
+  **Executed at closure, all exit 0:** `check_writeup_numbers.py` **144/144**;
+  `check_agents_md_format.py` clean on **AGENTS.md and all 7 other `.md` files** (10 fences
+  balanced, 0 ragged rows, 0 debris); `score_preregistered.py` **64/64**;
+  `verify_tome_merge_port.py` **96/96**; `verify_results_provenance.py` **35/35**;
+  `verify_pooled_corpus_port.py` **62/62**; `verify_eval_only_ckpt_gate.py` **14/14**;
+  `diagnose_analysis_dof.py` **20/20**. Logs under `results/_v_wrapup_*`.
+
+  **Left open deliberately, and recorded rather than quietly dropped:** `STORY.md` has **no
+  numeric audit** — extending the auditor to a 1,306-line chronology has a weak payoff, because
+  a narrative's figures are *correct about what was believed at the time* and an auditor keyed
+  on current values would flag them wrongly. And `Project-kilo` (PATCH J,
+  `scripts/verify_official_sroie.py` 26/26, `results/_v_official_sroie.log`) is **not in this
+  repository** and was unreachable from the workspace; its loader is moot under §7, and its one
+  lasting contribution — the `n=410` vs `n=397` reconciliation — is already merged into
+  `## The official SROIE archive` §1, where both counts turned out exact and the disagreement
+  was a **scope choice**, not an arithmetic error.

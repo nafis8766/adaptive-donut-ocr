@@ -7,9 +7,16 @@ we did about it. Written 2026-09-17, updated 2026-10-03 to cover today's worklog
 *This is the narrative companion to the other documents in this repo.
 [AGENTS.md](AGENTS.md) is the single source of truth — every number here comes from it, and where
 the two disagree, AGENTS.md is right and this file is stale. [WRITEUP.md](WRITEUP.md) presents
-the findings results-first, for a reader who wants the conclusions. [REPORT.md](REPORT.md) is a
-standing summary. **This file is the only one organised by time rather than by result**, and it
-is the one to read if you want to understand *why* the project looks the way it does.*
+the findings results-first, for a reader who wants the conclusions. **This file is the only one
+organised by time rather than by result**, and it is the one to read if you want to understand
+*why* the project looks the way it does.*
+
+> ⚠ **Read for the shape, never for a number.** This file has **no numeric audit** — every
+> figure in it was transcribed by hand, so a correction in `AGENTS.md` leaves it stale. It is
+> also deliberately full of claims that were **true when the chapter describes them and false
+> later**: "run 13 read '20% merge is free'" is a correct statement about what was believed in
+> September and a wrong statement about the project's conclusion. That is what a chronology is
+> for. The final position is `AGENTS.md` → `## Project closed 2026-10-05`.
 
 ---
 
@@ -1127,8 +1134,18 @@ left is a human one.
 
 ## Where the project actually stands
 
-*Current as of today's worklog, 2026-10-03. The queue itself lives in AGENTS.md; this is the
-narrative version.*
+*~~Current as of today's worklog, 2026-10-03.~~ **FINAL — the project closed 2026-10-05.** The
+queue itself lives in AGENTS.md; this is the narrative version.*
+
+> **What closing it meant, in one paragraph.** The three results below stand. The fourth
+> question — *does merging preserve more accuracy than pruning at an equal token budget?* — was
+> **left unresolved on purpose**, at `UNDERPOWERED`, because answering it needs **n ≳ 307**
+> documents and FUNSD's test split is **50**, which is all of it. The experiment that would have
+> reached 307 was built, verified green by five checks, and costed at 5.92 h against a 9 h
+> budget. It never ran, because no corpus with a licence anyone could read was available —
+> chapter 21 is the whole story, and chapter 24 below is how it ended. Reporting
+> `UNDERPOWERED` with the required *n* beside it is what the pre-registration said to do in
+> exactly this case, written months before the case arose.
 
 ### The four claims we can defend
 
@@ -1176,17 +1193,25 @@ narrative version.*
 
 ### Still open
 
-- **A licensed second corpus — the only remaining blocker.** Everything else in T4 is built and
-  verified (five verifiers green with provenance-checked logs; ≈5.9 h measured cost). The step
-  that remains is the user's: register at the ICDAR RRC portal, read the terms, download the
-  official SROIE (decided 2026-10-02, option 1).
-- **Then, in queue:** T6 (train the symmetric checkpoint `keep=0.30, merge=0.0`, ≈4–4.5 h) and T7
-  (the redesigned merge run on the pooled corpus, ≈2–3 h; the pre-registered primary becomes
-  scorable at n=410).
-- **Housekeeping (T8):** REPORT.md is stale — its banner still says "ToMe has never executed" and
-  its run table stops at run 10. This file now covers today's worklog but **has no numeric
-  audit** (every figure here is transcribed from AGENTS.md; if a number is corrected there, this
-  file goes stale). Dead code at `src/model.py:248`: `final_coords` is computed and thrown away.
+- ~~**A licensed second corpus — the only remaining blocker.**~~ **The blocker that closed the
+  project.** Everything else in T4 was built and verified (five verifiers green with
+  provenance-checked logs; ≈5.9 h measured cost). The step that remained was never taken: the
+  official ICDAR archive was downloaded and measured (**n=410** pooled), and **it contains no
+  licence, terms or citation file in any of its 4,226 entries** — the terms live only on the RRC
+  portal, which serves a certificate for a different domain and so cannot be authenticated. A
+  licensing decision must not rest on an unauthenticatable source, so the sweep never ran.
+- ~~**Then, in queue:** T6 … and T7 …~~ **Closed unrun 2026-10-05.** Both designs stand on
+  record in `AGENTS.md`; neither was faulted. They were closed because their blocker was, and
+  because at n=50 each was predicted to buy a *correctly designed* `UNDERPOWERED`.
+- **Housekeeping (T8):** ~~REPORT.md is stale — its banner still says "ToMe has never executed"
+  and its run table stops at run 10.~~ **REPORT.md was retired 2026-10-05** (`git rm`); it was
+  worse than recorded, since its own corrections asserted the figures T3 had retired. This file
+  now covers today's worklog but **has no numeric audit** (every figure here is transcribed from
+  AGENTS.md; if a number is corrected there, this file goes stale) — **the one T8 item left open
+  at closure, deliberately: see the banner at the top.** Dead code at `src/model.py:248`:
+  `final_coords` is computed and thrown away — **resolved 2026-10-05 by dropping the overstated
+  "w/ 2D coord centroids" from the architecture diagrams rather than the code**, since the
+  return value is what `verify_tome_merge_port.py` compares.
 - **Older open items, still standing:** the ~18% of outputs that are not valid JSON, which nobody
   has characterised; local-vs-Kaggle generation drift, written up as a limitation — run 5 reads
   74.72 locally against 77.74 on Kaggle on identical weights and images, and the gap widens as

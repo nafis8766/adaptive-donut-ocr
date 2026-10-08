@@ -11,12 +11,22 @@ Escaped pipes (\\|) inside table cells are literal text, not column separators, 
 are stripped before counting -- otherwise every cell containing |x| reads as ragged.
 
 Usage:
-    PYTHONIOENCODING=utf-8 python scripts/check_agents_md_format.py [path]
+    python scripts/check_agents_md_format.py [path]
 Exit 0 iff clean.
 """
 import os
 import re
 import sys
+
+# 2026-10-05: this script PRINTS the offending lines, so it prints whatever non-ASCII
+# AGENTS.md contains -- and that file is full of em dashes, arrows, x signs and (as of
+# the project-closure banner) U+26D4. Windows' default console codec is cp1252, so
+# without this the run died with UnicodeEncodeError and exit code 1 AFTER reporting
+# "1 PROBLEM(S)" but BEFORE naming it: the crash masked the real finding, and the exit
+# code was indistinguishable from the lint failing. Reconfigure rather than document a
+# PYTHONIOENCODING prefix -- the docstring above used to carry one, and the failure mode
+# is forgetting it. Same fix, and the same reason, as check_writeup_numbers.py.
+sys.stdout.reconfigure(encoding="utf-8")
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 path = sys.argv[1] if len(sys.argv) > 1 else os.path.join(ROOT, "AGENTS.md")

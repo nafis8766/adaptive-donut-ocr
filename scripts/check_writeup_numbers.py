@@ -458,8 +458,24 @@ print("  Dropping a claim is a decision; it should be enforced, not remembered."
 print()
 for banned, why in (
         (r"beats?\s+the\s+ink\s+oracle", "the router-vs-ink margin is t +1.62, under 2.0"),
-        (r"H1\s+is\s+(proven|established|isolated\b(?!\.))",
-         "H1 is supported, not isolated -- the control has not run"),
+        # 2026-10-05: `isolated` REMOVED from this alternation, and the removal is the point.
+        # This ban read `(proven|established|isolated\b(?!\.))` on the stated rationale
+        # "H1 is supported, not isolated -- the control has not run". The control HAD run:
+        # run 11 (2026-09-14) is run 9 with TRAIN_KEEP_RATIO 0.50 -> 1.00 and nothing else,
+        # and gave ISO(0.35) = -10.49 (t -3.74). So for three weeks this check BANNED THE
+        # TRUE STATEMENT and the needle below REQUIRED THE FALSE ONE, while README.md already
+        # carried the corrected version -- i.e. the repo's two main documents contradicted
+        # each other and the auditor enforced the wrong side.
+        #
+        # This is the D4 staleness shape one turn worse. D4's guard merely failed to notice
+        # its own fix; this one mandated the superseded wording, so applying the fix would
+        # have turned the check red and the fix would have looked like the defect.
+        # `proven|established` stays, because AGENTS.md claim 1 is explicit that the
+        # defensible form is "H1 isolated at keep=0.35/0.25/0.20" and never "H1 proven" --
+        # the loose budgets are underpowered, not null. The needle that now enforces THAT
+        # qualification is 'underpowered, not null', below.
+        (r"H1\s+is\s+(proven|established)\b",
+         "H1 is isolated (run 11) but only at keep=0.35/0.25/0.20 -- never 'proven'"),
         (r"\+14\s+to\s+\+28", "superseded range; D11 gives +17.7 to +34.0"),
         # Affirmative speed claims only. The disclaimers in section 5 legitimately contain
         # the words "latency" and "throughput"; an earlier version of this check banned the
@@ -483,10 +499,33 @@ for banned, why in (
 # a merging caveat -- just a different one. Do not weaken this to a bare "off-distribution":
 # the phrase has to be about the merging result specifically, or an unrelated sentence could
 # satisfy it.
+#
+# 2026-10-05, and this is the gap that let a WITHDRAWN CLAIM sit under a green check for 11
+# days. T3 retired "20% merge is free" and "40% costs -3.86 [-7.45, -0.30]" on 2026-09-24 --
+# and NOTHING HERE COULD NOTICE, because section 1 re-derives figures from results/*.json and
+# -3.86 still reproduces EXACTLY from run 13. T3 changed the VERDICT, not the arithmetic. So
+# this script was validating numbers while the sentence around them had been withdrawn: the
+# repo's one audited document was the one asserting a retired claim.
+#
+# The fix is a needle, not a ban, and deliberately so. A ban on /merging is free/ would fire on
+# the retirement's own disclaimer -- the text now literally reads `not "merging is free"` --
+# which is the exact trap the latency comment above records ("banned the bare words and fired
+# on the disclaimer itself"). Worse, strike-through markers live INSIDE the text, so a regex
+# cannot tell a struck historical claim from a live one. Requiring the terminal verdict to be
+# PRESENT is robust to both: re-asserting "free" means deleting these, and that turns the
+# check red.
+#   'n ≳ 307'  -- the required sample size, which is what makes UNDERPOWERED actionable
+#               rather than a shrug. Quoted beside the verdict per T1 §7.
+#   '0 of 3'   -- the Holm result in both runs. A null with no multiplicity statement is how
+#               the original "free" reading survived six contrasts.
+# 'underpowered, not null' replaces the 'not isolated' needle: same job (pin the live H1 scope
+# limit) against a statement that is actually true. See the ban comment above.
 for needle in ("No latency win", "No encoder-side saving",
                "No claim that the router beats",
                "merging result is off-distribution",
-               "not isolated"):
+               "underpowered, not null",
+               "n ≳ 307",
+               "0 of 3"):
     check(needle in doc, f"disclaimer present: {needle!r}",
           "a banned-phrase check passes trivially on a file with no disclaimers at all")
 

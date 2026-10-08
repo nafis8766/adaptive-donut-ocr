@@ -1,0 +1,154 @@
+==============================================================================
+D14 -- T1 is not an estimator choice: seven unpinned degrees of freedom
+==============================================================================
+run 13: C:\Users\Nafis\Desktop\Project\run 13\ablation_selection.json
+run 14: C:\Users\Nafis\Desktop\Project\run14\ablation_selection.json
+
+0. CALIBRATION -- loader checked against a published figure
+   run13 M=1920 merge-vs-prune (recall): mean +2.86  res 3.16  n=50
+  [PASS] n is FUNSD test in full (50 documents)
+   run13 M=1344 merge-vs-prune (recall): mean -0.22  res 3.16
+  [PASS] one of the two published M-rows reproduces D13's +2.86 to 0.01
+
+1. ROW -- how many token-matched (merge, non-merge) pairs exist
+   rows=28  merge rows=7  budgets carrying a merge row=4
+   selection-matched (merge, non-merge) pairs : 7
+   budget-matched  (merge, non-merge) pairs   : 12
+      M= 3840  keep=1.00 m=0.20 router      - keep=0.80 router TWIN     trim  +2.23
+      M= 1920  keep=0.50 m=0.20 RANKPAR     - keep=0.40 ink TWIN        trim  +3.54
+      M= 1920  keep=0.50 m=0.20 RANKPAR     - keep=0.40 router TWIN     trim  +2.47
+      M= 1920  keep=0.50 m=0.20 router      - keep=0.40 ink TWIN        trim  +3.22
+      M= 1920  keep=0.50 m=0.20 router      - keep=0.40 router TWIN     trim  +1.35
+      M= 1920  keep=0.50 m=0.20 ink         - keep=0.40 ink TWIN        trim  +1.66
+      M= 1920  keep=0.50 m=0.20 ink         - keep=0.40 router TWIN     trim  +0.71
+      M= 1440  keep=0.50 m=0.40 router      - keep=0.30 router TWIN     trim  -1.65
+      M= 1344  keep=0.35 m=0.20 router      - keep=0.28 router TWIN     trim  -0.21
+      M= 1344  keep=0.35 m=0.20 router      - keep=0.28 ink TWIN        trim  +0.89
+      M= 1344  keep=0.35 m=0.20 ink         - keep=0.28 router TWIN     trim  +2.13
+      M= 1344  keep=0.35 m=0.20 ink         - keep=0.28 ink TWIN        trim  +3.05
+  [PASS] more than one contrast can be called primary (12 budget-matched pairs) -- so a rule that does not NAME one leaves the choice open
+
+1b. DENOTATION -- what does the phrase 'run 14, m=0.40' actually name?
+   vs keep=0.50 router      (same keep frac, M 2400->1440): trim -0.17   mean -0.28   <- the published primary
+   vs keep=0.30 router TWIN (token-matched, M 1440=1440)  : trim +4.91   mean +5.78
+   spread between the two readings: 5.08 pts (trimmed)
+  [PASS] the SAME four words name a -0.17 pt null AND a +4.91 pt gain -- a 5.08 pt spread, 5.1x the 1.0 pt effect. Both are legitimate estimands; neither is named in the rule
+
+2. ARM -- the swing from choosing which split is 'the merge arm'
+   M=1920 checkerboard vs prune : trim +1.35   mean +2.86
+   M=1920 rank_parity  vs prune : trim +2.47   mean +3.15
+   swing (trimmed) +1.12 pts     swing (mean) +0.29 pts
+  [PASS] the split choice alone swings the trimmed estimate by 1.12 pts, MORE than the 1.0 pt effect being detected -- and both rows already exist
+
+3. DIRECTION -- `arr()` scales every key x100 and encodes no direction
+   negated-vs-router  recall  : mean   -63.98  min   -96.61  max   -21.74
+   negated-vs-router  ned     : mean   +41.05  min    +7.64  max   +86.21
+  [PASS] on the DELIBERATELY BROKEN arm, recall's worst document is -96.61 but `ned`'s worst is +7.64 -- opposite signs, so a tail rule phrased 'worst per-document delta' ranks the sabotage arm SAFEST on stored `ned`
+  [PASS] `ned` is stored as an error rate and never direction-corrected by arr(); T1 must pin direction PER QUANTITY, not once globally
+
+4. G -- the trim fraction picks the sign of the point estimate
+   run14 m=0.40 vs keep=0.50 router, g=0.05: trim +0.220   half-width 2.72
+   run14 m=0.40 vs keep=0.50 router, g=0.10: trim -0.168   half-width 2.23
+   run14 m=0.40 vs keep=0.50 router, g=0.15: trim -0.242   half-width 2.22
+  [PASS] the SIGN of the estimate changes across g in {0.05,0.10,0.15} (+0.22 -> -0.17 -> -0.24); all three are null, so D13's 'zero verdict flips' is true and does not cover this
+  [info] on the token-matched pairing the same g-sweep reads +6.09 / +4.91 / +4.46 and does NOT flip -- the g hazard is contrast-specific, which compounds section 1
+
+5. DID -- 'trim then difference' is not 'difference then trim'
+   trimmed: trim(per-doc DiD) +3.8696   trim(d14)-trim(d13) +3.0615   gap +0.8081
+   mean   : mean(per-doc DiD) +3.5822   mean(d14)-mean(d13) +3.5822   gap +0.0000
+  [info] mean gap is +0.00e+00: zero by linearity, so this line is a self-test of the pairing, NOT a finding
+  [PASS] the unpinned DiD ORDERING moves the estimate by 0.8081 pts, 16x the 0.05 pt seed-noise floor -- so it is a real choice, not rounding. The plain mean has NO such choice (gap is identically zero), so adopting a robust location statistic CREATES this degree of freedom
+   for scale: the effect is +3.06..+3.87 pts, the ordering gap is 0.81 pts (26% of it),
+             and the trim's own resolution gain here is 4.93 -> 2.99 (+1.94 pts)
+  [info] the gap is 42% of the resolution the trim buys, NOT larger than it -- an earlier draft of AGENTS.md claimed larger; corrected 2026-09-23 by this control
+
+6. TIE -- a count(d < -10) tail rule, and the boundary today
+   run13 m=0.20, the 'merging 20% is free' headline row, BOTH pairings (see 1b):
+      vs keep=0.50 router         (same keep frac): exactly at -10 = 1   '<' -> 4   '<=' -> 5
+      vs keep=0.40 router TWIN    (token-matched ): exactly at -10 = 1   '<' -> 3   '<=' -> 4
+  [PASS] a document sits EXACTLY on the threshold under BOTH pairings, so the tie convention changes the tail count (4->5 and 3->4) on the headline row -- live now, not hypothetical, and robust to the §1b ambiguity
+
+7. DISCARD -- T1's trim against T4's pooling
+   g=0.1 at pooled n=397 discards k=39 documents per tail
+   FUNSD test in full                        = 50 documents
+   run13 m=0.40 documents worse than -10 pts, BOTH pairings:
+      vs keep=0.50 router         (same keep frac): 10  [-57.0, -24.7, -22.2, -21.5, -17.8, -16.8, -16.5, -11.7, -10.9, -10.5]
+      vs keep=0.30 router TWIN    (token-matched ):  6  [-47.7, -32.1, -14.3, -13.0, -12.2, -11.1]
+  [PASS] under both pairings (10 and 6 harmed documents) ALL of them fit inside the 39-document lower discard set, so the pooled trimmed estimate can be numerically identical to one computed on the new corpus alone
+  [PASS] the discard set (39) exceeds half of FUNSD's entire contribution (50) -- 78% of it -- so T1 s5's constraint BINDS at the real pooled n=397; report T4 stratified by corpus and assert the discard set is not corpus-aligned
+      NOTE: the hazard shrank (k=39 < FUNSD's 50, so the trim can no longer delete the corpus outright) but did NOT go away, and a shrinking hazard is the kind that invites under-reacting.
+
+8. RANDOM TWIN -- does a token-matched random arm exist for any merge row?
+   run 13: merge-row budgets  [1344, 1440, 1920, 3840]
+            random-row budgets [1680, 2400, 3600]
+            overlap            []
+  [PASS] run 13 has NO token-matched random arm for any merge row, so a 'merging beats random at matched M' control cannot be computed from it
+   run 14: merge-row budgets  [1344, 1440, 1920, 3840]
+            random-row budgets [1680, 2400, 3600]
+            overlap            []
+  [PASS] run 14 has NO token-matched random arm for any merge row, so a 'merging beats random at matched M' control cannot be computed from it
+
+9. REPLICATION -- which pairs won, in each run, under the published rule
+   run 13:
+      M=3840 router  delta  +3.12  res 2.92  [ +0.19,  +6.04]  MERGING WINS
+      M=1920 router  delta  +2.86  res 3.16  [ -0.30,  +6.02]  --  res>3.0
+      M=1344 router  delta  -0.22  res 3.16  [ -3.38,  +2.94]  --  res>3.0
+      M=1440 router  delta  -1.29  res 3.55  [ -4.84,  +2.26]  --  res>3.0
+      M=1920 ink     delta  +2.28  res 2.73  [ -0.46,  +5.01]  --
+      M=1344 ink     delta  +4.06  res 3.81  [ +0.24,  +7.87]  MERGING WINS  res>3.0
+      -> winners: ['M=1344 ink', 'M=3840 router']
+   run 14:
+      M=3840 router  delta  +0.81  res 3.08  [ -2.27,  +3.90]  --  res>3.0
+      M=1920 router  delta  +1.46  res 4.35  [ -2.89,  +5.81]  --  res>3.0
+      M=1344 router  delta  +4.22  res 4.16  [ +0.06,  +8.37]  MERGING WINS  res>3.0
+      M=1440 router  delta  +5.78  res 4.90  [ +0.88, +10.69]  MERGING WINS  res>3.0
+      M=1920 ink     delta  -0.13  res 2.93  [ -3.06,  +2.80]  --
+      M=1344 ink     delta  +1.43  res 3.93  [ -2.50,  +5.36]  --  res>3.0
+      -> winners: ['M=1344 router', 'M=1440 router']
+   run13 winners  ['M=1344 ink', 'M=3840 router']
+   run14 winners  ['M=1344 router', 'M=1440 router']
+   intersection   []
+  [PASS] both runs declared MERGING WINS, on 2 and 2 pairs respectively, and the winner sets are DISJOINT -- not one pair that won in run 13 won in run 14. A disjunctive verdict rule over 6 pairs will do this to noise
+   what happened to each run's winners in the OTHER run:
+      M=3840 router  (run13 winner )  run13  +3.12 -> run14  +0.81   (-2.30)
+      M=1344 router  (run14 winner )  run13  -0.22 -> run14  +4.22   (+4.44)
+      M=1440 router  (run14 winner )  run13  -1.29 -> run14  +5.78   (+7.07)
+      M=1344 ink     (run13 winner )  run13  +4.06 -> run14  +1.43   (-2.63)
+  [PASS] every run-13 winner moved TOWARD zero in run 14, while run 14's winners were both negative in run 13 -- the signature of selecting on noise, and the reason T1 must name ONE pair rather than take the best of six
+
+   arity of the two verdicts, as pre-registered (AGENTS.md Q6 table):
+      MERGING WINS      needs 1 of 6 pairs (>=1 ink pair, CI excludes 0, d>0)
+      INDISTINGUISHABLE needs 6 of 6 flat AND 6 of 6 with res <= 3.0
+      run 13: 4/6 pairs have res > 3.0 -> INDISTINGUISHABLE BLOCKED   (M=1920 router, M=1344 router, M=1440 router, M=1344 ink)
+      run 14: 5/6 pairs have res > 3.0 -> INDISTINGUISHABLE BLOCKED   (M=3840 router, M=1920 router, M=1344 router, M=1440 router, M=1344 ink)
+  [PASS] in BOTH runs the null verdict was arithmetically unreachable (>=1 pair over the 3.0 res bar) while the positive verdict fired on a single pair. A 1-of-6 win condition against a 6-of-6 null condition is not a tie-breaker, it is a ratchet: only one of the two verdicts can be reached by noise, and it is the same one both times. res is data-dependent, so this could have come out otherwise -- it did not
+
+10. MULTIPLICITY -- does any declared winner survive its own family?
+  [PASS] exactly 2 independent quantities are stored per image in these runs ['ned', 'recall'] -- charAcc is an affine transform of ned (not a third witness) and word_order is absent, so the correction family is 6x2=12, not the 6x3=18 it is tempting to write. A family of 12 is the WEAKER correction, which is the honest one here
+   run 13: family of 12; Holm step-down at alpha=0.05
+      M=1920 router  ned    mean   +3.66  se  1.62  p 0.0240  >  Holm thr 0.00417  -> STOP, all remaining fail
+      nominal p<0.05: [('M=1920 router', 'ned'), ('M=3840 router', 'recall'), ('M=1344 ink', 'recall')]
+      Holm survivors: [] -- NONE
+   run 14: family of 12; Holm step-down at alpha=0.05
+      M=1440 router  recall mean   +5.78  se  2.50  p 0.0208  >  Holm thr 0.00417  -> STOP, all remaining fail
+      nominal p<0.05: [('M=1440 router', 'recall'), ('M=1344 router', 'recall')]
+      Holm survivors: [] -- NONE
+  [PASS] both runs have nominally significant tests (3 and 2) and ZERO Holm survivors. Neither published MERGING WINS verdict survives the smallest defensible correction for the family it was selected from -- the smallest p in each run misses the first Holm threshold (0.05/12 = 0.00417) by roughly 5x
+  [info] run 13's smallest p in the whole family is M=1920 router on `ned` (p=0.0240), a pair the published recall-only rule scored FLAT (+2.86, CI [-0.30,+6.02]). The pre-registered quantity was the less sensitive one ON THE ROW D13 HEADLINED. Recorded as a reason to distrust that row's null -- NOT as a licence to re-headline on ned, which would be choosing the metric after seeing the data.
+
+   units audit of the gate T1 is about to adopt:
+      native-scale res over the 12 tests: 0.0264 .. 0.0381
+      max CONCEIVABLE res for a paired delta of a [0,1] field at n=50: 0.280  (deltas lie in [-1,1], so sd <= 1)
+      a gate written `res <= 2.0` with units unstated: 0.280 < 2.0, so it CANNOT FAIL on the stored fields
+      a tail rule written `count(d < -10)`: native deltas lie in [-1,1], so no document can ever be below -10
+  [PASS] the res gate and the tail rule are BOTH unfalsifiable on the stored native fields -- observed res is 52x inside the gate and the arithmetic ceiling is 7.1x inside it. Any run scored on `per_image` as-stored returns 'powered, no harmed documents' BY ARITHMETIC. T1 must state units per quantity, not just direction (section 2)
+
+==============================================================================
+CONTROLS: 20/20 PASS
+==============================================================================
+
+WHAT THIS LICENSES: rescoping T1 from 'choose an estimator' to 'pin the analysis'.
+WHAT IT DOES NOT:   choosing the flattering side of any of these. Every swing above
+                    measures ANALYST FREEDOM, not a merging effect. Quoting +1.12 as
+                    a benefit of rank_parity would be the exact failure this measures.
+
