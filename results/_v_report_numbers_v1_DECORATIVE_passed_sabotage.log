@@ -1,0 +1,67 @@
+==========================================================================
+report/report.tex -- numeric cross-check
+==========================================================================
+artifacts read     : 12 results/*.json (12,504 numeric leaves, matched by ROUNDING not substring)
+trackers read      : 4 (966,308 chars)
+figures audited    : 113
+  backed by a measured artifact : 69
+  backed by tracker prose only  : 44
+not found anywhere : 0
+non-vacuity        : sentinel 77.7777 correctly matches nothing
+                     rounding control: 51.84 resolves from stored 51.838991...
+
+Figures resting on tracker PROSE rather than on a measured artifact --
+worth an eye, because prose is where a transcription error survives:
+  [prose] 100
+  [prose] 112
+  [prose] 149
+  [prose] 4.2
+  [prose] 410
+  [prose] 500
+  [prose] 771
+  [prose] 800
+  [prose] 9.7
+  [prose] 1.04
+  [prose] 1.09
+  [prose] 1.25
+  [prose] 1.30
+  [prose] 1.57
+  [prose] 1.62
+  [prose] 1.90
+  [prose] 1.94
+  [prose] 2.24
+  [prose] 2.70
+  [prose] 2.82
+  [prose] 2560
+  [prose] 27.4
+  [prose] 29.3
+  [prose] 3.74
+  [prose] 4.14
+  [prose] 5.92
+  [prose] 6.03
+  [prose] 6.96
+  [prose] 69.2
+  [prose] 7.35
+  [prose] 7.92
+  [prose] 8.15
+  [prose] 10.49
+  [prose] 10.93
+  [prose] 11.47
+  [prose] 13.01
+  [prose] 18.80
+  [prose] 19.46
+  [prose] 20.34
+  [prose] 37.50
+  [prose] 52.50
+  [prose] 73.09
+  [prose] 77.31
+  [prose] 150.00
+
+ALL FIGURES TRACE TO AN ARTIFACT OR A TRACKER
+
+Scope limit, stated so this green is not over-read: this checks that each figure
+EXISTS in a source, NOT that the sentence around it is still the project's
+position, and NOT that the figure was transcribed into the right sentence. A
+withdrawn verdict whose arithmetic still reproduces passes this check -- that is
+exactly the defect that sat under a green check here for 11 days. Only a human
+read of the prose catches it.

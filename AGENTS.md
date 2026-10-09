@@ -709,8 +709,8 @@ source of truth — this file still wins on any disagreement. ~~`REPORT.md` (sam
 standing prose summary of the project and of what each run established; it carries the same
 subordination notice.~~ **`REPORT.md` was RETIRED 2026-10-05 (`git rm`) — see T8.**
 
-**~~Five~~ FOUR derived documents, none of them a source of truth.** All four are subordinate
-to this file and all four go stale the moment a run lands:
+**~~Five~~ ~~FOUR~~ FIVE derived documents, none of them a source of truth.** All five are
+subordinate to this file and all five go stale the moment a run lands:
 
 | File | Organised by | Audience | Audit |
 |---|---|---|---|
@@ -718,6 +718,20 @@ to this file and all four go stale the moment a run lands:
 | **`NOTES.md`** | **caveat first — "read this before quoting a number"** | **a maintainer about to cite a figure** | — |
 | `WRITEUP.md` | results-first, claim by claim | a reviewer checking the claims | `scripts/check_writeup_numbers.py` |
 | **`STORY.md`** | **chronology — stage by stage** | **a general reader, no ML background** | **none — see below** |
+| **`report/report.pdf`** | **results first, limitations last — a standalone 5-page technical report** | **an external reader evaluating the work; attachable to an application** | **`scripts/check_report_numbers.py`** |
+
+⚠ **The count went back up to five on 2026-10-08, deliberately, and the new document is NOT a
+`REPORT.md` revival.** `report/report.tex` → `report.pdf` is built by `report/build.ps1` (two
+pdflatex passes, same toolchain as the CV) and is **a dated snapshot for an external audience**,
+not a standing prose tracker — which is the distinction `REPORT.md` failed. Three properties
+keep it out of that trap: it is **compiled**, so it cannot be hand-edited into drift; it carries
+its own date and a subordination line in the document itself; and **it has a numeric audit from
+the day it was written**, which `REPORT.md` never had and `STORY.md` still does not.
+**What it deliberately excludes:** the TODO queue, T-numbers, run 18, the licence forensics,
+verifier-defect archaeology, and every internal process state. **What it deliberately keeps:**
+every scope limit, the `UNDERPOWERED` merge verdict with its required `n`, and the
+pre-registration that retired this project's own headline — stated as a method strength, which
+is what it is.
 
 ⚠ **`REPORT.md` was the fifth and is gone.** Retired 2026-10-05 because its two jobs — claims
 and a per-run table — were already done better by `WRITEUP.md` (audited) and by this file's own
@@ -1000,6 +1014,7 @@ one, because in several cases the caveat is the finding.
 | — | `scripts/verify_notebook_train_select_mode.py` | PATCH H's **notebook-level** check — execs cells 2/4/7/11 and the shipped saliency block. **Undocumented until 2026-09-27, and it had no log at all.** Run 2026-09-27: **37 passed, 0 failed through section 3, then exit 1 in section 4** (`NameError: epoch_sal`). Three of its own defects were found by running it — see `## Patch H, run 18's staged config, and two select-mode verifiers`. **Do not cite it as green.** |
 | — | `scripts/check_writeup_numbers.py` | Re-derives every figure in `WRITEUP.md` from `results/*.json` — deliberately **not** from this file for the derivable figures, because prose checked against prose proves nothing. **144/144, exit 0 (re-run 2026-10-05).** ~~142/142 (2026-10-02)~~ — **the count rose because two §7 disclaimer needles were ADDED, not because figures were dropped**: `n ≳ 307` and `0 of 3` now have to be present, and `not isolated` was replaced by `underpowered, not null`. Found six real errors incl. a double sign inversion. ⚠ **It was silently FAILING 135/7 for 8 days** — its §6 transcription check read only `AGENTS.md`, and the 2026-09-24 split moved 7 figures into the archives, so it failed on figures that had merely *moved* and were never wrong. Fixed by reading all four tracker files, with a raising assert if one is missing. Sabotage-tested (bogus figure → 1 failure, exit 1). ⚠⚠ **It checks ARITHMETIC, not whether a claim is still the project's position** — and that gap let a *withdrawn verdict* sit under a green check for 11 days (T3 retired "20% merge is free" on 2026-09-24; `−3.86` still reproduces exactly from run 13, so nothing here could fire). Closed 2026-10-05 by the two new needles, which a re-assertion of "free" would have to delete. |
 | — | `scripts/check_agents_md_format.py` | Structural lint for the tracker files: fences balance, no ragged table rows, no edit debris. **AGENTS.md exit 0 (0 debris, 0 ragged, 10 fences balanced), and all 7 other `.md` files exit 0, 2026-10-05.** ⚠ **It had the cp1252 crash this file's own Gotchas entry documents, and nobody had applied the known fix** — it printed `UnicodeEncodeError` on `⛔` and died **after** reporting `1 PROBLEM(S)` but **before naming it**, so the crash masked its own finding. Fixed with `sys.stdout.reconfigure` (the docstring previously just *documented* a `PYTHONIOENCODING` prefix, which the Gotchas entry says is not a fix). The finding underneath was real: a markdown heading inside a blockquote (`> # …`) trips the botched-paste rule, correctly. |
+| — | `scripts/check_report_numbers.py` | **The attachable report's numeric audit (2026-10-08/09).** Three sections. **(1) TARGETED — the actual audit:** **58** load-bearing figures each **re-derived from a named artifact field** (D11/D12/M1) and then required to be present in `report.tex` — every table cell, every paired delta, every `t`, the MDE, the KV MiB and percentages, the DiD column. **(2) SWEEP — a backstop, and a weak one:** remaining figures must exist *somewhere*; its false-pass rate is **measured and printed at 4.8%**. **(3) six non-vacuity controls.** **121 passed, 0 failed, 0 unsourced, exit 0** (`results/_v_report_numbers.log`). ⚠ **It found two defects in itself, both by being run.** (a) Tier 1 began as a **substring** match against the JSON, which stores full precision: `51.84` **failed** against the stored `51.838991011355475` while `62.77`/`37.20`/`33.80` **passed** purely because those round by truncation — three of four sibling cells decided by luck, and the one that failed was *correct*. (b) ⚠⚠ **The existence sweep PASSED A CORRUPTED HEADLINE** — mutating recall `77.37 → 77.31` left it at exit 0, because `77.31` occurs once by coincidence in `AGENTS-ARCHIVE-RUNS.md`. That is a decorative check reported as an audit. **Fixed by section 1, and pinned by control C3, which sabotages section 1 on every run** and asserts it goes red; **C4** records that the sweep alone would still miss it. **C6** asserts the script's own `paired()` reproduces all **24** stored `delta_pts`/`se_pts`/`t` values to **1e-9**, so section 1 audits against the project's measurement rather than against my restatement. ⚠ **A third self-correction belongs to the report, not the script:** the MDE check first used `1.96·SE`, derived 2.71/2.76, and reported *the report* as wrong — the project's `meta.resolution_pts` convention is **2·SE** (2.76/2.81) and the report was right. ⚠⚠ **Same scope limit as the WRITEUP auditor: it checks arithmetic and presence, never whether the sentence around a figure is still the project's position.** |
 | — | `scripts/probe_generation_determinism.py` | Tests by execution the assumption that greedy generation is bit-identical across runs — the sole justification for bootstrapping over documents only. **6/6** within-process, **6/6** across two processes. |
 | — | `scripts/diagnose_tome_parity.py` | Quantifies the ToMe score-order/parity gotcha (~49% missed redundancy). Imports the **shipped** `checkerboard_color`; a local restatement scored 10/10 under sabotage. |
 | — | `scripts/diagnose_decoder.py` | LEGACY (copy-vs-next-token, settled before run 6). Re-run on run 8: no copy failure (COPY 0.0% / NEXT 74.5%), and the first legible sample of generated text recorded anywhere. |
@@ -1009,6 +1024,7 @@ one, because in several cases the caveat is the finding.
 | Path | Role |
 | --- | --- |
 | [README.md](README.md), [NOTES.md](NOTES.md), [WRITEUP.md](WRITEUP.md), [STORY.md](STORY.md) | **Derived prose, none of them a source of truth** — see the subordination table at the top of this file. `WRITEUP.md` is the only one with a numeric audit (`scripts/check_writeup_numbers.py`) — and that audit checks **arithmetic, not whether a claim is still current**, which is how it sat green over a withdrawn verdict for 11 days; `STORY.md` (2026-09-17, updated 2026-10-03) is the only one organised chronologically (stage → problem → fix, for a reader with no ML background) and has **no audit at all**. **`NOTES.md` is the old `README.md`, renamed 2026-10-02** when the visitor-facing and maintainer-facing jobs were split — it holds the caveat-first detail, the new `README.md` leads with results. **`REPORT.md` was the fifth and was retired 2026-10-05 (`git rm`, T8)** — superseded by `WRITEUP.md` plus this file's run table, and the repo's worst staleness surface. Correcting a number in this file leaves all four stale until someone propagates it. |
+| [report/](report/) | **The attachable technical report (2026-10-08) — `report.tex` → `report.pdf`, 5 pages, built by `report/build.ps1`.** Written for **an external reader evaluating the work**, not for a maintainer: no strike-throughs, no T-numbers, no internal diagnostic IDs. It is a **dated snapshot**, states so in its own footer, and is **audited by `scripts/check_report_numbers.py`** (113 figures, 0 unsourced). ⚠ **Regenerate it, never hand-edit the PDF**, and re-run the audit after any edit to the `.tex` — the audit is the only thing standing between this document and the staleness that retired `REPORT.md`. Two LaTeX notes worth keeping: `lmodern` must load **before** `fontenc` or `microtype`'s font expansion dies on bitmap fonts, and the build needs **two** pdflatex passes for `\pageref{LastPage}`. |
 | [kaggle_token_pruning_ocr.ipynb](kaggle_token_pruning_ocr.ipynb) | The **canonical** notebook, 17 cells, edited only via asserted patchers (below). Produced runs 2–6. **It did NOT produce runs 7–8.** |
 | [kaggle_pruning_run.ipynb](kaggle_pruning_run.ipynb) | **The notebook that actually produced runs 7–11.** Generated by `scripts/make_kaggle_pruning_notebook.py`, which copies the canonical notebook and adds the `DO_TRAIN` pruning-ON retrain + `SUPERVISE_SALIENCY` ink-BCE loss, and since 2026-09-16 the **real checkerboard `BipartiteTokenMerger` spliced from `src/tome.py`** plus the 13 token-matched merge rows (PATCH E/F/G), and since 2026-09-26 **PATCH H** — `_selection_signal` spliced from `src/model.py` (59 lines) with `select_mode` threaded into `forward()` so `forward()` and `generate()` share one selection path — and since 2026-09-29 **PATCH I**, the pooled-corpus port (cells 2/9/13/15: FUNSD+SROIE = 397 behind a `PooledTestSet`, a per-document `corpus` label, `word_order` in `per_image`, per-corpus strata on every row, and a 29th sweep row `keep=0.40 random TWIN` at M=1920). ⚠ **This list read "E/F/G" until 2026-09-27, 11 days after H shipped** — see `## Patch H, run 18's staged config, and two select-mode verifiers`. **The mechanism behind the project's headline result lives only here and in its generator — not in `src/`, not in the canonical notebook.** That is a third copy of the model; see the duplication gotcha. Regenerate, never hand-edit. **The merge fix exists ONLY here** — the canonical notebook still carries the broken parity split (gotcha). |
 | [src/](src/) | Library mirror: `model.py`, `router.py`, `tome.py`, `dataset.py`, `train.py`, `evaluate.py`, `loss.py` |
@@ -3435,6 +3451,27 @@ encoder tail **1e-5**.
   `for f in …; do …; done` suite loop keyed on `$?` would have recorded that crash as a
   pass. Redirect (`> log 2>&1`) or set `set -o pipefail`; do not pipe a verifier into
   anything. The suite loop in Conventions is safe because it runs `python -u "$f"` bare.
+
+- **Multi-agent verification is UNAVAILABLE in this project, and its failure mode returns a
+  clean-looking zero.** Three independent attempts, three billing-quota deaths, none of them a
+  script defect: a 6-agent adversarial check on the SROIE measurements (`402 Budget pool quota
+  has been exhausted`, 0/6, 4.1 s), a 3-agent retry of the same (`403 pre-consume quota
+  failed`), and on **2026-10-09** a 7-agent audit of `report/report.tex` — six lenses plus a
+  completeness critic — which died **0 of 7** on the same `402` after burning ~1.0M subagent
+  tokens and 54 tool calls. ⚠ **The danger is the shape of the result, not the outage.** That
+  last run returned `{"confirmedCount": 0, "confirmed": [], "criticFindings": []}` — which is
+  **byte-identical to what a clean audit returns**, and the only thing distinguishing "nothing
+  is wrong" from "nothing ran" was the separate `failures` list. An orchestrator that reads the
+  result object and not the failure list records a full adversarial audit as passed. **So:
+  check the completion count before reading any aggregate a fan-out returns, and treat
+  `0 findings` from `0 completed agents` as NO EVIDENCE rather than as a pass.** Same family as
+  *"a verifier that crashes reads exactly like one nobody ran"*, one level up — here the
+  crashing thing is the whole harness, and it crashes into a success-shaped value.
+  **Practical consequence: verify by hand.** The report audit was done directly instead —
+  greps for the forbidden-claim list, the retired figures and the leaked-internals list, plus
+  `scripts/check_report_numbers.py`'s 58 re-derived figures. That is what the dead workflow was
+  for, and it is cheaper than it looks; what is lost is the *independence*, which is exactly
+  the thing this project values and cannot currently buy.
 
 ---
 

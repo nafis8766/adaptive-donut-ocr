@@ -1,0 +1,141 @@
+==============================================================================
+report/report.tex -- numeric audit
+==============================================================================
+artifacts : 12 results/*.json (12,504 numeric leaves)
+trackers  : 4 (971,591 chars)
+
+------------------------------------------------------------------------------
+SECTION 1 -- TARGETED: each figure re-derived from a named artifact field
+------------------------------------------------------------------------------
+  [PASS] grid: 4800 visual tokens = 4800   80x60 token grid
+  [PASS] visual tokens @ keep=0.50 = 2400   0.5 x 4800
+  [PASS] visual tokens @ keep=0.35 = 1680   0.35 x 4800
+  [PASS] visual tokens @ keep=0.25 = 1200   0.25 x 4800
+  [PASS] visual tokens @ keep=0.20 = 960   0.2 x 4800
+  [PASS] budget table: unpruned ceiling = 77.62   D12 run 9 keep=1.00 word_recall_pct
+  [PASS] budget table: recall @ keep=0.50 = 78.22   D12 run 9 keep=0.5 word_recall_pct
+  [PASS] budget table: recall @ keep=0.35 = 77.37   D12 run 9 keep=0.35 word_recall_pct
+  [PASS] budget table: recall @ keep=0.25 = 70.67   D12 run 9 keep=0.25 word_recall_pct
+  [PASS] budget table: recall @ keep=0.20 = 64.61   D12 run 9 keep=0.2 word_recall_pct
+  [PASS] budget table: delta @ keep=0.50 = +0.60   D12 paired per-image vs own keep=1.00
+  [PASS] budget table: t @ keep=0.50 = 0.43   D12 paired t, n=50
+  [PASS] budget table: delta @ keep=0.35 = -0.26   D12 paired per-image vs own keep=1.00
+  [PASS] budget table: t @ keep=0.35 = -0.18   D12 paired t, n=50
+  [PASS] budget table: delta @ keep=0.25 = -6.96   D12 paired per-image vs own keep=1.00
+  [PASS] budget table: t @ keep=0.25 = -2.82   D12 paired t, n=50
+  [PASS] budget table: delta @ keep=0.20 = -13.01   D12 paired per-image vs own keep=1.00
+  [PASS] budget table: t @ keep=0.20 = -5.42   D12 paired t, n=50
+  [PASS] budget table: MDE @ keep=0.50 = 2.76   D12 meta.resolution_pts['run 9  (trained at keep=0.50)|0.5'] (= 2 x paired SE)
+  [PASS] budget table: MDE @ keep=0.35 = 2.81   D12 meta.resolution_pts['run 9  (trained at keep=0.50)|0.35'] (= 2 x paired SE)
+  [PASS] KV: unpruned MiB = 150.00   M1 cross_kv_bytes_analytic @4800
+  [PASS] KV: MiB @ keep=0.50 = 75.00   M1 cross_kv_bytes_analytic @2400
+  [PASS] KV: pct vs unpruned @ keep=0.50 = -50.0   M1 analytic ratio
+  [PASS] KV: MiB @ keep=0.35 = 52.50   M1 cross_kv_bytes_analytic @1680
+  [PASS] KV: pct vs unpruned @ keep=0.35 = -65.0   M1 analytic ratio
+  [PASS] KV: MiB @ keep=0.25 = 37.50   M1 cross_kv_bytes_analytic @1200
+  [PASS] KV: pct vs unpruned @ keep=0.25 = -75.0   M1 analytic ratio
+  [PASS] KV: MiB @ keep=0.20 = 30.00   M1 cross_kv_bytes_analytic @960
+  [PASS] KV: pct vs unpruned @ keep=0.20 = -80.0   M1 analytic ratio
+  [PASS] KV: share of 771 MiB params = 19.46   M1 analytic @4800 / 771 MiB
+  [PASS] KV: combined ratio at M=1920 = 2.50   M1 150.00/60.00 MiB
+  [PASS] KV: merge-step-alone ratio = 1.25   M1 2400/1920 -- the report MUST separate this from the 2.50x
+  [PASS] selection table: router @ keep=0.50 = 80.46   D11 run 9 router keep=0.5
+  [PASS] selection table: random @ keep=0.50 = 62.77   D11 run 9 random keep=0.5
+  [PASS] selection table: margin @ keep=0.50 = +17.7   D11 router minus random, same budget
+  [PASS] selection table: router @ keep=0.35 = 79.25   D11 run 9 router keep=0.35
+  [PASS] selection table: random @ keep=0.35 = 51.84   D11 run 9 random keep=0.35
+  [PASS] selection table: margin @ keep=0.35 = +27.4   D11 router minus random, same budget
+  [PASS] selection table: router @ keep=0.25 = 71.15   D11 run 9 router keep=0.25
+  [PASS] selection table: random @ keep=0.25 = 37.20   D11 run 9 random keep=0.25
+  [PASS] selection table: margin @ keep=0.25 = +34.0   D11 router minus random, same budget
+  [PASS] selection table: router @ keep=0.20 = 63.10   D11 run 9 router keep=0.2
+  [PASS] selection table: random @ keep=0.20 = 33.80   D11 run 9 random keep=0.2
+  [PASS] selection table: margin @ keep=0.20 = +29.3   D11 router minus random, same budget
+  [PASS] DiD table: trained-unpruned delta @ keep=0.50 = -1.57   D12 run 5 paired vs own keep=1.00
+  [PASS] DiD table: DiD @ keep=0.50 = -2.17   D12 (run5 delta - run9 delta), paired
+  [PASS] DiD table: t @ keep=0.50 = -0.81   D12 paired t on the DiD, n=50
+  [PASS] DiD table: trained-unpruned delta @ keep=0.35 = -6.03   D12 run 5 paired vs own keep=1.00
+  [PASS] DiD table: DiD @ keep=0.35 = -5.77   D12 (run5 delta - run9 delta), paired
+  [PASS] DiD table: t @ keep=0.35 = -2.28   D12 paired t on the DiD, n=50
+  [PASS] DiD table: trained-unpruned delta @ keep=0.25 = -11.47   D12 run 5 paired vs own keep=1.00
+  [PASS] DiD table: DiD @ keep=0.25 = -4.52   D12 (run5 delta - run9 delta), paired
+  [PASS] DiD table: t @ keep=0.25 = -1.52   D12 paired t on the DiD, n=50
+  [PASS] DiD table: trained-unpruned delta @ keep=0.20 = -20.34   D12 run 5 paired vs own keep=1.00
+  [PASS] DiD table: DiD @ keep=0.20 = -7.33   D12 (run5 delta - run9 delta), paired
+  [PASS] DiD table: t @ keep=0.20 = -3.00   D12 paired t on the DiD, n=50
+  [PASS] closing line: headline delta = -0.26   D12 keep=0.35 paired mean
+  [PASS] closing line: its standard error = 1.41   1 x paired SE -- NOT 1.96; the report must label which
+
+  section 1: 58 re-derived figures present, 0 missing
+
+------------------------------------------------------------------------------
+SECTION 2 -- SWEEP (backstop): every other figure must exist in SOME source
+------------------------------------------------------------------------------
+  figures already covered by section 1 : 30
+  backed by a measured artifact        : 46
+  backed by tracker prose only         : 38
+  unsourced                            : 0
+
+  resting on PROSE rather than on a measurement (an eye is warranted --
+  prose is where a transcription error survives):
+    [prose] 100
+    [prose] 112
+    [prose] 149
+    [prose] 4.2
+    [prose] 410
+    [prose] 500
+    [prose] 771
+    [prose] 800
+    [prose] 9.7
+    [prose] 1.04
+    [prose] 1.09
+    [prose] 1.30
+    [prose] 1.57
+    [prose] 1.62
+    [prose] 1.90
+    [prose] 1.94
+    [prose] 2.24
+    [prose] 2.70
+    [prose] 2.82
+    [prose] 2560
+    [prose] 27.4
+    [prose] 29.3
+    [prose] 3.74
+    [prose] 4.14
+    [prose] 5.92
+    [prose] 6.03
+    [prose] 6.96
+    [prose] 69.2
+    [prose] 7.35
+    [prose] 7.92
+    [prose] 8.15
+    [prose] 10.49
+    [prose] 10.93
+    [prose] 11.47
+    [prose] 13.01
+    [prose] 18.80
+    [prose] 20.34
+    [prose] 73.09
+
+------------------------------------------------------------------------------
+SECTION 3 -- NON-VACUITY: can any of the above actually fail?
+------------------------------------------------------------------------------
+  [PASS] C1 sentinel 77.7777 matches no source   the sweep matcher can report absence
+  [PASS] C2 rounding control: 51.84 resolves from stored 51.838991...   a substring matcher FAILS this
+  [PASS] C3 self-sabotage: headline 77.37 -> 77.31 breaks section 1   1 targeted check(s) go red, incl. 'budget table: recall @ keep=0.35'
+  [PASS] C4 the sweep alone would MISS that corruption   77.31 occurs in a tracker by coincidence -- section 1 is what catches it
+  [info] C5 sweep false-pass rate: 24/500 = 4.8% of random 2dp values in [30,90] clear the EXISTENCE bar
+         -> section 2 is a backstop, not an audit. Section 1 is the audit.
+  [PASS] C6 calibration: paired() reproduces all 24 stored delta/SE/t values to 1e-9   section 1 audits against the measurement, not my restatement
+
+==============================================================================
+TOTAL: 121 passed, 0 failed
+==============================================================================
+
+Every load-bearing figure in the report re-derives from a named artifact field,
+and a corrupted headline is proven to break this check (control C3).
+
+SCOPE LIMIT -- do not over-read this green: it establishes arithmetic and presence,
+NOT that the sentence around any figure is still the project's position. A withdrawn
+verdict whose numbers still reproduce passes everything above. Only a human read of
+the prose catches that, which is why AGENTS.md wins on any disagreement.

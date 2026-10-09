@@ -2684,3 +2684,96 @@ existing Kaggle workflow is untouched.
   lasting contribution — the `n=410` vs `n=397` reconciliation — is already merged into
   `## The official SROIE archive` §1, where both counts turned out exact and the disagreement
   was a **scope choice**, not an arithmetic error.
+
+- **2026-10-08 — the attachable technical report, and its auditor found its own defect.**
+  The wrap-up left the repo correct and the project illegible to anyone outside it: `WRITEUP.md`
+  is the audited claims document, but it is built as an **internal record** — it opens with a
+  ⛔ banner retiring a claim, carries three dated correction blocks and nested strike-throughs,
+  and names `D11`/`M1`/`T1 §7` without a map. Correct for a maintainer, wrong for a reviewer
+  reading it beside an application. **New: `report/report.tex` → `report.pdf`, 5 pages, built by
+  `report/build.ps1`** (two pdflatex passes; `lmodern` loads **before** `fontenc` or
+  `microtype`'s font expansion dies on bitmap fonts — both found by running the build, not by
+  reading it). Zero overfull boxes, zero undefined references.
+
+  **Scope decided with the user, and the line is worth recording because it is easy to get
+  backwards.** The brief was *limitations yes, unfinished internal state no*. So the report
+  **keeps** every scope limit — cross-KV only, no latency, no encoder saving, `n = 50`, the
+  router not beating the ink oracle, the 18% invalid-JSON rate, the ceiling drift **including
+  the 10.93 pt run** — and keeps the **`UNDERPOWERED` merge verdict with its required
+  `n ≳ 307`**, because omitting an axis that is in the architecture diagram invites the question
+  anyway. It **excludes** the TODO queue, every T-number, run 18, the licence forensics, the
+  verifier-defect archaeology and all process state. The pre-registration is told as a **method
+  strength** rather than a gap: a rule fixed before the deciding run, applied backwards, which
+  retired this project's own headline and then found a defect in itself.
+
+  ⚠ **The derived-document count goes back to FIVE, three days after T8 cut it to four — and
+  that is not a `REPORT.md` revival.** `REPORT.md` died of being a hand-edited standing prose
+  tracker with no audit. This one is **compiled** (so it cannot be hand-edited into drift),
+  **dated in its own footer**, and **audited from the day it was written**. If it ever acquires
+  a *stale-as-of* banner, it has become `REPORT.md` and should go the same way.
+
+  **New: `scripts/check_report_numbers.py` — 121 passed, 0 failed, exit 0**
+  (`results/_v_report_numbers.log`). Three sections, in descending order of what a green is
+  worth. **(1) TARGETED — the actual audit:** **58** load-bearing figures, each
+  **re-derived from a named artifact field** and then required to be present in `report.tex`
+  — every cell of all three tables, every paired delta and `t`, the MDE, the KV MiB and
+  percentages, the DiD column, the closing SE. **(2) SWEEP — a backstop:** remaining
+  figures must exist somewhere in `results/*.json` or the four trackers. **(3) six
+  non-vacuity controls.**
+
+  ⚠⚠ **The first version of this script was DECORATIVE, and the way I found out is the
+  project's own rule.** I sabotage-tested it: mutate the report's headline recall
+  `77.37 → 77.31` and re-run. **It exited 0.** `77.31` occurs exactly once in
+  `AGENTS-ARCHIVE-RUNS.md`, in an unrelated merge table, so an existence-anywhere check
+  cleared it. Measured the bar properly with a deterministic sample: **4.8% of random
+  2-decimal values in [30,90] clear it** — a 1-in-21 chance of passing any given corrupted
+  figure, on a document whose whole purpose is that its numbers are right. That is
+  Conventions' *"ask what a FAILING system would score on this same check"*, answered
+  empirically: about the same. **Fixed by section 1, and pinned by control C3, which re-runs
+  that exact sabotage on every invocation** and asserts section 1 goes red; **C4** records
+  that the sweep alone would still miss it, so the two sections' roles cannot blur.
+
+  ⚠ **A second self-defect:** tier 1 began as a **substring** match against the JSON, which
+  stores full precision. `51.84` **failed** against the stored `51.838991011355475`;
+  `62.77`/`37.20`/`33.80` **passed** purely because those round by *truncation*. Three of four
+  sibling cells were being decided by luck and the fourth by arithmetic — and the one that
+  failed was **correct**. Replaced with rounding each stored value to the figure's own decimal
+  count; **C2** pins it so the substring form cannot return. **C6** then asserts the script's
+  own `paired()` helper reproduces all **24** stored `delta_pts`/`se_pts`/`t` values in
+  `curve_vs_unpruned` to **1e-9**, so section 1 audits against the project's measurement and
+  not against my reimplementation of it.
+
+  ⚠ **A third, and this one was the script accusing the report wrongly.** The MDE check
+  first computed 1.96·SE, derived **2.71 / 2.76**, and reported the report's **2.76 / 2.81**
+  as wrong. The report was right: D12's own `meta.resolution_pts` uses a **2·SE** convention
+  (2×1.3822 = 2.764, 2×1.4074 = 2.815), and the report even has them in the correct row
+  order. The check now **reads the named field** instead of assuming the project shares a
+  convention. **Suspect the verifier first — including when the verifier is the one you
+  wrote an hour ago.**
+
+  **Three fixes to the report itself, all from checks rather than from reading:**
+  (i) the closing line carried an **unlabelled** ± — `1.41` — which an ordinary reader
+  takes for a 95% interval; it is **one standard error** (D12's `se_pts` = 1.4074, where
+  1.96·SE would be 2.76). Now stated as *"paired standard error 1.41, n = 50"*.
+  (ii) *"A pre-registration was written before the deciding run"* — **there was no deciding
+  run.** Run 17 was never collected, which is precisely *why* the rule was applied backwards;
+  the old phrasing let a reviewer infer a run that never happened. Now *"written for a run that
+  was never collected"*, which is both accurate and the stronger story. (iii) the budget
+  table's verdict column was clipped past the right margin (the one overfull box); the power
+  figures moved into the prose, where they already were. Rebuilt: 5 pages, **zero** overfull
+  boxes, zero undefined references, and the PDF's mtime is newer than its source.
+
+  **Verified by hand, because the adversarial check could not run — see the new Gotchas
+  entry.** A 7-agent audit of the report (six lenses + a completeness critic) died **0 of 7**
+  on `402 Budget pool quota has been exhausted`, the third such death in this project. It
+  returned `confirmedCount: 0` with an empty findings array — **byte-identical to a clean
+  audit**. So the lenses were run as greps instead: the forbidden-claim list (latency,
+  throughput, encoder saving, 2.50x-as-merging, "free", beats-the-ink-oracle, "H1 proven"),
+  the retired figures (−3.86, 7.45, +0.54, 3.33x, n=397, 347, 17/17), and the
+  leaked-internals list (T/D/M numbers, PATCH letters, run numbers, script and notebook names,
+  queue state). **Result: clean.** Every `free` in the report is either about *pruning* (which
+  is licensed) or the report **denying** *"merging is free"*; every latency and encoder hit is
+  the report refuting the claim; the one `T1` match was the `fontenc` package option; `0.18`
+  was the `t`-statistic, not the retired 0.18–0.22x latency figure. **Zero retired figures
+  and zero leaked internals.** What is missing is the *independence*, which is the thing this
+  project values and currently cannot buy.
