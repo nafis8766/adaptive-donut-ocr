@@ -2,7 +2,7 @@
 report/report.tex -- numeric audit
 ==============================================================================
 artifacts : 12 results/*.json (12,504 numeric leaves)
-trackers  : 4 (971,591 chars)
+trackers  : 4 (982,513 chars)
 
 ------------------------------------------------------------------------------
 SECTION 1 -- TARGETED: each figure re-derived from a named artifact field
