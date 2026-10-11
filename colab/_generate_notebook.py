@@ -266,9 +266,9 @@ still the project's position is a job for reading, not for a script.
   **1.04×** wall-clock, because the router sits *after* the frozen Swin encoder and all 4,800
   tokens are computed at every budget.
 
-The [5-page technical report](https://github.com/nafis8766/adaptive-donut-ocr/blob/main/report/report.pdf)
-has the full method and every scope limit. `AGENTS.md` in the repository is the source of
-truth and wins on any disagreement.
+The [technical report](https://github.com/nafis8766/adaptive-donut-ocr/blob/main/report/report.pdf)
+has the full method, the experimental setup and every scope limit, and the
+[trained weights](https://huggingface.co/nafis8766/adaptive-donut-ocr-router) are on the Hub.
 """))
 
 NB = {

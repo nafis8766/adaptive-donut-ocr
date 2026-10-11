@@ -2852,3 +2852,58 @@ existing Kaggle workflow is untouched.
   Reproducing section that leads with the CPU route and states which notebook runs where;
   the file-map gained `colab/` and `hf/` rows; the `report/` row's stale **113 figures** became
   **121 checks / 58 re-derived**.
+
+- **2026-10-10 — the report is rewritten as a research paper, and the line that forced it was
+  `AGENTS.md` naming itself inside it.**
+
+  **The ruling:** *"THE PAPER YOU WROTE SAID AGENTS.MD IS THE SINGLE SOURCE OF TRUTH IN IT. WE
+  CANNOT HAVE IT. I WANT THE PAPER TO BE AS PROFESSIONAL AND SIMILAR TO RESEARCH PAPERS AS
+  POSSIBLE."* Both halves are correct and the first is the sharper one. The report's footer read
+  *"This report is a dated snapshot; `AGENTS.md` is the source of truth."* That sentence is
+  correct **inside this repository** and meaningless to a reviewer reading the PDF cold — it
+  names an internal working log as the authority for a document that is supposed to stand on its
+  own. An audit of the report for *leaked internals* had already run on 2026-10-09 and **passed**,
+  because the leak list was T-numbers, run numbers, PATCH letters and script names. `AGENTS.md`
+  itself was not on that list. **A purge list is only as good as its enumeration**, which is this
+  file's *"a green count is scoped to whatever the sweep globbed"* in a new place.
+
+  **What the document is now:** title block, **abstract**, numbered sections, a captioned
+  **Figure 1**, **Tables 1–3** with captions and `\label`/`
+ef` cross-references, a
+  **Contributions** list, and **nine references** (Donut, Swin, mBART, FUNSD, ToMe, DynamicViT,
+  straight-through, Holm, Tukey–McLaughlin) in a `thebibliography` block. 5 pages → **8**;
+  zero overfull boxes, zero undefined references. The reproducibility line now points at the
+  **repository and the Hub** rather than at a tracker file — which is what a paper does anyway.
+
+  ⚠ **One of the three safeguards that kept this document out of the `REPORT.md` trap is now
+  gone, deliberately, and that should be said rather than glossed.** Those were: compiled (cannot
+  be hand-edited into drift), self-dated with a subordination line, and numerically audited. The
+  **subordination line is deleted**. Two remain, and **the numeric audit is now the only
+  mechanical guard** against this document drifting away from the artifacts. It survived the
+  rewrite intact — **58/58 targeted figures still present, 0 unsourced, 121 passed** — and it
+  is the thing to re-run after any edit to the `.tex`.
+
+  **The auditor needed one scoping fix, and the alternative was the wrong one.** The new
+  bibliography made the sweep report `1308.3432` — the straight-through estimator's arXiv id —
+  as an *unsourced figure*. The sweep now stops at `\begin{thebibliography}`. **Whitelisting the
+  number would have been wrong**: a bibliography accumulates identifiers with every citation
+  (years, volumes, issues, page ranges), and the ones that did *not* fire avoided it only by
+  colliding with a real value somewhere in a 1 MB corpus — exactly the coincidence control C5
+  measures at **4.8%**. **The cut was checked for blindness rather than assumed safe:** a bogus
+  `61.4927` injected into the *body* is still caught, exit 1, named failure. Section 1 never read
+  that region at all.
+
+  **Three smaller things from the same pass.**
+  (i) The architecture block had rendered as a loose tabular with a **dangling arrow** on its own
+  line; it is now a proper captioned `figure`.
+  (ii) The Colab notebook carried the same `AGENTS.md` sentence in its closing cell. Fixed **in
+  `colab/_generate_notebook.py` and regenerated**, per the never-hand-edit rule — the notebook is
+  generated, so a fix typed into it would have vanished at the next regeneration. All four
+  public-facing artifacts (report, model card, notebook, generator) now grep **zero** for
+  `AGENTS.md` / *source of truth* / *dated snapshot*.
+  (iii) ⚠ **My own provenance check printed a misleading result and I nearly filed it.** After
+  rebuilding, `ls --time-style=+%H:%M:%S` showed the PDF at `17:05` against a `.tex` at `17:55`,
+  i.e. the PDF looking **stale**. It was a day newer — the format string dropped the date. Caught
+  by re-checking with epoch seconds. **That is the mtime-provenance trap this file documents,
+  reproduced inside the check written to detect it**: a time-of-day comparison across midnight
+  is not an ordering. Compare `os.path.getmtime` floats, or print the date.

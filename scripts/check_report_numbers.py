@@ -326,6 +326,20 @@ print("SECTION 2 -- SWEEP (backstop): every other figure must exist in SOME sour
 print("-" * 78)
 
 body = report_src.split(r"\begin{document}", 1)[1]
+
+# Cut the bibliography. It is full of numbers that are IDENTIFIERS, not measurements --
+# arXiv IDs, years, volumes, issues, page ranges -- and none of them is a claim this audit
+# has any business sourcing. Found when the report gained references: `1308.3432` (the
+# straight-through estimator's arXiv ID) was reported as an unsourced figure.
+#
+# Whitelisting that one number would have been the wrong fix: a bibliography accumulates
+# more of them with every citation, and the ones that DON'T fire do so only because they
+# happen to collide with a real value somewhere in a 1 MB corpus -- which is the same
+# coincidence that made the section-2 sweep decorative in the first place (control C5).
+# Scoping the sweep to the claims is the fix; section 1 never read this region anyway.
+if r"\begin{thebibliography}" in body:
+    body = body.split(r"\begin{thebibliography}", 1)[0]
+
 body = re.sub(r"(?m)^\s*%.*$", " ", body)
 body = re.sub(r"\\(?:vspace|hspace|titlespacing|setlist|hrule|definecolor|usepackage"
               r"|documentclass|rule|enlargethispage|geometry)\s*(\*)?(\[[^\]]*\])?(\{[^{}]*\})*", " ", body)
