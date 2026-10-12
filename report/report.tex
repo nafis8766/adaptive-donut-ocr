@@ -1,92 +1,128 @@
-% AdaptiveDonutOCR -- technical report, paper form
+% AdaptiveDonutOCR -- technical report.
 %
-% Build: .\build.ps1   (two pdflatex passes; the second resolves \pageref{LastPage})
+% Typeset on the Research Future journal manuscript template (report/new main.tex):
+% authblk author block, one-and-a-half spacing, numbered line numbers, biblatex/nejm
+% references, and the template's mandated section order -- Introduction, Materials and
+% Methods, Results, Discussion -- followed by its Acknowledgments, Data Availability
+% and Supplementary Materials blocks.
+%
+% Build: .\build.ps1   (pdflatex -> bibtex -> pdflatex -> pdflatex)
 %
 % Every figure in this document is re-derived from a versioned result artifact by
 % scripts/check_report_numbers.py, which must stay green after any edit here. Run it.
+% That audit is the only mechanical guard against this document drifting from the
+% measurements, so do not hand-edit report.pdf and do not skip the audit.
 
-\documentclass[11pt,a4paper]{article}
+\documentclass{article}
+\usepackage[utf8]{inputenc}
 
-% lmodern BEFORE fontenc: microtype's font expansion requires scalable (Type 1) fonts,
-% and the default Computer Modern ships as bitmaps here -- without this, pdflatex dies
-% with "auto expansion is only possible with scalable fonts". Fixing the font is the
-% right repair; switching microtype's expansion off would just hide it.
+% lmodern + T1: the default Computer Modern ships here as bitmaps, which embeds poorly
+% in the PDF and renders badly in some viewers. Scalable Type 1 outlines instead.
 \usepackage{lmodern}
 \usepackage[T1]{fontenc}
-\usepackage[utf8]{inputenc}
-\usepackage[margin=2.2cm]{geometry}
-\usepackage{booktabs}
+
+\usepackage{authblk}
+\usepackage{setspace}
+\usepackage[margin=1.25in]{geometry}
+\usepackage{graphicx}
+\graphicspath{ {./figures/} }
+\usepackage{subcaption}
 \usepackage{amsmath}
 \usepackage{amssymb}   % \gtrsim in the sample-size requirement
 \usepackage{bm}
-\usepackage{microtype}
+\usepackage{booktabs}  % horizontal rules only -- the template forbids vertical rules
 \usepackage{enumitem}
+
+% xcolor BEFORE hyperref: hyperref pulls in `color` for colorlinks, and loading xcolor
+% on top of an already-loaded color raises an option clash. Defining linkblue up here
+% also means hyperref's option list can refer to it.
 \usepackage{xcolor}
-\usepackage{titlesec}
-\usepackage[colorlinks=true,linkcolor=linkblue,urlcolor=linkblue,citecolor=linkblue]{hyperref}
-\usepackage{lastpage}
-\usepackage{fancyhdr}
-
 \definecolor{linkblue}{HTML}{1A4F8B}
-\definecolor{rulegrey}{HTML}{888888}
+\usepackage[colorlinks=true,linkcolor=linkblue,urlcolor=linkblue,citecolor=linkblue]{hyperref}
 
-\titleformat{\section}{\large\bfseries}{\thesection}{0.6em}{}
-\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection}{0.6em}{}
-\titlespacing{\section}{0pt}{1.6ex plus 0.4ex minus 0.2ex}{0.8ex plus 0.1ex}
-\titlespacing{\subsection}{0pt}{1.3ex plus 0.3ex minus 0.2ex}{0.6ex plus 0.1ex}
+\usepackage{lineno}
+\linenumbers
 
-\pagestyle{fancy}
-\fancyhf{}
-\renewcommand{\headrulewidth}{0pt}
-\fancyfoot[C]{\small\color{rulegrey}\thepage\ of \pageref{LastPage}}
+\captionsetup{font=small,labelfont=bf}
+\setlist[itemize]{leftmargin=1.4em, topsep=4pt, itemsep=3pt, parsep=0pt}
+\setlist[enumerate]{leftmargin=1.7em, topsep=4pt, itemsep=3pt, parsep=0pt}
 
-\setlist[itemize]{leftmargin=1.3em, topsep=3pt, itemsep=2.5pt, parsep=0pt}
-\setlist[enumerate]{leftmargin=1.6em, topsep=3pt, itemsep=3pt, parsep=0pt}
+%%%%%% Bibliography %%%%%%
+% The template ships backend=bibtex. Changed to biber, which is biblatex's native
+% backend and the one \addbibresource (the template's own command) is written for.
+% This is not a preference: under backend=bibtex this document builds correctly but
+% warns "Please (re)run BibTeX" on EVERY pass, permanently. biblatex detects whether a
+% requested rerun happened by comparing the .bbl's md5 before and after -- and bibtex
+% regenerates a byte-identical .bbl, so the check concludes the rerun never happened and
+% re-requests it, forever. Measured: five pdflatex/bibtex cycles, warning on all five,
+% .bbl md5 unchanged from the second onward.
+%
+% The warning is not cosmetic. It routes through \G@refundefinedtrue, so the log also
+% says "There were undefined references" on a document whose references are all defined
+% -- which is the same line a genuinely mistyped \ref produces. A build that always
+% reports a problem cannot report a real one.
+\usepackage[style=nejm,
+citestyle=numeric-comp,
+sorting=none,
+backend=biber]{biblatex}
+\addbibresource{references.bib}
 
-\title{\textbf{Learned Visual-Token Pruning for Document OCR:}\\
-\large What It Buys, What It Does Not, and How We Checked}
+%%%%%% Title %%%%%%
+\title{Learned Visual-Token Pruning for Document OCR: What It Buys, What It Does Not,
+and How We Checked}
 
-\author{MD. Nafis Kamal\\
-\small\texttt{nafiskamal8766@gmail.com}\\
-\small Independent research}
+%%%%%% Authors %%%%%%
+\author[1*]{MD. Nafis Kamal}
 
+%%%%%% Affiliations %%%%%%
+% Listed as independent because this project was conducted independently and was not
+% hosted, supervised or funded by an institution. Stated rather than left to inference.
+\affil[1]{Independent researcher, Dhaka, Bangladesh.}
+\affil[*]{Address correspondence to: \href{mailto:nafiskamal8766@gmail.com}
+{nafiskamal8766@gmail.com}}
+
+%%%%%% Date %%%%%%
 \date{October 2026}
+
+%%%%%% Spacing %%%%%%
+\onehalfspacing
 
 \begin{document}
 
 \maketitle
-\thispagestyle{fancy}
 
+%%%%%% Abstract %%%%%%
 \begin{abstract}
 \noindent
-Donut, an OCR-free document understanding model, encodes a page as 4{,}800 visual tokens,
-most of which are blank paper. We insert a learned patch-saliency router between its frozen
-Swin-B encoder and its mBART decoder, rank those tokens, and discard the low-ranked ones
-before the decoder attends to them. On full-page OCR over the FUNSD test split we report
-three results, each with the condition under which it holds. First, discarding 65\% of the
-visual tokens frees 65\% of the decoder's cross-attention key--value cache
-($150.00 \rightarrow 52.50$\,MiB) for $-0.26$ points of word recall (paired
-$t = -0.18$, $n = 50$); the same operation applied to a checkpoint not trained under pruning
-costs $6.03$ points, so the result is a property of pruning-aware \emph{training} and not of
-the pruner. Second, the learned ranking beats a random mask by $+17.7$ to $+34.0$ points at
-matched token budgets, with the margin widening as the budget tightens. Third, a
-difference-in-differences design on bit-identical token sets rejects the competing hypothesis
-that pruning acts as inference-time denoising. We also report what the architecture does not
-deliver: cutting tokens five-fold yields $1.04\times$ wall-clock, because both the router and
-the merger sit downstream of the frozen encoder, and a token-merging stage evaluated under a
-pre-registered analysis protocol returns \emph{underpowered} rather than a null. That
-protocol was fixed before the run it was written for, applied to earlier runs when that run
-was not collected, and retired a claim this work had previously reported.
+A scanned document page is mostly blank paper, yet an optical character recognition (OCR)
+model that reads pages end to end encodes one as thousands of visual tokens, every one of
+which its decoder attends to at every generation step. We ask whether such a model can learn
+which of those tokens to keep, and what discarding the rest actually buys. We insert a
+learned patch-saliency scoring head between a frozen hierarchical vision encoder and an
+autoregressive text decoder, rank the encoder's 4{,}800 patch tokens, and discard the
+low-ranked ones before the decoder sees them. Evaluated on full-page OCR over the FUNSD test
+split of noisy scanned forms, we report three results, each with the condition under which it
+holds. First, discarding 65\% of the visual tokens frees 65\% of the decoder's
+cross-attention key--value cache, from $150.00$ to $52.50$\,MiB, for $-0.26$ points of word
+recall at a paired $t$ of $-0.18$ on $n = 50$ documents; the same operation applied to a
+checkpoint that never trained under pruning costs $6.03$ points, so the result is a property
+of pruning-aware \emph{training} and not of the pruner. Second, the learned ranking beats a
+random mask by $+17.7$ to $+34.0$ points at matched token budgets, with the margin widening
+as the budget tightens. Third, a difference-in-differences design on bit-identical token sets
+rejects the competing explanation that pruning acts as inference-time denoising. We also
+report what the architecture does not deliver: cutting tokens five-fold yields
+$1.04\times$ wall-clock, because both inserted stages sit downstream of the frozen encoder,
+and a token-merging stage scored under an analysis protocol fixed in advance returns
+\emph{underpowered} rather than a null. That protocol retired a claim we had previously
+reported.
 \end{abstract}
 
-\vspace{0.3em}
 \noindent
-{\small\textbf{Code, weights and artifacts.}
-\url{https://github.com/nafis8766/adaptive-donut-ocr} (code and all result artifacts) \textperiodcentered{}
-\url{https://huggingface.co/nafis8766/adaptive-donut-ocr-router} (trained weights).
-Every figure below is re-derived from a versioned artifact by a script in that repository,
-and a notebook reproduces Tables~\ref{tab:budget}--\ref{tab:did} on a CPU runtime in about
-one minute, without a GPU, the weights, or the dataset.}
+{\small\textbf{Code and weights.}
+\url{https://github.com/nafis8766/adaptive-donut-ocr} \textperiodcentered{}
+\url{https://huggingface.co/nafis8766/adaptive-donut-ocr-router}. See Data Availability.}
+
+%%%%%% Main Text %%%%%%
 
 \section{Introduction}
 
@@ -106,13 +142,14 @@ hundred steps, and token reduction can therefore only be applied at the encoder-
 interface. That placement decides what the method can and cannot buy, and most of this
 report is about separating the two.
 
-\paragraph{Contributions.}
+\subsection*{Contributions}
+
 \begin{enumerate}
 \item A learned patch-saliency router at the encoder--decoder interface that discards 65\% of
 the visual tokens for a measured $-0.26$ recall points, with the accompanying
 \emph{conditional} isolated by a dedicated ablation: the result requires pruning-aware
-training and does not transfer to a model trained unpruned (Sections~\ref{sec:budget},
-\ref{sec:why}).
+training and does not transfer to a model trained unpruned
+(Sections~\ref{sec:budget} and~\ref{sec:why}).
 \item A quantification of the learned ranking's value against a random mask at matched
 budgets, $+17.7$ to $+34.0$ points, together with the negative result that it does not
 significantly beat a hand-crafted ink heuristic (Section~\ref{sec:selection}).
@@ -120,21 +157,41 @@ significantly beat a hand-crafted ink heuristic (Section~\ref{sec:selection}).
 inference-time-denoising explanation for why pruning helps (Section~\ref{sec:why}).
 \item An honest efficiency accounting: the saving is decoder cross-attention memory and
 \emph{not} latency or encoder compute, with the architectural reason measured rather than
-asserted (Section~\ref{sec:limits}).
+asserted (Section~\ref{sec:efficiency}).
 \item A pre-registered analysis protocol for the token-merging question, fixed in advance of
 the deciding run, which returned \emph{underpowered} and retired a previously reported claim
-of ours (Section~\ref{sec:method-layer}).
+of ours (Sections~\ref{sec:stats} and~\ref{sec:merge}).
 \end{enumerate}
 
-\section{Method}
+\section{Materials and Methods}
+
+\subsection{Experimental design}
+
+Every comparison reported here is \emph{paired per document} over the same evaluation set and
+\emph{within a single checkpoint and compute environment}. Three design choices follow from
+that and are fixed before any result is read.
+
+\begin{itemize}
+\item \textbf{The reference arm is always the same model.} A token budget is scored against
+that checkpoint's \emph{own} unpruned row, never against a different checkpoint's, because the
+unpruned ceiling moves between retrains (Section~\ref{sec:measurement}).
+\item \textbf{Each intervention has a degenerate control at the same budget.} Learned
+selection is scored against a random mask drawn at the identical token count, and the
+pruning-aware checkpoint against one trained unpruned on \emph{bit-identical} token sets.
+\item \textbf{Thresholds are fixed before the measurement they judge.} The minimum detectable
+effect required of a null, the margin required of the router against the ink heuristic, and
+the full analysis rule for the merging question (Section~\ref{sec:stats}) were all written
+down in advance of the runs they score.
+\end{itemize}
 
 \subsection{Architecture}
 
 We insert two stages between a frozen encoder and an unfrozen decoder
 (Figure~\ref{fig:arch}).
 
-\begin{figure}[h]
+\begin{figure}[htbp]
 \centering
+\singlespacing
 \footnotesize
 \setlength{\tabcolsep}{4pt}
 \begin{tabular}{@{}ccccccc@{}}
@@ -143,7 +200,8 @@ frozen Swin-B encoder & $\rightarrow$ & PatchSaliencyRouter & $\rightarrow$
 (4800 patch tokens) & & MLP score, STE top-$k$ & & cosine soft-merge & & seq2seq \\
 \end{tabular}
 \caption{The pipeline. Both inserted stages sit \emph{downstream} of the frozen encoder,
-which is what bounds the efficiency story to the decoder side (Section~\ref{sec:limits}).}
+which is what bounds the efficiency story to the decoder side
+(Section~\ref{sec:efficiency}).}
 \label{fig:arch}
 \end{figure}
 
@@ -152,15 +210,22 @@ The backbone is \texttt{naver-clova-ix/donut-base}. The encoder emits 4800 token
 $d_{\text{model}} = 1024$, and the full model occupies 771\,MiB of parameters at fp32.
 
 \subsection{Saliency router}
+\label{sec:router}
 
 The router is a two-layer MLP scoring head, $\mathrm{Linear}(1024 \rightarrow 256)
 \rightarrow \mathrm{LayerNorm} \rightarrow \mathrm{GELU} \rightarrow
 \mathrm{Linear}(256 \rightarrow 1) \rightarrow \sigma$, applied per token. Hard top-$k$
-selection is made differentiable with a straight-through estimator~\cite{ste},
-\[
-M_{\text{ste}} = \mathrm{TopK}(s) + s - \mathrm{detach}(s),
-\]
-so the forward pass performs discrete filtering while gradients from the decoder's
+selection is made differentiable with a straight-through estimator~\cite{ste}, as in
+Equation~\ref{eq:ste}.
+
+\begin{linenomath}
+\begin{equation} \label{eq:ste}
+M_{\text{ste}} = \mathrm{TopK}(s) + s - \mathrm{detach}(s)
+\end{equation}
+\end{linenomath}
+
+\noindent
+The forward pass therefore performs discrete filtering while gradients from the decoder's
 cross-entropy reach the scorer. The head is 263{,}169 parameters, roughly $0.1\%$ of the
 model.
 
@@ -181,17 +246,17 @@ Merging~\cite{tome}, applied to the retained set. Membership of the two halves i
 from each token's \emph{original} page position on a checkerboard of
 $(\text{row} + \text{col}) \bmod 2$, which makes the partition invariant to the order in
 which the router emits tokens. The stage has no parameters. Its evaluation is the subject of
-Section~\ref{sec:method-layer} and its status is unresolved.
+Section~\ref{sec:merge} and its status is unresolved.
 
-\section{Experimental setup}
-
-\subsection{Data and task}
+\subsection{Data, task and training}
 
 Full-page OCR into a single \texttt{\{"text": ...\}} target. Training uses the FUNSD
 train split~\cite{funsd} (149 images) plus 500 synthetic document pages; evaluation uses the
 FUNSD test split, which is 50 images and is the entire split. Training ran on one free-tier
-Kaggle T4 with discriminative learning rates (router $10^{-4}$, decoder
-$2 \times 10^{-5}$, unfrozen encoder tail $10^{-5}$).
+cloud T4 GPU with discriminative learning rates (router $10^{-4}$, decoder
+$2 \times 10^{-5}$, unfrozen encoder tail $10^{-5}$). The evaluated checkpoint is trained
+with pruning active at a keep ratio of $0.50$ for five epochs, resumed from a model trained
+unpruned.
 
 \subsection{Evaluation protocol}
 
@@ -210,6 +275,7 @@ incorrectly; it was \emph{stopping}, at 71\% of gold length. The same root cause
 valid-JSON output at $0\%$.
 
 \subsection{Two compute environments}
+\label{sec:environments}
 
 Training runs on a cloud T4; the diagnostics that produce every table below run locally on
 CPU against cached checkpoints. The same weights on the same 50 images score $77.74$ in the
@@ -219,22 +285,85 @@ version. Token \emph{selection} reproduces across the two to three decimal place
 in this report is therefore a within-checkpoint, within-environment paired delta.} No number
 here compares an absolute level measured in one environment to a level measured in the other.
 
+\subsection{Statistical analysis}
+\label{sec:stats}
+
+Each configuration is scored on all 50 test documents, and every reported delta is the mean
+of the \emph{per-document} differences with a paired standard error over the same 50
+documents; $t$ is that mean over its standard error. Deltas and $t$ values are computed from
+the stored per-image arrays rather than from column means, so a reported figure can be
+re-derived from the published artifact. The minimum detectable effect quoted for a null row
+is twice its paired standard error.
+
+For the token-merging question we fixed a fuller analysis rule in advance, because that
+question is the one with an effect size comparable to the measurement noise. The rule names
+the primary contrast and its control row before either is scored, and pins the estimator, the
+standard error, the interval method, a tail statistic alongside the location statistic,
+the multiplicity treatment over three confirmatory quantities, and a table stating what each
+verdict licenses. The location estimator is a 10\% trimmed mean of per-document differences
+with a Tukey--McLaughlin standard error~\cite{tukey}; intervals are deterministic at
+$\pm 1.96$ standard errors rather than bootstrapped, since a bootstrap endpoint is one draw
+rather than a value; multiplicity is Holm step-down~\cite{holm} at $\alpha = 0.05$. The
+justification on record for each choice is the \emph{variance structure} of the paired
+differences --- five of fifty documents carry three-quarters of the sum of squares --- and
+never the sign of any contrast.
+
+The rule is also the reason a location estimator alone was not considered sufficient. A
+trimmed mean is exactly blind to the tail it discards: on the merging contrasts, pushing the
+single worst document a further 25 points leaves the estimate unchanged to the last bit. An
+accuracy-\emph{preservation} claim is a claim about precisely those documents, so the rule
+names a tail quantity and its threshold in the same breath as the location one, and a
+tail-gate failure vetoes the verdict that would license the word ``free''.
+
+\subsection{Execution-level verification of the measurement code}
+\label{sec:verification}
+
+Each diagnostic re-derives its numbers from cached result artifacts, so any claim here is
+recheckable on a CPU without a training run. Fourteen numbered diagnostics plus a memory
+measurement are each a standalone, seeded script that prints an explicit verdict and a
+concern list. Several falsified the hypothesis they were built to support: the first inverted
+the plan it was meant to enable, the second overturned the first's recommendation in under a
+second of compute, and the study in Section~\ref{sec:why} rejected the explanation this work
+had carried for a week. The memory study's pre-written framing --- ``a large reduction in a
+small quantity'' --- was falsified by its own output at $19.46\%$, and the script now derives
+that sentence from the measurement instead of asserting it.
+
+Every notebook edit goes through a patcher that backs up first, asserts each anchor matches
+exactly once, and parses the result; every patcher has a companion that \emph{executes the
+real cell} against stubs, with no GPU and no weight download. The training loop, the loss
+block, the mid-run weight-swap control and the results writer are all covered this way. Three
+correctness defects were found here rather than by a run failing: the decoding setting above,
+the straight-through trap of Section~\ref{sec:router}, and a supervision term that fed a
+probability to a loss expecting a logit, attenuating the gradient by up to $112\times$ on
+exactly the tokens the scorer was most wrong about.
+
+Passing checks receive the same scrutiny as failing ones. Before a green check is trusted we
+ask what a \emph{failing} system would score on that same check; if the answer is ``about the
+same'', the check is decorative and is rebuilt. The clearest case: a router probe printed ``no
+concerns'' across five sections, and a sixth section comparing the router against the actual
+objective reversed the verdict entirely --- the five clean sections were measuring properties
+a broken router also satisfies. Controls are correspondingly chosen so that they can fail;
+one acceptance gate was moved off a noisy recall delta onto a near-deterministic quantity,
+and a mid-flight anchor was pinned to a number that did not yet exist and then reproduced it
+at a gap of $0.00$.
+
 \section{Results}
 
 \subsection{Token budget, accuracy and memory}
 \label{sec:budget}
 
-The checkpoint is trained with pruning active at a keep ratio of $0.50$ for five epochs,
-resumed from a model trained unpruned. Table~\ref{tab:budget} evaluates it at four budgets
-against its own unpruned ceiling, paired per image over the same 50 documents.
+Table~\ref{tab:budget} evaluates the pruning-aware checkpoint at four budgets against its own
+unpruned ceiling, paired per image over the same 50 documents.
 
-\begin{table}[h]
-\centering
+\begin{table}[htbp]
+\singlespacing
 \caption{Word recall and decoder cross-attention KV cache against token budget, paired per
 image on FUNSD test ($n = 50$). Deltas and $t$ statistics are computed from per-image recall
 arrays, not from the column means. The KV figures are analytic and were independently
 confirmed against the cache captured from a forward hook.}
 \label{tab:budget}
+\centering
+\small
 \vspace{0.3em}
 \begin{tabular}{@{}lrrrrrl@{}}
 \toprule
@@ -273,11 +402,11 @@ which pruning does not touch, is separately asserted to be a function of generat
 only and is non-monotone in the keep ratio, so a self/cross mix-up could not be mistaken for
 a pruning win. Twenty-five of twenty-five controls pass.
 
-\paragraph{The headline budget was fixed by a rule.} keep$=$0.20 gives a larger memory
-reduction ($-80.0\%$) and a better-sounding number; it costs $13.01$ points. The measurement
-script pins the reported budget to the tightest one that is free and fails a control if that
-budget turns out not to be, so the framing cannot drift toward the largest available
-percentage.
+\paragraph{The headline budget was fixed by a rule.} keep$=$0.20 would give a larger
+memory reduction ($-80.0\%$) and a better-sounding number; it costs $13.01$ points. The
+measurement script pins the reported budget to the tightest one that is free and fails a
+control if that budget turns out not to be, so the framing cannot drift toward the largest
+available percentage.
 
 \paragraph{Scope.} Cross-attention KV only --- not total memory, not peak, not the encoder,
 and not latency. Unpruned cross-attention KV is \textbf{19.46\%} of the model's 771\,MiB of
@@ -291,12 +420,14 @@ A random mask at the same budget is the floor a learned ranking must clear. We r
 random selection per configuration so that every comparison sees identical masks
 (Table~\ref{tab:selection}).
 
-\begin{table}[h]
-\centering
+\begin{table}[htbp]
+\singlespacing
 \caption{Learned ranking against a random mask at matched token budgets, paired per image on
 FUNSD test ($n = 50$). The margin widens as the budget tightens, then falls back at
 keep$=$0.20 where both arms are badly degraded.}
 \label{tab:selection}
+\centering
+\small
 \vspace{0.3em}
 \begin{tabular}{@{}lrrrr@{}}
 \toprule
@@ -345,12 +476,14 @@ checkpoints were evaluated with ink-based selection, which is weight-independent
 four budgets). Every difference between the curves is therefore attributable to the weights
 (Table~\ref{tab:did}).
 
-\begin{table}[h]
-\centering
+\begin{table}[htbp]
+\singlespacing
 \caption{Difference-in-differences on bit-identical token sets, paired per image
 ($n = 50$). Each checkpoint's delta is taken against its \emph{own} unpruned row, so the
 difference of differences isolates the effect of pruning-aware training.}
 \label{tab:did}
+\centering
+\small
 \vspace{0.3em}
 \begin{tabular}{@{}lrrrr@{}}
 \toprule
@@ -390,88 +523,32 @@ $0.25$ and $0.20$ ($-8.15$, $-7.35$, $-7.92$ locally, every $t$ at or beyond $-2
 \emph{loose} budgets are \textbf{underpowered, not null}. The defensible statement is that H1
 is isolated at keep$=$0.35/0.25/0.20, and never that H1 is proven.
 
-\section{Analysis protocol and verification}
-\label{sec:method-layer}
+\subsection{Token merging at a matched budget returns underpowered}
+\label{sec:merge}
 
-We treat the measurement layer as part of the contribution, because several of the findings
-above came from it rather than from additional training.
+The merging stage's only defensible estimand is token-matched: at an equal budget, does
+merging preserve more word recall than simply pruning harder? Scored under the rule of
+Section~\ref{sec:stats}, at a matched budget of $M = 1920$ visual tokens, the pre-registered
+primary contrast measures $\bm{+1.66}$ $[-0.81, +4.14]$ in one run and $\bm{+0.02}$
+$[-1.90, +1.94]$ in the other, with \textbf{0 of 3} confirmatory quantities surviving Holm
+correction in either. Both are flat, and both sit well above the 1.0-point resolution the
+design targets, so the verdict is \textbf{underpowered}, which licenses nothing: not
+``merging is free'', not ``no measured cost'', not even ``merging changes nothing''.
 
-\subsection{Artifact-derived diagnostics}
-
-Each diagnostic re-derives its numbers from cached result artifacts, so any claim here is
-recheckable on a CPU without a training run. Fourteen numbered diagnostics plus a memory
-measurement are each a standalone, seeded script that prints an explicit verdict and a
-concern list. Several falsified the hypothesis they were built to support: the first inverted
-the plan it was meant to enable, the second overturned the first's recommendation in under a
-second of compute, and the study in Section~\ref{sec:why} rejected the explanation this work
-had carried for a week. The memory study's pre-written framing --- ``a large reduction in a
-small quantity'' --- was falsified by its own output at $19.46\%$, and the script now derives
-that sentence from the measurement instead of asserting it.
-
-\subsection{Execution-level verification}
-
-Every notebook edit goes through a patcher that backs up first, asserts each anchor matches
-exactly once, and parses the result; every patcher has a companion that \emph{executes the
-real cell} against stubs, with no GPU and no weight download. The training loop, the loss
-block, the mid-run weight-swap control and the results writer are all covered this way. Three
-correctness defects were found here rather than by a run failing: the decoding setting of
-Section~3.2, the straight-through trap of Section~2.2, and a supervision term that fed a
-probability to a loss expecting a logit, attenuating the gradient by up to $112\times$ on
-exactly the tokens the scorer was most wrong about.
-
-Passing checks receive the same scrutiny as failing ones. Before a green check is trusted we
-ask what a \emph{failing} system would score on that same check; if the answer is ``about the
-same'', the check is decorative and is rebuilt. The clearest case: a router probe printed ``no
-concerns'' across five sections, and a sixth section comparing the router against the actual
-objective reversed the verdict entirely --- the five clean sections were measuring properties
-a broken router also satisfies. Controls are correspondingly chosen so that they can fail;
-one acceptance gate was moved off a noisy recall delta onto a near-deterministic quantity,
-and a mid-flight anchor was pinned to a number that did not yet exist and then reproduced it
-at a gap of $0.00$.
-
-\subsection{A pre-registered protocol that retired one of our own claims}
-
-The analysis rule for the token-merging question --- estimator, standard error, interval
-method, a tail statistic alongside the location statistic, multiplicity treatment over three
-quantities, and a table stating what each verdict licenses --- was fixed in advance on the
-\emph{variance structure} of the paired per-document differences, never on the sign of any
-contrast. The location estimator is a 10\% trimmed mean of per-document differences with a
-Tukey--McLaughlin standard error~\cite{tukey}; multiplicity is Holm step-down~\cite{holm} at
-$\alpha = 0.05$.
-
-The run that rule was written to score was never collected, so it was instead applied
-\emph{backwards} to two completed runs --- and the verdicts did not survive it. Two figures
-this work had been reporting as results turned out to reproduce exactly in arithmetic while
-failing as \emph{verdicts}: one because its sign flips with both the estimator and the
-replicate, the other because it is unreplicated across the two runs. The rule also exposed a
-defect in itself --- its tail gate fires on 13 of 21 contrasts in which nothing is merged at
-all, so it is sensitive but not specific to the mechanism it was written to police. A
-pre-registration that only ever confirms is not doing any work; this one cost us a headline,
-which is the evidence that it was real.
-
-\section{Limitations}
-\label{sec:limits}
-
-\paragraph{The token-merging stage is unresolved, and is reported as unresolved.} Its only
-defensible estimand is token-matched: at an equal budget, does merging preserve more word
-recall than simply pruning harder? At a matched budget of $M = 1920$ visual tokens the
-pre-registered primary contrast measures $\bm{+1.66}$ $[-0.81, +4.14]$ in one run and
-$\bm{+0.02}$ $[-1.90, +1.94]$ in the other, with \textbf{0 of 3} confirmatory quantities
-surviving Holm correction in either. Both are flat, and both sit well above the 1.0-point
-resolution the design targets, so the honest verdict is \textbf{underpowered}, which licenses
-nothing: not ``merging is free'', not ``no measured cost'', not even ``merging changes
-nothing''. Reaching the target resolution requires $n \gtrsim 307$ documents. FUNSD's test
-split is 50 documents and that is the entire split, so $n$ was never a free parameter.
-
-A pooled evaluation that would have reached $n \approx 410$ was built and verified --- a
+Reaching the target resolution requires $n \gtrsim 307$ documents. FUNSD's test split is 50
+documents and that is the entire split, so $n$ was never a free parameter in this design. A
+pooled evaluation that would have reached $n \approx 410$ was built and verified --- a
 29-row sweep including a structure-matched random arm at $M = 1920$ that the completed runs
-structurally could not supply, with cost measured at 5.92\,h against a 9\,h budget --- and was
-not run, for one reason: no second corpus with licensing we could establish. The
-first-party-licensed candidate annotates only a key-value subset of each page rather than the
-page itself, making its recall a different quantity at a measurement grain $4.2\times$ coarser
-than the effect being resolved; the candidate with the right annotations carried only an
-uploader-asserted licence with no attribution to the competition that produced the scans. We
-stopped at data we could not account for rather than publish a number resting on it.
+structurally could not supply, with cost measured at 5.92\,h against a 9\,h budget --- and
+was not run, for the reason given in Section~\ref{sec:discussion}.
+
+Applying the rule also exposed a defect in the rule. Its tail gate fires on 13 of 21
+contrasts in which nothing is merged at all, so the gate is sensitive but not specific to the
+mechanism it was written to police; the bar it needs is an active non-merge comparator at the
+same budget, which is the structure-matched random arm named above.
+
+\subsection{Efficiency accounting: what is saved and what is not}
+\label{sec:efficiency}
 
 \paragraph{No latency or throughput win, and the reason is structural.} Reducing 4{,}800
 visual tokens to 960 --- a $5\times$ reduction --- yields $\bm{1.04\times}$ wall-clock, with a
@@ -488,100 +565,163 @@ inserting it one stage earlier caps the saving at $4.9\%$ even at a 50\% merge r
 only $9.7\%$ of the encoder lies downstream of that point. The version that would pay must
 precede stage 2, which holds $69.2\%$ of the encoder in 14 of its 20 blocks, inside a frozen
 pretrained encoder whose window partitioning, shifted-window cyclic shift and relative
-position bias all assume an intact spatial grid. That is a separate project, and we specify
-it rather than attempt it.
+position bias all assume an intact spatial grid.
 
-\paragraph{The efficiency claim is narrow by construction.} Of the $2.50\times$ cross-attention
-KV reduction available at $M = 1920$ with pruning and merging combined, \textbf{pruning
-supplies $2.0\times$ and the merge step alone $1.25\times$}, so the combined ratio is not a
-merging result and we do not quote it as one.
+\paragraph{The efficiency claim is narrow by construction.} Of the $2.50\times$
+cross-attention KV reduction available at $M = 1920$ with pruning and merging combined,
+\textbf{pruning supplies $2.0\times$ and the merge step alone $1.25\times$}, so the combined
+ratio is not a merging result and we do not quote it as one.
 
-\vspace{0.4em}
-\noindent Remaining limitations, each measured:
+\subsection{Measurement limits of the design}
+\label{sec:measurement}
+
+Three further quantities were measured and bound how the results above may be read.
 
 \begin{itemize}
-\item \textbf{$n = 50$ test images}, which drives the $\approx 2.8$-point resolution on the
-free rows. Sufficient for the effects claimed, and stated wherever an effect is near it.
-\item \textbf{Generation diverges between the two compute environments}, widening as the
-budget tightens. Characterised, and the reason every figure here is a paired within-environment
-delta rather than a level.
-\item \textbf{Roughly 18\% of predictions are still not valid JSON.} Measured as a rate only
-and never characterised; predictions are deliberately never repaired before scoring.
 \item \textbf{The unpruned ceiling moves between retrains} --- $1.09$ and $1.30$ points on two
 runs, and $10.93$ on an earlier one where the drift cannot be separated from a harness fault.
-This is why every comparison is within-checkpoint, and why each run from that point on
-re-evaluates unchanged reference weights through the same harness first. The two early runs
-remain ambiguous retroactively: no control can be added to a run that has already happened.
+Every comparison is therefore within-checkpoint, and each run from that point on re-evaluates
+unchanged reference weights through the same harness first. The two early runs remain
+ambiguous retroactively: no control can be added to a run that has already happened.
+\item \textbf{Roughly 18\% of predictions are still not valid JSON.} Measured as a rate only
+and never characterised; predictions are deliberately never repaired before scoring, so this
+is a floor on the reported recall rather than a separate defect.
 \item \textbf{The merger's ordering fix is correct about the partition and unproven about
 recall.} Deriving the bipartite split from the original raster index rather than from score
 rank takes missed vertical redundancy from $100\%$ to $0\%$, but the head-to-head against the
-previous split is null on three checkpoints. It is retained on the design argument and is
-described as a free parameter rather than a validated setting.
+previous split is null on three checkpoints.
 \end{itemize}
 
-\section{Conclusion}
+\section{Discussion}
+\label{sec:discussion}
 
-A learned router at the encoder--decoder interface of a document OCR model discards 65\% of
-the visual tokens and 65\% of the decoder's cross-attention KV cache for $-0.26 $ points of
-word recall (paired standard error $1.41$, $n = 50$), and its ranking is worth $+17.7$ to
-$+34.0$ points over a random mask at matched budgets. The same operation on a checkpoint not
-trained for it costs $6.03$ points; the distance between those two sentences is the result,
-and it is why the claim carries a conditional rather than a headline. What the architecture
-does not deliver is equally measured: no latency win, no encoder saving, and a token-merging
-stage whose matched-budget benefit remains underpowered at the only sample size this corpus
-admits.
+The result worth carrying away is a conditional, not a headline. A learned router at the
+encoder--decoder interface of a document OCR model discards 65\% of the visual tokens and
+65\% of the decoder's cross-attention KV cache for $-0.26$ points of word recall (paired
+standard error $1.41$, $n = 50$), and its ranking is worth $+17.7$ to $+34.0$ points over a
+random mask at matched budgets. The same operation on a checkpoint not trained for it costs
+$6.03$ points. The distance between those two sentences is the finding: token pruning at this
+interface is not a free inference-time transformation that can be applied to a trained model,
+and a reader who takes only the first sentence will reach for it in exactly the setting where
+it does not hold. The practical implication is that the pruning budget belongs in the training
+recipe, not in the deployment configuration.
 
-\begin{thebibliography}{9}
-\small
+Where the architecture's placement is concerned, the negative results are the more
+transferable ones. Because both inserted stages are downstream of a frozen encoder, the method
+can only ever reduce decoder-side work, and the measurements say so: a five-fold token cut
+buys $1.04\times$ wall-clock and $0\%$ of encoder compute
+(Section~\ref{sec:efficiency}). Any future attempt to turn token reduction on a document model
+into a speed result has to move the reduction inside the encoder, and we specify what that
+costs --- a merge that preserves window partitioning, a defined cyclic shift and a
+relative-position-bias rule for merged tokens, encoder retraining, and a fresh unpruned
+ceiling --- rather than attempt it here. We therefore describe the merger as a decoder-side
+memory mechanism and nothing more.
 
-\bibitem{donut}
-G.~Kim, T.~Hong, M.~Yim, J.~Nam, J.~Park, J.~Yim, W.~Hwang, S.~Yun, D.~Han, and S.~Park.
-\newblock OCR-free Document Understanding Transformer.
-\newblock \emph{European Conference on Computer Vision (ECCV)}, 2022.
+\subsection*{Limitations}
 
-\bibitem{swin}
-Z.~Liu, Y.~Lin, Y.~Cao, H.~Hu, Y.~Wei, Z.~Zhang, S.~Lin, and B.~Guo.
-\newblock Swin Transformer: Hierarchical Vision Transformer using Shifted Windows.
-\newblock \emph{IEEE/CVF International Conference on Computer Vision (ICCV)}, 2021.
+The token-merging stage is unresolved and is reported as unresolved. Its matched-budget
+contrast is flat in both runs but at a resolution several times coarser than the effect being
+sought, and \emph{underpowered} is not a null (Section~\ref{sec:merge}). The pooled
+evaluation that would have resolved it was built, verified and not run, for one reason: no
+second corpus with licensing we could establish. The first-party-licensed candidate annotates
+only a key-value subset of each page rather than the page itself, making its recall a
+different quantity at a measurement grain $4.2\times$ coarser than the effect being resolved;
+the candidate with the right annotations carried only an uploader-asserted licence with no
+attribution to the competition that produced the scans, and the official distribution of that
+corpus ships no licence, terms or citation file of any kind. We stopped at data we could not
+account for rather than publish a number resting on it. This is the limitation we would
+address first, and it is a data-access problem rather than a modelling one.
 
-\bibitem{mbart}
-Y.~Liu, J.~Gu, N.~Goyal, X.~Li, S.~Edunov, M.~Ghazvininejad, M.~Lewis, and L.~Zettlemoyer.
-\newblock Multilingual Denoising Pre-training for Neural Machine Translation.
-\newblock \emph{Transactions of the Association for Computational Linguistics}, 2020.
+The remaining limitations are each measured rather than estimated, and are stated where they
+bear on a result: $n = 50$ test images, which drives the $\approx 2.8$-point resolution on the
+free rows and makes the loose-budget isolation arms underpowered rather than null; generation
+that diverges between the two compute environments, widening as the budget tightens, which is
+why every figure here is a paired within-environment delta rather than a level; an unpruned
+ceiling that drifts between retrains; and a residual rate of malformed structured output
+(Section~\ref{sec:measurement}). The learned ranking's advantage over a hand-crafted ink
+heuristic is directional and below the threshold fixed in advance, and is not claimed
+(Section~\ref{sec:selection}).
 
-\bibitem{funsd}
-G.~Jaume, H.~Kemal Ekenel, and J.-P.~Thiran.
-\newblock FUNSD: A Dataset for Form Understanding in Noisy Scanned Documents.
-\newblock \emph{ICDAR Workshop on Open Services and Tools for Document Analysis (ICDAR-OST)},
-2019.
+\subsection*{On the analysis protocol}
 
-\bibitem{tome}
-D.~Bolya, C.-Y.~Fu, X.~Dai, P.~Zhang, C.~Feichtenhofer, and J.~Hoffman.
-\newblock Token Merging: Your ViT But Faster.
-\newblock \emph{International Conference on Learning Representations (ICLR)}, 2023.
+We treat the measurement layer as part of the contribution, because several of the findings
+above came from it rather than from additional training. The pre-registered rule of
+Section~\ref{sec:stats} is the clearest case. The run it was written to score was never
+collected, so it was instead applied \emph{backwards} to two completed runs --- and the
+verdicts did not survive it. Two figures this work had been reporting as results turned out to
+reproduce exactly in arithmetic while failing as \emph{verdicts}: one because its sign flips
+with both the estimator and the replicate, the other because it is unreplicated across the two
+runs. A pre-registration that only ever confirms is not doing any work; this one cost us a
+headline, which is the evidence that it was real. The companion lesson, which generalises past
+this project, is that an estimator chosen after seeing the effect is not a measurement, and
+that a passing check deserves the same interrogation as a failing one
+(Section~\ref{sec:verification}).
 
-\bibitem{dynamicvit}
-Y.~Rao, W.~Zhao, B.~Liu, J.~Lu, J.~Zhou, and C.-J.~Hsieh.
-\newblock DynamicViT: Efficient Vision Transformers with Dynamic Token Sparsification.
-\newblock \emph{Advances in Neural Information Processing Systems (NeurIPS)}, 2021.
+\section*{Acknowledgments}
 
-\bibitem{ste}
-Y.~Bengio, N.~L\'eonard, and A.~Courville.
-\newblock Estimating or Propagating Gradients Through Stochastic Neurons for Conditional
-Computation.
-\newblock \emph{arXiv:1308.3432}, 2013.
+\subsection*{General}
 
-\bibitem{holm}
-S.~Holm.
-\newblock A Simple Sequentially Rejective Multiple Test Procedure.
-\newblock \emph{Scandinavian Journal of Statistics}, 6(2):65--70, 1979.
+During the preparation of this work, the author used Anthropic's Claude (via Claude Code) as
+a coding and writing assistant: for implementation of the training and evaluation harness, for
+the diagnostic and verification scripts, and for drafting and editing this manuscript. All
+experimental design decisions, hypotheses, pre-registered thresholds and verdicts are the
+author's. Every reported figure is re-derived from a committed result artifact by a script in
+the repository, and the author reviewed and edited all content and takes full responsibility
+for it.
 
-\bibitem{tukey}
-J.~W.~Tukey and D.~H.~McLaughlin.
-\newblock Less Vulnerable Confidence and Significance Procedures for Location Based on a
-Single Sample: Trimming/Winsorization~1.
-\newblock \emph{Sankhy\=a: The Indian Journal of Statistics, Series A}, 25(3):331--352, 1963.
+\subsection*{Author Contributions}
 
-\end{thebibliography}
+M. N. Kamal conceived the study, implemented the method and the measurement harness, designed
+and pre-registered the analyses, conducted all experiments, and wrote the manuscript.
+
+\subsection*{Funding}
+
+This research received no specific grant from any funding agency. It was conducted
+independently by the author, using free-tier cloud GPU sessions and local CPU compute.
+
+\subsection*{Competing interests}
+
+The author declares that there is no conflict of interest regarding the publication of this
+article.
+
+\subsection*{Data Availability}
+
+All code, configuration and result artifacts are openly available at
+\url{https://github.com/nafis8766/adaptive-donut-ocr} under the MIT licence. The repository
+includes the versioned JSON artifacts from which every figure in this report is derived
+(per-document recall arrays, measured cache sizes and control verdicts), together with the
+scripts that re-derive them; model checkpoints and per-run archives are excluded for size and
+are not required to reproduce any number reported here. The trained router checkpoint is
+published at \url{https://huggingface.co/nafis8766/adaptive-donut-ocr-router}.
+
+Evaluation uses the publicly available FUNSD dataset~\cite{funsd}; training additionally uses
+a public synthetic document corpus whose distribution states no licence, which is recorded in
+the model card. The second evaluation corpus discussed in the Limitations is deliberately
+\emph{not} redistributed here, for the licensing reason given there.
+
+\section*{Supplementary Materials}
+
+Supplied as part of the public repository rather than as separate files:
+
+\begin{itemize}
+\item \textbf{A reproduction notebook.} Re-derives Tables~\ref{tab:budget}--\ref{tab:did} from
+the committed artifacts on a free CPU runtime in about a minute, with no GPU, no model weights
+and no dataset download, and then runs the project's own audits so that a reader watches the
+work score itself.
+\item \textbf{A numeric audit of this report.} Each load-bearing figure above is re-derived
+from a named field of a named artifact and then required to be present in the manuscript
+source. The audit carries a self-sabotage control that corrupts a headline figure on every run
+and asserts the audit goes red, because an earlier version of it passed a corrupted headline
+and was therefore decorative.
+\item \textbf{The pre-registered scorer.} The executable form of the analysis rule of
+Section~\ref{sec:stats}, including the per-corpus discard constraint and the contrast-direction
+pin, with its non-vacuity controls.
+\item \textbf{The execution-level verifiers} described in Section~\ref{sec:verification}, each
+of which executes real notebook cells against stubs rather than inspecting them statically.
+\item \textbf{A model card} recording the checkpoint's provenance, its intended use, and the
+scope limits restated here --- in particular that no latency claim follows from this work.
+\end{itemize}
+
+\printbibliography
 
 \end{document}

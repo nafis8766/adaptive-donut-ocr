@@ -28,7 +28,7 @@ matching, not inference-time denoising, and that was tested rather than assumed.
 
 Full method, every diagnostic, and the complete record of what failed:
 **[github.com/nafis8766/adaptive-donut-ocr](https://github.com/nafis8766/adaptive-donut-ocr)** ·
-[5-page technical report (PDF)](https://github.com/nafis8766/adaptive-donut-ocr/blob/main/report/report.pdf)
+[Technical report (PDF)](https://github.com/nafis8766/adaptive-donut-ocr/blob/main/report/report.pdf)
 
 ---
 

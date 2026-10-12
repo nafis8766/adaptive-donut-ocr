@@ -91,10 +91,10 @@ for p in required:
 
 CELLS.append(md(r"""## 2 · Run the repository's own numeric audit
 
-`scripts/check_report_numbers.py` re-derives every load-bearing figure in the project's 5-page
-report from a named field of a named artifact, then requires it to be present in the report.
-It also carries a self-sabotage control: it corrupts a headline figure in memory and asserts
-the audit goes red, so a passing run is known to be able to fail.
+`scripts/check_report_numbers.py` re-derives every load-bearing figure in the project's
+technical report from a named field of a named artifact, then requires it to be present in the
+report. It also carries a self-sabotage control: it corrupts a headline figure in memory and
+asserts the audit goes red, so a passing run is known to be able to fail.
 
 That control is not decoration. The first version of this script passed a corrupted headline
 figure at exit 0, because the corrupted value happened to occur once in an archive by

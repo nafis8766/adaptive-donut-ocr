@@ -4,7 +4,7 @@ A document page becomes **4,800 visual tokens** inside [Donut](https://huggingfa
 
 Independent research project. Donut (Swin-B + mBART) on FUNSD full-page OCR, trained on a single free-tier Kaggle T4.
 
-**Trained weights:** [`nafis8766/adaptive-donut-ocr-router`](https://huggingface.co/nafis8766/adaptive-donut-ocr-router) · **5-page report:** [report/report.pdf](report/report.pdf) · **[Run the results in Colab →](https://colab.research.google.com/github/nafis8766/adaptive-donut-ocr/blob/main/colab/reproduce_results.ipynb)**
+**Trained weights:** [`nafis8766/adaptive-donut-ocr-router`](https://huggingface.co/nafis8766/adaptive-donut-ocr-router) · **Technical report:** [report/report.pdf](report/report.pdf) · **[Run the results in Colab →](https://colab.research.google.com/github/nafis8766/adaptive-donut-ocr/blob/main/colab/reproduce_results.ipynb)**
 
 ```
 frozen Swin-B encoder  →  PatchSaliencyRouter  →  BipartiteTokenMerger  →  mBART decoder

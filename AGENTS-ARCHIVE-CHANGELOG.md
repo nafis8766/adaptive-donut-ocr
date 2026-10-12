@@ -2907,3 +2907,80 @@ ef` cross-references, a
   by re-checking with epoch seconds. **That is the mtime-provenance trap this file documents,
   reproduced inside the check written to detect it**: a time-of-day comparison across midnight
   is not an ordering. Compare `os.path.getmtime` floats, or print the date.
+
+
+- **2026-10-12 — the report re-typeset onto a journal manuscript template the user supplied; one
+  of the template's own settings overruled on measurement.** User ruling: *"i saw an issue with
+  the report. i have added a new latex template called new main in report folder. use that
+  template for the report."* The template is `report/new main.tex`, the *Research Future*
+  submission template. ⚠ It is **deliberately not committed** and `report/.gitignore` says
+  why: a third-party document, a public repository, and redistribution terms nobody read --
+  the same caution this project applied to a corpus licence it could not authenticate. So a
+  fresh clone will not have it; `report.tex` is self-contained and the build never reads it. **No figure changed**
+  — `scripts/check_report_numbers.py` is **121 passed, 0 failed, 58/58 targeted figures present,
+  0 unsourced, exit 0** after the swap, which is the point of having it.
+
+  **What the template imposed, and it is structural rather than cosmetic.** An `authblk` author
+  block with affiliation footnotes; one-and-a-half spacing; `lineno` margin line numbers;
+  `biblatex`/`nejm` references out of a real database (`report/references.bib`, nine entries)
+  instead of a hand-written `thebibliography`; the mandated order **Introduction → Materials and
+  Methods → Results → Discussion**; and its Acknowledgments / Author Contributions / Funding /
+  Competing interests / Data Availability / Supplementary Materials blocks. **8 pages → 13.**
+  `Equation 1` is now numbered and cross-referenced the way the template requires, wrapped in
+  `linenomath` because `lineno` and a numbered `amsmath` display do not otherwise coexist.
+
+  ⚠ **The restructure was not a reshuffle, and it fixed a real defect in the previous version.**
+  The template states *"All data should be presented in the Results. No data should be presented
+  for the first time in the Discussion."* The paper-form version presented the **entire
+  efficiency accounting** — `1.04×` wall-clock, the `0%` encoder saving, `4.9%`/`9.7%`/`69.2%`,
+  the `2.50×`/`2.0×`/`1.25×` split — **plus** the merge verdict (`+1.66`, `+0.02`, `0 of 3`,
+  `n \gtrsim 307`) and the ceiling-drift figures (`1.09`, `1.30`, `10.93`) for the first time
+  inside a `Limitations` section. Those are measurements. They now live in Results §3.4–3.6
+  (`Token merging at a matched budget returns underpowered`, `Efficiency accounting`,
+  `Measurement limits of the design`) and the Discussion interprets them **with no new digits**.
+  **Every limitation is unchanged in strength and still named** — the `underpowered` verdict with
+  its required `n`, the licence blocker, the `18%` invalid-JSON rate, the drift including the
+  `10.93`, and the ink-heuristic margin that is below its pre-registered threshold.
+
+  ⚠⚠ **`backend=bibtex` → `backend=biber`, and the reason is measured rather than preferential.**
+  Under the template's own setting the document builds **correctly** — nine references, citations
+  rendering `[1]`–`[9]`, no `[?]` — and warns *"Please (re)run BibTeX"* on **every pass,
+  permanently.** Five `pdflatex`/`bibtex` cycles from a clean tree: warning on all five, `.bbl`
+  md5 unchanged from the second onward. The mechanism is in `biblatex.sty`'s
+  `\blx@check@bbl@rerun@mdfivesum` — biblatex detects a discharged rerun by diffing the
+  `.bbl`'s md5, bibtex regenerates it byte-identically, so the test concludes the rerun never
+  happened and re-arms itself. **There is no exit state.**
+  **It is not a cosmetic warning.** The request routes through `\blx@logreq@active`, which calls
+  `\G@refundefinedtrue`, so the log *also* reports **"There were undefined references"** on a
+  document whose references all resolve — **the identical line a mistyped `\ref` produces.** A
+  build that always reports a problem cannot report a real one. Filed as a Gotchas entry; the
+  general form is this file's green-check rule aimed at a warning: ask what the log would look
+  like if the thing were genuinely broken, and if the answer is *identical*, remove the cause
+  rather than learn to ignore it. (`xcolor` also moved **before** `hyperref`, which pulls in
+  `color` for `colorlinks` and clashes if `xcolor` arrives after. Neither change alters a glyph.)
+
+  ⚠ **A guard in the auditor silently stopped guarding, and the second marker is not the fix —
+  the assert is.** `check_report_numbers.py`'s sweep cut was keyed on `\begin{thebibliography}`,
+  which **ceased to exist** in the source the moment the bibliography became `biblatex`. The
+  `if ... in body:` form degraded to a no-op without a word: this file's own D4 staleness shape,
+  a guard keyed on the state it was written in rather than on the condition it cares about.
+  Harmless *this* time, because a `biblatex` body has no identifiers left to sweep — which is
+  precisely why it would have gone unnoticed until it mattered. It now accepts either
+  `\printbibliography` or `\begin{thebibliography}` and **raises when neither is present.**
+
+  **Three smaller things from the same pass.**
+  (i) ⚠ **A literal 0x08 backspace byte was found in `AGENTS.md`** — the sole control character in
+  the file — which is why the 2026-10-10 entry above read `egin{thebibliography}`. It came from
+  a session passing `\b` through Bash, the mechanism the doubled-backslash Gotchas entry
+  already records. Repaired with a byte-level assertion that nothing but those two characters
+  changed, and the file is now clean of control characters.
+  (ii) **`5-page report` was dropped rather than corrected, in four places** (`README.md`,
+  `hf/MODEL_CARD.md`, the Colab generator, and thus the regenerated notebook). It had *already*
+  been stale since 2026-10-10's 8 pages and nobody had caught it; a page count in prose is a
+  staleness surface that buys nothing, so the number is gone instead of re-pinned. ⚠ The HF
+  model card's **published** copy still says `5-page` until someone runs
+  `python hf/upload_model.py --push`; the local file is corrected.
+  (iii) **The build script grew content checks**, because `pdflatex` exits 0 while leaving `[?]`
+  in the PDF: it now counts `\entry{` in the `.bbl`, greps the log for undefined
+  references/citations, reports the overfull-box count, and **exits 1** on any of them. The old
+  two-pass script would have shipped a reference-free PDF silently.

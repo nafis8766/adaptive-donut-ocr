@@ -337,8 +337,22 @@ body = report_src.split(r"\begin{document}", 1)[1]
 # happen to collide with a real value somewhere in a 1 MB corpus -- which is the same
 # coincidence that made the section-2 sweep decorative in the first place (control C5).
 # Scoping the sweep to the claims is the fix; section 1 never read this region anyway.
-if r"\begin{thebibliography}" in body:
-    body = body.split(r"\begin{thebibliography}", 1)[0]
+#
+# TWO markers, and the assert is load-bearing. The report moved to a journal template on
+# 2026-10-12 and now emits the bibliography with biblatex's \printbibliography, so the
+# `\begin{thebibliography}` this cut was originally keyed on NO LONGER EXISTS in the
+# source. A single-marker `if ... in body:` would have silently stopped cutting anything
+# -- the exact staleness shape this project has recorded before: a guard keyed on the
+# state it was written in rather than on the condition it cares about. If the bibliography
+# mechanism changes again, this raises instead of quietly becoming a no-op.
+CUT_MARKERS = (r"\printbibliography", r"\begin{thebibliography}")
+_cut = [m for m in CUT_MARKERS if m in body]
+assert _cut, (
+    "no bibliography marker found in report/report.tex -- the sweep below is scoped by one "
+    f"of {CUT_MARKERS}. The bibliography mechanism has changed; re-point this cut. Do NOT "
+    "delete the assert: without a cut, every arXiv ID, volume and page range in the "
+    "bibliography is swept as if it were a measured claim.")
+body = body.split(_cut[0], 1)[0]
 
 body = re.sub(r"(?m)^\s*%.*$", " ", body)
 body = re.sub(r"\\(?:vspace|hspace|titlespacing|setlist|hrule|definecolor|usepackage"
