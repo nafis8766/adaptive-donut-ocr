@@ -339,20 +339,33 @@ body = report_src.split(r"\begin{document}", 1)[1]
 # Scoping the sweep to the claims is the fix; section 1 never read this region anyway.
 #
 # TWO markers, and the assert is load-bearing. The report moved to a journal template on
-# 2026-10-12 and now emits the bibliography with biblatex's \printbibliography, so the
-# `\begin{thebibliography}` this cut was originally keyed on NO LONGER EXISTS in the
-# source. A single-marker `if ... in body:` would have silently stopped cutting anything
-# -- the exact staleness shape this project has recorded before: a guard keyed on the
-# state it was written in rather than on the condition it cares about. If the bibliography
-# mechanism changes again, this raises instead of quietly becoming a no-op.
-CUT_MARKERS = (r"\printbibliography", r"\begin{thebibliography}")
-_cut = [m for m in CUT_MARKERS if m in body]
-assert _cut, (
+# 2026-10-12 and emitted the bibliography with biblatex's \printbibliography, so the
+# `\begin{thebibliography}` this cut was originally keyed on stopped existing. A
+# single-marker `if ... in body:` would have silently stopped cutting anything -- the exact
+# staleness shape this project has recorded before: a guard keyed on the state it was
+# written in rather than on the condition it cares about.
+#
+# It earned itself the NEXT DAY. On 2026-10-13 the report moved again, to IEEE's conference
+# template, which uses plain BibTeX: `\bibliography{references}` and neither prior marker.
+# The assert raised, named the cause, and the fix took one line -- instead of the sweep
+# quietly widening to a region nobody was checking. Hence `\bibliography{` as a third
+# marker. Note it does NOT also match `\bibliographystyle{`, which has "style" between
+# "bibliography" and the brace.
+#
+# Under BibTeX the cut is a no-op in effect, because the entries live in references.bib and
+# the generated .bbl rather than in report.tex -- there is nothing after the marker to cut.
+# The marker is still required, because what the assert protects is the invariant "this
+# script knows where the claims end", not any particular byte range.
+CUT_MARKERS = (r"\printbibliography", r"\begin{thebibliography}", r"\bibliography{")
+_at = [(body.index(m), m) for m in CUT_MARKERS if m in body]
+assert _at, (
     "no bibliography marker found in report/report.tex -- the sweep below is scoped by one "
     f"of {CUT_MARKERS}. The bibliography mechanism has changed; re-point this cut. Do NOT "
     "delete the assert: without a cut, every arXiv ID, volume and page range in the "
     "bibliography is swept as if it were a measured claim.")
-body = body.split(_cut[0], 1)[0]
+# Earliest in the DOCUMENT, not first in the tuple -- so a file carrying two of them is cut
+# at whichever actually begins the bibliography.
+body = body[:min(_at)[0]]
 
 body = re.sub(r"(?m)^\s*%.*$", " ", body)
 body = re.sub(r"\\(?:vspace|hspace|titlespacing|setlist|hrule|definecolor|usepackage"

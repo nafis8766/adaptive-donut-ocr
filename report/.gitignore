@@ -4,29 +4,36 @@
 #
 # report.tex and references.bib ARE committed: the .tex is the source the numeric audit
 # (scripts/check_report_numbers.py) reads, and the .bib is the bibliography database that
-# bibtex needs. Neither is an intermediate.
+# BibTeX needs. Neither is an intermediate.
 report.aux
 report.log
 report.out
 report.toc
 report.synctex.gz
 
-# biblatex/biber intermediates. report.bbl is generated from references.bib on every
-# build, so it is not a source either. report-blx.bib is biblatex's internal control file,
-# written only under backend=bibtex -- the biber build does not produce it (verified by
-# deleting it and rebuilding), but it is listed so a future backend switch cannot commit it.
+# BibTeX intermediates. report.bbl is generated from references.bib by IEEEtran.bst on
+# every build, so it is not a source either.
 report.bbl
 report.blg
+
+# biblatex/biber intermediates. The report used biblatex for one day (2026-10-12) before
+# moving to IEEE's conference template, which uses plain BibTeX; these are no longer
+# produced. Kept listed so a future backend switch cannot commit them by accident.
 report.bcf
 report.run.xml
 report-blx.bib
 
-# The journal manuscript template the report is typeset on, as supplied by the user on
-# 2026-10-12. Deliberately NOT committed: it is a third-party document (the *Research
-# Future* author template, placeholder authors and all), this repository is public, and
-# its redistribution terms were never read -- the same caution this project applied to a
-# corpus licence it could not authenticate. Nothing in the build reads it; report.tex is
-# self-contained. Consequence, stated so nobody is surprised: a fresh clone will NOT have
-# this file, so AGENTS.md's references to it describe a file on the author's disk, not a
-# repository artifact. Committing it is the user's call, not an agent's.
+# The LaTeX templates the report has been typeset on, as supplied by the user:
+#   new main.tex            -- the Research Future journal template (2026-10-12)
+#   conference_101719.tex   -- IEEE's conference template (2026-10-13), the current one
+#
+# Deliberately NOT committed. They are third-party documents (placeholder authors and
+# guidance text and all), this repository is public, and their redistribution terms were
+# never read -- the same caution this project applied to a corpus licence it could not
+# authenticate. Nothing in the build reads either file; report.tex is self-contained.
+#
+# Consequence, stated so nobody is surprised: a fresh clone will NOT have these, so
+# AGENTS.md's references to them describe files on the author's disk, not repository
+# artifacts. Committing them is the user's call, not an agent's.
 new main.tex
+conference_101719.tex

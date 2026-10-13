@@ -3,21 +3,23 @@
 # Usage, from a terminal in this folder:
 #     .\build.ps1
 #
-# FOUR passes, not two, and the order matters:
+# FOUR passes, and the order matters:
 #
-#   1. pdflatex  writes report.bcf, listing the \cite keys and the reference context
-#   2. biber     reads report.bcf + references.bib and writes report.bbl
+#   1. pdflatex  writes report.aux, including the \citation{} keys and \bibstyle{IEEEtran}
+#   2. bibtex    reads report.aux + references.bib and writes report.bbl in IEEE style
 #   3. pdflatex  pulls report.bbl in, so the bibliography and [n] citation labels appear
-#   4. pdflatex  resolves the now-correct labels -- a \ref to a section, table or equation
-#                that moved when the bibliography changed the page layout
+#   4. pdflatex  resolves the now-correct labels -- a \ref to a numbered section, table or
+#                equation that moved when the bibliography changed the page layout
 #
-# BIBER, not bibtex. The journal template ships biblatex with backend=bibtex; that builds
-# a correct PDF but warns "Please (re)run BibTeX" on every pass forever, because biblatex
-# checks whether a requested rerun happened by diffing the .bbl's md5 and bibtex rewrites
-# it byte-identically. See the comment in report.tex. Dropping pass 2 entirely does not
-# fail the build -- it silently produces a PDF with no references and [?] for every
-# citation, which is why pass 4's exit check below reads the .bbl rather than trusting
-# the exit codes.
+# BIBTEX, not biber. The report moved from a biblatex template to IEEE's conference
+# template, which uses plain BibTeX with IEEEtran.bst. Note this is NOT a return to the
+# arrangement that produced the permanent "Please (re)run BibTeX" warning -- that bug is
+# biblatex's rerun-detection comparing .bbl checksums, and biblatex is no longer loaded at
+# all. Plain BibTeX with IEEEtran.bst has no such check. Verified: 0 warnings after pass 4.
+#
+# Dropping pass 2 does not fail the build -- it silently produces a PDF with no references
+# and [?] for every citation, which is why the checks after pass 4 read the artifacts
+# instead of trusting the exit codes.
 
 $here = Split-Path -Parent $MyInvocation.MyCommand.Path
 
@@ -26,13 +28,13 @@ if (-not (Test-Path "$bin\pdflatex.exe")) {
     $bin = "C:\Program Files\MiKTeX\miktex\bin\x64"
 }
 $pdflatex = "$bin\pdflatex.exe"
-$biber    = "$bin\biber.exe"
+$bibtex   = "$bin\bibtex.exe"
 if (-not (Test-Path $pdflatex)) {
     Write-Host "Could not find pdflatex.exe. Is MiKTeX installed?" -ForegroundColor Red
     exit 1
 }
-if (-not (Test-Path $biber)) {
-    Write-Host "Could not find biber.exe next to pdflatex." -ForegroundColor Red
+if (-not (Test-Path $bibtex)) {
+    Write-Host "Could not find bibtex.exe next to pdflatex." -ForegroundColor Red
     exit 1
 }
 
@@ -49,22 +51,24 @@ function Invoke-Pdflatex([int]$pass) {
 
 Invoke-Pdflatex 1
 
-Write-Host "biber ..." -ForegroundColor Cyan
+Write-Host "bibtex ..." -ForegroundColor Cyan
 Push-Location $here
-& $biber --quiet "report"
-$biberExit = $LASTEXITCODE
+& $bibtex "report" | Select-String -Pattern "Warning|error|I couldn't|I found no|repeated entry"
+$bibtexExit = $LASTEXITCODE
 Pop-Location
-if ($biberExit -ne 0) {
+# bibtex exits 1 on warnings alone (e.g. an empty field), so only a hard failure (2+) stops
+# the build. A missing .bib or an unresolved \cite is a hard error and does stop it.
+if ($bibtexExit -ge 2) {
     Write-Host ""
-    Write-Host "biber FAILED. Full error is in report.blg" -ForegroundColor Red
+    Write-Host "bibtex FAILED. Full error is in report.blg" -ForegroundColor Red
     exit 1
 }
 
 Invoke-Pdflatex 2
 Invoke-Pdflatex 3
 
-# Three content checks on the finished build. A LaTeX run exits 0 while leaving [?] in the
-# PDF, so the exit codes above are necessary and not sufficient -- read the artifacts.
+# Content checks on the finished build. A LaTeX run exits 0 while leaving [?] in the PDF,
+# so the exit codes above are necessary and not sufficient -- read the artifacts.
 $log = Get-Content "$here\report.log" -Raw
 $bad = $false
 
@@ -72,7 +76,7 @@ if (-not (Test-Path "$here\report.bbl")) {
     Write-Host "PROBLEM: report.bbl is missing -- the bibliography did not build." -ForegroundColor Red
     $bad = $true
 } else {
-    $entries = ([regex]'\\entry\{').Matches((Get-Content "$here\report.bbl" -Raw)).Count
+    $entries = ([regex]'\\bibitem').Matches((Get-Content "$here\report.bbl" -Raw)).Count
     if ($entries -lt 1) {
         Write-Host "PROBLEM: report.bbl has no entries." -ForegroundColor Red
         $bad = $true
@@ -86,8 +90,26 @@ if ($log -match 'There were undefined references' -or $log -match 'Citation .* u
     $bad = $true
 }
 
+# IEEEtran is two-column, so an over-wide table or an unbreakable URL overflows a 3.4in
+# column rather than a 6in page. These are far more likely here than they were on a
+# single-column template, which is why the count is printed on every build.
 $overfull = ([regex]'Overfull \\[hv]box').Matches($log).Count
 Write-Host "  overfull boxes       : $overfull" -ForegroundColor DarkGray
+
+# IEEE's own guidance text must not survive into the PDF. The template says so explicitly:
+# "Failure to remove the template text from your paper may result in your paper not being
+# published." Cheap to assert, and it cannot be assumed -- report.tex is a full rewrite but
+# a future edit could paste a block back in.
+$tex = Get-Content "$here\report.tex" -Raw
+foreach ($needle in @('Given Name Surname', 'dept. name of organization',
+                      'This document is a model and instructions',
+                      'IEEE conference templates contain guidance text',
+                      'Identify applicable funding agency here')) {
+    if ($tex -match [regex]::Escape($needle)) {
+        Write-Host "PROBLEM: IEEE template boilerplate still in report.tex: '$needle'" -ForegroundColor Red
+        $bad = $true
+    }
+}
 
 if ($bad) { exit 1 }
 

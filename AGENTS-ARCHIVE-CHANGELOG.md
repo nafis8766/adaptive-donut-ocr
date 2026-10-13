@@ -2984,3 +2984,76 @@ ef` cross-references, a
   in the PDF: it now counts `\entry{` in the `.bbl`, greps the log for undefined
   references/citations, reports the overfull-box count, and **exits 1** on any of them. The old
   two-pass script would have shipped a reference-free PDF silently.
+
+
+- **2026-10-13 — the report re-typeset onto IEEE's conference template; three of the
+  template's rules changed content rather than styling.** User ruling: *"we need to use the
+  conference template for our report. i have already added it to the report folder."* The
+  template is `report/conference_101719.tex` — IEEE's standard distribution, that being its
+  real filename — untracked for the same reason as the journal template before it (third
+  party, public repo, terms unread). **13 pages → 7**, because `IEEEtran [conference]` is
+  two-column 10pt. **No figure changed:** `scripts/check_report_numbers.py` is **121 passed,
+  0 failed, 58/58 targeted figures present, 0 unsourced, exit 0**.
+
+  **What the template forced.**
+  (1) ⚠ **"Do Not Use Symbols, Special Characters, Footnotes, or Math in Paper Title or
+  Abstract."** The abstract was dense with `$...$`, `\times`, `\rightarrow` and signed
+  numbers; it is now **plain prose** ("from 150.00 to 52.50 MiB", "a fivefold token cut yields
+  only 1.04 times the throughput"). **This cost no needles**, because every figure the abstract
+  quotes also appears in the body and the audit only requires presence somewhere — verified
+  rather than assumed, and the title/abstract are now checked **by script** against `$`, `_`,
+  `^`, `\times`, `\rightarrow`, `\gtrsim`, `\pm`, `\%` and `\footnote`.
+  (2) **Two columns.** The 7-column budget table does not fit a 3.4 in column and became a
+  `table*` spanning both; Tables II and III stay in-column on shortened headers with the full
+  wording moved into the captions; and **`Fig. 1` was rebuilt vertically** — the horizontal
+  pipeline was a full page wide and would have needed a second `figure*`.
+  (3) **Plain BibTeX with `IEEEtran.bst`.** `biblatex` and `biber` are gone entirely. Note this
+  is **not** a return to the arrangement that produced yesterday's permanent *"Please (re)run
+  BibTeX"* warning — that bug is biblatex's rerun detection comparing `.bbl` md5s, and biblatex
+  is no longer loaded. Measured: **0 warnings of any kind** after the fourth pass.
+
+  **Two content decisions that were mine rather than the template's, recorded as such.** A
+  short **Related Work** section was added — IEEE papers conventionally carry one, the journal
+  version folded it into the Introduction, and it uses the existing citations and makes no new
+  claim. And the **Results-holds-all-data organisation was kept**: that was the *previous*
+  template's rule, not IEEE's, but it is a better paper, so the efficiency accounting and the
+  measurement limits stay in Results instead of migrating back into Limitations.
+
+  ⚠⚠ **THE AUDITOR'S BIBLIOGRAPHY-CUT ASSERT EARNED ITSELF IN TWENTY-FOUR HOURS.** Written
+  yesterday to replace a silent `if ... in body:` with a raising check — on the general ground
+  that a guard keyed on the state it was written in is half-tested — it **fired on the first
+  run** against the IEEE source: `\bibliography{references}` is neither
+  `\printbibliography` nor `\begin{thebibliography}`. It raised, named the cause, and
+  the fix was one line. Under the single-marker form it replaced, the sweep would have silently
+  widened to a region nobody was checking. `\bibliography{` is now a third marker (it does
+  not also match `\bibliographystyle{`, which has "style" before the brace) and the cut
+  takes the **earliest marker in the document** rather than the first in the tuple. **This is
+  the clearest instance in the project of the "falsify the guard, not just the code" rule
+  paying out** — the guard was not written for this template, and it caught this template.
+
+  **Two defects found by building, both silent, both now Gotchas entries.**
+  (a) ⚠ **A font warning with no visible symptom.** `Font shape OT1/ptm/m/scit undefined`
+  traced to `\emph{own}` inside a **table** caption: IEEEtran sets table captions in small
+  caps, Times has no small-caps **italic**, so the emphasis silently became plain italic. The
+  caption looked fine, the build exited 0, and the only tell was one line in a 36,000-line log.
+  The asymmetry is the part worth keeping: **figure** captions are not small caps, so the
+  identical `\emph` in `Fig. 1` is correct. Nothing in the template says so.
+  (b) ⚠⚠ **`references.bib` used biblatex's `journaltitle`, which `IEEEtran.bst` ignores
+  without warning.** All three `@article` entries would have printed **with no venue**, and the
+  bibliography would have read as terse rather than broken. BibTeX does not report unrecognised
+  fields and exits 0 here regardless, so the exit code said nothing. Fixed to `journal`; caught
+  by reading the rendered references. **General form: switching bibliography engines renames
+  part of the `.bib` interface and no diagnostic marks the gap.**
+
+  **Also in this change.** `build.ps1` is `pdflatex → bibtex → pdflatex → pdflatex` and now
+  **asserts IEEE's own guidance text is absent** from `report.tex` (`Given Name Surname`,
+  `dept. name of organization`, the red removal warning, …) — IEEE states that leaving it in
+  can get a paper rejected, and `report.tex` being a full rewrite today does not stop a future
+  edit pasting a block back. It also prints the warning and overfull-box counts on every run,
+  which is what makes a defect like (a) visible instead of log-resident. `report/.gitignore`
+  gained `conference_101719.tex` beside `new main.tex`, verified in both directions with
+  `git check-ignore` over the real tracked listing. ⚠ `hf/upload_model.py`'s report gates —
+  PDF-newer-than-`.tex`, audit exit 0, no internal tracker references — were re-run against the
+  IEEE build and pass; they were written yesterday for a different template and did not need
+  changing, which is the behaviour a gate keyed on a *condition* rather than a *state* should
+  have.
