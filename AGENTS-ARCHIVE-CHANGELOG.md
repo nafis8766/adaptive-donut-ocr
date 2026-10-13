@@ -3057,3 +3057,33 @@ ef` cross-references, a
   IEEE build and pass; they were written yesterday for a different template and did not need
   changing, which is the behaviour a gate keyed on a *condition* rather than a *state* should
   have.
+
+- **2026-10-13 (same day, after the template swap) — the paper retitled, and the affiliation
+  question settled.** Two user decisions, both recorded because both are the kind of thing a
+  later session would otherwise re-litigate.
+
+  **Title.** *"Learned Visual-Token Pruning for Document OCR: Memory, Not Speed; Training, Not
+  Inference"*, replacing *"... What It Buys, What It Does Not, and How We Checked"*. The old
+  subtitle described the paper's *posture* in a rhetorical triple and read like a talk
+  abstract; "How We Checked" was both vague and faintly defensive. The new one spends the same
+  six words stating the paper's two actual corrections — the saving is decoder **memory** and
+  not speed (1.04x wall-clock at a 5x token cut, 0% encoder), and it comes from pruning-aware
+  **training** and not from inference-time denoising (the rejected H2). It signals the
+  honest-accounting character by *doing* it rather than by announcing it. 89 chars, under
+  IEEE's 100. Checked: the old subtitle is quoted nowhere else in the repo, so nothing
+  downstream went stale; audit re-run green (121/0, 58/58) and the build is still 7 pages,
+  0 warnings, 0 overfull boxes.
+
+  **Affiliation: "Independent Researcher", not BRAC University.** The user asked directly. The
+  recommendation, and the ground for it: the BSc ran to **June 2026** and this project ran
+  **August-October 2026**, so none of the work was done while enrolled, and affiliation
+  conventionally names the institution one belonged to *while doing the work* or that hosted or
+  funded it -- BRACU did neither (no supervisor, no lab, no funding; free-tier Kaggle and local
+  CPU). Three supporting reasons: it is **consistent with the CV**, which calls this an
+  "Independent research project", and an inconsistency between two documents in one application
+  package is worse than either label alone; it **adds nothing**, since the committee already has
+  the CV and transcript; and it **reads better for a solo project** -- a university byline on an
+  unsupervised paper invites "who advised this?", and the answer is nobody. Recorded with the
+  alternative that was offered and not taken: if BRACU affiliation is ever wanted on this work,
+  the clean route is to *earn* it by bringing in a BRACU faculty co-author rather than to claim
+  it.
